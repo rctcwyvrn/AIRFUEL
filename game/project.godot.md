@@ -8,9 +8,10 @@ Godot 4.6 project configuration for the Step 1 prototype.
 
 - Main scene: `res://maps/graybox_corridor.tscn`.
 - Input actions defined here and consumed by `player.gd`:
-  `move_forward/back/left/right` (WASD), `jump` (Space), `dash` (Shift),
-  `down_dash` (Ctrl and C), `respawn` (R). All use `physical_keycode`
-  (layout-independent). `ui_cancel` (Esc) is the built-in default.
+  `move_forward/back/left/right` (WASD), `strafe_up` (E), `strafe_down` (Q),
+  `jump` (Space), `dash` (Shift, combines with held direction keys),
+  `respawn` (R). All use `physical_keycode` (layout-independent). `ui_cancel`
+  (Esc) is the built-in default.
 - `physics/common/physics_ticks_per_second = 120`.
 
 ## Implementation

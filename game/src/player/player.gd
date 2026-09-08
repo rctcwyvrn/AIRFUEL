@@ -103,6 +103,14 @@ func _air_move(wish: Vector3, delta: float) -> void:
 				and _spend(config.air_strafe_cost_per_sec * delta):
 			_air_accelerate(wish, config.air_strafe_accel, config.air_strafe_speed_cap, delta)
 
+	# Q/E vertical strafe: fueled only, no free tier (E up, Q down)
+	var vert := _vertical_input()
+	if vert != 0.0:
+		var vdir := Vector3.UP * vert
+		if velocity.dot(vdir) < config.air_strafe_vertical_cap \
+				and _spend(config.air_strafe_cost_per_sec * delta):
+			_air_accelerate(vdir, config.air_strafe_accel, config.air_strafe_vertical_cap, delta)
+
 	if ramp_grace_timer > 0.0:
 		ramp_grace_timer -= delta
 	else:
@@ -221,13 +229,23 @@ func _probe_wall_at(dir: Vector3, dist_scale := 1.0) -> Dictionary:
 func _handle_dashes() -> void:
 	if state == MoveState.WALLRUN:
 		return
-	if Input.is_action_just_pressed("dash") and dash_cooldown_timer == 0.0 \
-			and _spend(config.air_dash_cost):
-		velocity += _aim_dir() * config.air_dash_impulse
-		dash_cooldown_timer = config.air_dash_cooldown
-	if Input.is_action_just_pressed("down_dash") and state == MoveState.AIRBORNE \
-			and _spend(config.down_dash_cost):
-		velocity.y = minf(velocity.y, -config.down_dash_speed)
+	if not Input.is_action_just_pressed("dash"):
+		return
+	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var vert := _vertical_input()
+	if input == Vector2.ZERO and vert == 0.0:
+		return  # bare Shift is inert: dash requires a held direction
+	if input == Vector2.ZERO and vert < 0.0:
+		# Shift+Q alone is the down dash (DESIGN.md 4.4): own tuning, no cooldown
+		if state == MoveState.AIRBORNE and _spend(config.down_dash_cost):
+			velocity.y = minf(velocity.y, -config.down_dash_speed)
+		return
+	if dash_cooldown_timer > 0.0 or not _spend(config.air_dash_cost):
+		return
+	var b := global_transform.basis
+	var dir := (b.x * input.x + -b.z * -input.y + Vector3.UP * vert).normalized()
+	velocity += dir * config.air_dash_impulse
+	dash_cooldown_timer = config.air_dash_cooldown
 
 
 func _update_state() -> void:
@@ -271,13 +289,13 @@ func _wish_dir() -> Vector3:
 	return (b.x * input.x + -b.z * -input.y).normalized()
 
 
-## Omnidirectional, camera-relative (pitch included) — no input dashes forward.
-func _aim_dir() -> Vector3:
-	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var cb := camera.global_transform.basis
-	if input == Vector2.ZERO:
-		return -cb.z
-	return (cb.x * input.x + -cb.z * -input.y).normalized()
+func _vertical_input() -> float:
+	var vert := 0.0
+	if Input.is_action_pressed("strafe_up"):
+		vert += 1.0
+	if Input.is_action_pressed("strafe_down"):
+		vert -= 1.0
+	return vert
 
 
 func _camera_feel(delta: float) -> void:

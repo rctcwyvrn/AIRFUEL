@@ -17,8 +17,9 @@ velocity. No weapons, no networking — those are later roadmap steps.
   `horizontal_speed() -> float`, `state_name() -> String`.
 - Expected children: `Head` (Node3D, pitch) → `Head/Camera3D` (roll + FOV feel).
   Yaw goes on the body itself.
-- Consumes input actions: `move_forward/back/left/right`, `jump`, `dash`,
-  `down_dash`, `respawn`, `ui_cancel` (mouse release toggle).
+- Consumes input actions: `move_forward/back/left/right`, `strafe_up` (E),
+  `strafe_down` (Q), `jump`, `dash` (Shift), `respawn`, `ui_cancel` (mouse
+  release toggle).
 - `MoveState { GROUNDED, AIRBORNE, WALLRUN }` in `state`.
 
 ## Implementation
@@ -48,9 +49,16 @@ timers → per-state move (`_ground_move` / `_air_move` / `_wallrun_move`) →
   only up to a cap along the wish direction). Free control caps at
   `base_run_speed`; the fueled strafe tier caps at `air_strafe_speed_cap` and
   drains `air_strafe_cost_per_sec` only when it can actually add speed.
-- Dash aim (`_aim_dir`) is camera-relative including pitch; empty input = camera
-  forward. Double jump is fuel-gated plus a short cooldown (interpretation of
-  §4.5: fuel is the constraint, cooldown just prevents hover-spam).
+  Vertical strafe (E up / Q down, `_vertical_input`) is fueled-only — no free
+  tier — capped at `air_strafe_vertical_cap`, airborne only.
+- **Dash is Shift + held direction** (Lily's control scheme, chosen over an
+  assumed camera-aimed dash): WASD components in the body yaw plane, E/Q as
+  pure vertical — camera pitch never affects dash direction. Bare Shift is
+  inert. Shift+Q with no WASD held fires the §4.4 down dash instead, with its
+  own `down_dash_*` tuning and no cooldown (fuel is its limiter); every other
+  direction uses `air_dash_impulse`/`air_dash_cost`/`air_dash_cooldown`.
+  Double jump is fuel-gated plus a short cooldown (interpretation of §4.5:
+  fuel is the constraint, cooldown just prevents hover-spam).
 - Respawn on `respawn` action or falling below `config.kill_y`.
 
 ## Assertions

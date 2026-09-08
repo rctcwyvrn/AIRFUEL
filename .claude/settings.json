@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -c 'if (((.tool_input.file_path // \"\") | test(\"game/.*\\\\.(gd|tscn|tres)$|game/project\\\\.godot$\")) or ((.tool_name == \"Bash\") and ((.tool_input.command // \"\") | test(\">|\\\\bsed -i\\\\b|\\\\btee\\\\b|\\\\bmv \\\\b|\\\\bcp \\\\b\")) and ((.tool_input.command // \"\") | test(\"game/[^ ]*\\\\.(gd|tscn|tres|godot)([^A-Za-z0-9.]|$)\")))) then {hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:\"A Godot file under game/ was modified. Repo convention: run the sidecar-check skill to verify and update the paired <file>.md sidecar before finishing this task.\"}} else empty end'",
+            "command": "jq -c 'if (((.tool_input.file_path // \"\") | test(\"game/.*\\\\.(gd|tscn|tres)$|game/project\\\\.godot$\")) or ((.tool_name == \"Bash\") and ((.tool_input.command // \"\") | test(\">|\\\\bsed -i\\\\b|\\\\btee\\\\b|\\\\bmv \\\\b|\\\\bcp \\\\b|\\\\bpython3?\\\\b|\\\\btouch \\\\b\")) and ((.tool_input.command // \"\") | test(\"game/[^ ]*\\\\.(gd|tscn|tres|godot)([^A-Za-z0-9.]|$)\")))) then {hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:\"A Godot file under game/ was modified. Repo convention: run the sidecar-check skill to verify and update the paired <file>.md sidecar before finishing this task.\"}} else empty end'",
             "timeout": 10,
             "statusMessage": "Checking sidecar-doc convention"
           }

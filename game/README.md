@@ -16,12 +16,15 @@ godot4 --path game             # just play
 
 | Input | Action |
 |---|---|
-| WASD + mouse | Move / look |
+| WASD + mouse | Strafe / look |
+| E / Q | Strafe up / down in the air (fuel) |
 | Space | Jump / double jump (fuel) / wallrun dismount |
-| Shift | Omnidirectional dash (fuel, camera-aimed) |
-| Ctrl or C | Down dash (fuel) |
+| Shift + WASD/E/Q | Dash in that direction (fuel); Shift+Q alone = down dash |
 | R | Respawn |
 | Esc | Release mouse |
+
+Bare Shift does nothing — a dash always needs a held direction. WASD dashes
+are in the facing (yaw) plane; E/Q dash straight up/down.
 
 ## What to test (Step 1 questions from the design doc)
 

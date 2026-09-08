@@ -20,6 +20,7 @@ extends Resource
 @export var air_control_accel := 6.0
 @export var air_strafe_accel := 25.0
 @export var air_strafe_speed_cap := 18.0
+@export var air_strafe_vertical_cap := 10.0
 @export var air_strafe_cost_per_sec := 6.0
 @export var double_jump_cost := 8.0
 @export var double_jump_strength := 8.0
