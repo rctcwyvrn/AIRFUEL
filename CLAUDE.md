@@ -1,0 +1,76 @@
+# CLAUDE.md — Airfuel
+
+Airfuel is a solo-dev 6v6 movement shooter prototype in Godot 4.6 (GDScript).
+Read this first, then the sidecar doc of any file you touch.
+
+## Where things are
+
+- `design/DESIGN.md` — **the design authority.** 26 sections. Consult it before
+  any gameplay decision. Appendix A lists cut ideas *with reasons* — never
+  re-propose them. Appendix B lists every tuning variable.
+- `game/` — the Godot project. Currently implements **prototype roadmap Step 1
+  only** (movement alone, DESIGN.md §24). Steps 2–4 (railgun, bot, networked
+  melee) are not started. Everything else waits — do not build ahead of the
+  roadmap.
+- `game/README.md` — how to run, controls, what Step 1 is trying to answer.
+- `shell.nix` — dev environment. All Godot work goes through it.
+
+## Build / run / verify
+
+```sh
+nix-shell                                        # from repo root; binary is godot4
+godot4 --path game --editor                      # open editor
+godot4 --path game                               # play
+godot4 --headless --path game --import           # verify: scan + register classes
+godot4 --headless --path game --quit-after 300   # verify: 5s smoke run, must be silent
+```
+
+Run both verify commands after any change to `game/`. Script errors print to
+stderr; a clean run prints only the engine banner. Then run the
+**`sidecar-check` skill** (`/sidecar-check`) to confirm the sidecar docs still
+match the code — a PostToolUse hook in `.claude/settings.json` will also remind
+you whenever a Godot file changes.
+
+## Conventions
+
+### Sidecar docs (required)
+
+**Every Godot file is paired with a markdown doc named `<filename>.md` beside
+it** (`player.gd` → `player.gd.md`, `hud.tscn` → `hud.tscn.md`). This covers
+`.gd`, `.tscn`, `.tres`, and `project.godot`.
+
+Each sidecar has four sections:
+
+- **Function** — what the file is for, in terms of the design doc.
+- **Interface** — what the rest of the project may rely on: exports, public
+  fields/methods, node paths, groups, consumed input actions, signals.
+- **Implementation** — how it works; the non-obvious decisions and their why.
+- **Assertions** — invariants that must survive any edit. Treat these as a
+  checklist before and after changing the paired file.
+
+**When you change a Godot file, update its sidecar in the same change.** When
+you create a Godot file, create its sidecar. A stale sidecar is a bug.
+
+Verification is automated: the **`sidecar-check` skill**
+(`.claude/skills/sidecar-check/`) compares every sidecar against its Godot file
+claim-by-claim and fixes drift. Run it after any `game/` change, before ending
+a turn that touched Godot files, or standalone as `/sidecar-check` for a full
+audit. Its `check_pairs.sh` gives a fast structural pass (missing/stale/orphan
+pairs).
+
+### Code
+
+- GDScript, tabs, typed (`:=`, typed params/returns), snake_case files.
+- **No gameplay literals in scripts.** Every tunable number lives in
+  `game/src/player/default_tuning.tres` (schema:
+  `game/src/player/movement_config.gd`, mirroring DESIGN.md Appendix B). If you
+  need a new number, add a config field + tres value, don't inline it.
+- Scenes are hand-written `.tscn` — keep them minimal and diffable. Omit `uid`
+  attributes; the editor adds them.
+- Format/lint via `gdformat` / `gdlint` (in the devshell) if in doubt.
+
+### Process
+
+- The developer (Lily) collaborates through questions — when a design point is
+  ambiguous, ask rather than assume; DESIGN.md §23 tracks open questions.
+- Don't commit unless asked.

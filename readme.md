@@ -14,7 +14,7 @@ Are you ready to become an Airfuel Runner?
 - Choose your left and right arm weapons: Sword or Railgun?
 - Sword: Leaping, swift one-shot killer
 - Railgun: Lethal laser from afar. Commit, aim, and obliterate
-- Puck between dual swords, dual railguns, or one of each
+- Pick between dual swords, dual railguns, or one of each
 
 ## Push the bomb
 - Carry the bomb from the center of the map into the enemy base
@@ -22,14 +22,14 @@ Are you ready to become an Airfuel Runner?
 
 ## Unending action
 - Teleport home at any time to refresh resources
-- Launch out of the canon to soar back into the action
+- Launch out of the cannon to soar back into the action
 
 ## Personalize
 - Customize your UI to your liking using the built-in render engine
 - Run private servers with custom maps and tunable parameters (unlimited speed anyone?)
 
 ## Enjoy!
-This is a for fun project made by a single developer with, using LLMs to assist with the coding to make thw ptoject possible.
+This is a for fun project made by a single developer, using LLMs to assist with the coding to make the project possible.
 
 The full source code is available on GitHub, submit bugfixes and propose patches there. Download the game on itch.io
 

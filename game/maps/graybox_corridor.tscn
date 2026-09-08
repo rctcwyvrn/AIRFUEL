@@ -1,0 +1,145 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.25, 0.32, 0.45, 1)
+sky_horizon_color = Color(0.55, 0.58, 0.62, 1)
+ground_bottom_color = Color(0.12, 0.12, 0.14, 1)
+ground_horizon_color = Color(0.55, 0.58, 0.62, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+
+[sub_resource type="StandardMaterial3D" id="mat_floor"]
+albedo_color = Color(0.42, 0.44, 0.47, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_wall"]
+albedo_color = Color(0.55, 0.62, 0.72, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_cyl"]
+albedo_color = Color(0.85, 0.5, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_panel"]
+albedo_color = Color(0.3, 0.72, 0.65, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_plat"]
+albedo_color = Color(0.6, 0.45, 0.75, 1)
+
+[node name="GrayboxCorridor" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0, -0.5, -0.353553, 0.707107, -0.612372, 0.353553, 0.707107, 0.612372, 0, 30, 0)
+shadow_enabled = true
+
+[node name="FloorA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -70)
+use_collision = true
+size = Vector3(30, 1, 80)
+material = SubResource("mat_floor")
+
+[node name="FloorB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 10)
+use_collision = true
+size = Vector3(30, 1, 60)
+material = SubResource("mat_floor")
+
+[node name="FloorC" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 80)
+use_collision = true
+size = Vector3(30, 1, 60)
+material = SubResource("mat_floor")
+
+[node name="WallL1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 6, -77.5)
+use_collision = true
+size = Vector3(1, 12, 45)
+material = SubResource("mat_wall")
+
+[node name="WallL2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 6, -7.5)
+use_collision = true
+size = Vector3(1, 12, 35)
+material = SubResource("mat_wall")
+
+[node name="WallL3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 6, 67.5)
+use_collision = true
+size = Vector3(1, 12, 45)
+material = SubResource("mat_wall")
+
+[node name="WallR1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 6, -50)
+use_collision = true
+size = Vector3(1, 12, 40)
+material = SubResource("mat_wall")
+
+[node name="WallR2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 6, 22.5)
+use_collision = true
+size = Vector3(1, 12, 45)
+material = SubResource("mat_wall")
+
+[node name="WallR3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 6, 92.5)
+use_collision = true
+size = Vector3(1, 12, 35)
+material = SubResource("mat_wall")
+
+[node name="Cylinder1" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, -25)
+use_collision = true
+radius = 2.5
+height = 16.0
+material = SubResource("mat_cyl")
+
+[node name="Cylinder2" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 8, 10)
+use_collision = true
+radius = 2.5
+height = 16.0
+material = SubResource("mat_cyl")
+
+[node name="Cylinder3" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 8, 45)
+use_collision = true
+radius = 2.5
+height = 16.0
+material = SubResource("mat_cyl")
+
+[node name="PanelA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 9, -60)
+use_collision = true
+size = Vector3(1, 6, 18)
+material = SubResource("mat_panel")
+
+[node name="PanelB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 10, -15)
+use_collision = true
+size = Vector3(1, 6, 18)
+material = SubResource("mat_panel")
+
+[node name="PanelC" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 9, 60)
+use_collision = true
+size = Vector3(1, 6, 18)
+material = SubResource("mat_panel")
+
+[node name="HighPlatform" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 95)
+use_collision = true
+size = Vector3(10, 1, 10)
+material = SubResource("mat_plat")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 2, -100)
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]

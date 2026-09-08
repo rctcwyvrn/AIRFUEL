@@ -1,0 +1,54 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/hud/hud.gd" id="1_hud"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="FuelBar" type="ProgressBar" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -64.0
+offset_right = 220.0
+offset_bottom = -40.0
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="FuelLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -64.0
+offset_right = 220.0
+offset_bottom = -40.0
+theme_override_font_sizes/font_size = 14
+text = "AIRFUEL 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpeedLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -104.0
+offset_right = 220.0
+offset_bottom = -70.0
+theme_override_font_sizes/font_size = 28
+text = "0 m/s"
+horizontal_alignment = 1
+
+[node name="StateLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 420.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 20
+text = "AIRBORNE"

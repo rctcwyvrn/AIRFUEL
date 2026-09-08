@@ -1,0 +1,4 @@
+# Godot
+game/.godot/
+game/export/
+*.tmp
