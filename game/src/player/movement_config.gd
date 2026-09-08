@@ -16,6 +16,7 @@ extends Resource
 @export_group("Air")
 @export var gravity := 14.0
 @export var terminal_velocity := 55.0
+@export var overspeed_decay := 60.0
 @export var terminal_fall_speed := 40.0
 @export var air_control_accel := 6.0
 @export var air_strafe_accel := 25.0
@@ -52,6 +53,7 @@ extends Resource
 @export var dismount_up_velocity := 6.0
 @export var dismount_push_off := 4.0
 @export var wall_rearm_time := 0.18
+@export var dash_wall_rearm_time := 0.7
 
 @export_group("Assists")
 @export var glide_speed_retention := 0.9

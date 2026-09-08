@@ -30,6 +30,13 @@ func _physics_process(delta: float) -> void:
 				state = ArmState.IDLE
 
 
+## Hard reset (loadout swap): drops any charge/cooldown.
+func reset() -> void:
+	state = ArmState.IDLE
+	charge = 0.0
+	cooldown = 0.0
+
+
 func try_charge() -> bool:
 	if state != ArmState.IDLE:
 		return false

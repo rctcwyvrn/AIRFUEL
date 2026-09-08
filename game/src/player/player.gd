@@ -10,9 +10,12 @@ extends CharacterBody3D
 enum MoveState { GROUNDED, AIRBORNE, WALLRUN }
 
 signal shot_fired(side: String, result: String)
+signal died
+signal respawned
 
 const CANISTER := preload("res://src/weapons/canister.tscn")
 
+@export var ghost_controlled := false
 @export var config: MovementConfig
 @export var combat: CombatConfig
 @export var mouse_sensitivity := 0.0022
@@ -23,6 +26,9 @@ const CANISTER := preload("res://src/weapons/canister.tscn")
 @onready var arm_right: RailArm = $ArmRight
 @onready var vm_left: MeshInstance3D = $Head/Camera3D/ViewmodelL
 @onready var vm_right: MeshInstance3D = $Head/Camera3D/ViewmodelR
+@onready var puppet_arm_l: MeshInstance3D = $PuppetArmL
+@onready var puppet_arm_r: MeshInstance3D = $PuppetArmR
+@onready var trail: GPUParticles3D = $Trail
 
 var state := MoveState.AIRBORNE
 var fuel := 0.0
@@ -52,6 +58,35 @@ var last_shot_time := -1000.0
 var hp := 2
 var _net_target_pos := Vector3.ZERO
 
+# Per-tick command state: filled from Input for humans, written directly by
+# a controller (TAS ghost, future bots) when ghost_controlled.
+var cmd_move := Vector2.ZERO
+var cmd_vert := 0.0
+var cmd_jump := false
+var cmd_dash := false
+var cmd_fire_l := false
+var cmd_fire_r := false
+var cmd_swap := false
+var cmd_respawn := false
+
+var recording := false
+var _tape_lines: PackedStringArray = []
+
+var run_time := 0.0
+var run_finished := false
+
+const LOADOUTS: Array = [["rail", "rail"], ["rail", "sword"], ["sword", "sword"]]
+const RAIL_VM_COLOR := Color(0.45, 0.47, 0.5)
+const SWORD_VM_COLOR := Color(0.82, 0.84, 0.88)
+var loadout_index := 0
+var arm_types: Array = ["rail", "rail"]
+var sword_cd: Array = [0.0, 0.0]
+var sword_active := 0.0
+var sword_side := "L"
+var _net_prog := Vector2.ZERO
+var _rail_vm_mesh: BoxMesh
+var _sword_vm_mesh: BoxMesh
+
 
 func _ready() -> void:
 	fuel = config.fuel_max
@@ -62,8 +97,31 @@ func _ready() -> void:
 	arm_right.charge_complete.connect(func() -> void: pending_arms.append(arm_right))
 	vm_left.set_meta("rest_pos", vm_left.position)
 	vm_right.set_meta("rest_pos", vm_right.position)
+	vm_left.set_meta("rest_rot", vm_left.rotation)
+	vm_right.set_meta("rest_rot", vm_right.rotation)
+	_rail_vm_mesh = BoxMesh.new()
+	_rail_vm_mesh.size = Vector3(0.12, 0.12, 0.5)
+	_sword_vm_mesh = BoxMesh.new()
+	_sword_vm_mesh.size = Vector3(0.05, 0.2, 1.05)
+	_apply_loadout_visuals()
 	base_fov = camera.fov
-	if is_multiplayer_authority():
+	if ghost_controlled:
+		# TAS/bot body: real physics, no human input, translucent orange.
+		# Layer 0: nothing collides INTO the ghost (players/rays phase
+		# through); mask 1 keeps ITS OWN physics against the world.
+		collision_layer = 0
+		camera.current = false
+		set_process_unhandled_input(false)
+		vm_left.visible = false
+		vm_right.visible = false
+		var bm := $BodyMesh as MeshInstance3D
+		bm.visible = true
+		var gmat := (bm.material_override as StandardMaterial3D).duplicate()
+		gmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		gmat.albedo_color = Color(1.0, 0.55, 0.1, 0.4)
+		gmat.emission = Color(1.0, 0.55, 0.1, 1.0)
+		bm.material_override = gmat
+	elif is_multiplayer_authority():
 		# Explicit claim: auto-current fails when a remote puppet's camera
 		# entered the viewport first (client-side join order)
 		camera.current = true
@@ -75,6 +133,11 @@ func _ready() -> void:
 		vm_left.visible = false
 		vm_right.visible = false
 		$BodyMesh.visible = true
+		# Shoulder weapon blocks: the remote player's loadout + charge tell.
+		# Materials duplicated so multiple puppets tint independently.
+		for arm: MeshInstance3D in [puppet_arm_l, puppet_arm_r]:
+			arm.material_override = arm.material_override.duplicate()
+			arm.visible = true
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -91,13 +154,21 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_gather_input()
+	if not run_finished:
+		run_time += delta
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
 	double_jump_timer = maxf(0.0, double_jump_timer - delta)
 	wall_rearm_timer = maxf(0.0, wall_rearm_timer - delta)
 	wall_coyote_timer = maxf(0.0, wall_coyote_timer - delta)
 	ground_coyote_timer = maxf(0.0, ground_coyote_timer - delta)
 	jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
-	if Input.is_action_just_pressed("jump"):
+	sword_cd[0] = maxf(0.0, sword_cd[0] - delta)
+	sword_cd[1] = maxf(0.0, sword_cd[1] - delta)
+	if sword_active > 0.0:
+		sword_active -= delta
+		_sword_hit_check()
+	if cmd_jump:
 		jump_buffer_timer = config.jump_buffer_time
 
 	move_locked = arm_left.is_locking() or arm_right.is_locking()
@@ -115,7 +186,11 @@ func _physics_process(delta: float) -> void:
 
 	_handle_dashes()
 
-	velocity = velocity.limit_length(config.terminal_velocity)
+	var speed := velocity.length()
+	if speed > config.terminal_velocity:
+		# Soft ceiling: overspeed (sword lunge) decays fast instead of clamping
+		velocity *= move_toward(speed, config.terminal_velocity,
+				config.overspeed_decay * delta) / speed
 	if move_locked:
 		# Charging bleeds you down to a slower, more readable trajectory
 		velocity = velocity.limit_length(combat.charge_speed_cap)
@@ -128,19 +203,32 @@ func _physics_process(delta: float) -> void:
 	_update_state()
 	_camera_feel(delta)
 	_update_viewmodels(delta)
+	trail.emitting = horizontal_speed() > config.base_run_speed * 1.2
 
-	var manual_respawn := Input.is_action_just_pressed("respawn") and not Net.active
+	var manual_respawn := cmd_respawn and not Net.active
 	if manual_respawn or global_position.y < config.kill_y:
 		_respawn()
 
+	if recording:
+		var flags := (int(cmd_jump) | int(cmd_dash) << 1 | int(cmd_fire_l) << 2
+				| int(cmd_fire_r) << 3 | int(cmd_swap) << 4 | int(cmd_respawn) << 5)
+		_tape_lines.append("%.5f %.5f %.3f %.3f %.1f %d" % [
+				rotation.y, head.rotation.x, cmd_move.x, cmd_move.y, cmd_vert, flags])
+
 	if Net.active:
-		_send_state.rpc(global_position, velocity, rotation.y, head.rotation.x)
+		_send_state.rpc(global_position, velocity, rotation.y, head.rotation.x,
+				arm_progress_left(), arm_progress_right(), loadout_index)
 
 
 func _process(delta: float) -> void:
 	if is_multiplayer_authority():
 		return
 	global_position = global_position.lerp(_net_target_pos, 1.0 - exp(-20.0 * delta))
+	trail.emitting = velocity.length() > config.base_run_speed * 1.2
+	# Rail arms glow with charge (the audible-tell stand-in); swords idle warm
+	for i in 2:
+		var mat := (puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
+		mat.emission_energy_multiplier = (_net_prog[i] * 3.0) if arm_types[i] == "rail" else 0.4
 
 
 func _ground_move(wish: Vector3, delta: float) -> void:
@@ -178,7 +266,7 @@ func _air_move(wish: Vector3, delta: float) -> void:
 			_air_accelerate(wish, config.air_strafe_accel, config.air_strafe_speed_cap, delta)
 
 	# Q vertical strafe: fueled downward thrust only
-	var vert := 0.0 if move_locked else _vertical_input()
+	var vert := 0.0 if move_locked else cmd_vert
 	if vert != 0.0:
 		var vdir := Vector3.UP * vert
 		if velocity.dot(vdir) < config.air_strafe_vertical_cap \
@@ -190,7 +278,7 @@ func _air_move(wish: Vector3, delta: float) -> void:
 	else:
 		_decay_excess_speed(config.ramp_decay_rate, delta)
 
-	if not move_locked and Input.is_action_just_pressed("jump"):
+	if not move_locked and cmd_jump:
 		jump_buffer_timer = 0.0
 		if wall_coyote_timer > 0.0:
 			_coyote_walljump()
@@ -236,7 +324,7 @@ func _wallrun_move(delta: float) -> void:
 	velocity.z = dir.z * wall_speed - wall_normal.z * config.wall_stick_speed
 	velocity.y = move_toward(velocity.y, 0.0, 20.0 * delta) - config.wallrun_gravity * delta
 
-	if not move_locked and Input.is_action_just_pressed("jump"):
+	if not move_locked and cmd_jump:
 		jump_buffer_timer = 0.0
 		_dismount(true)
 
@@ -252,7 +340,8 @@ func _dismount(jumped: bool) -> void:
 	if jumped:
 		var flat := Vector3(velocity.x, 0.0, velocity.z)
 		var dir := flat.normalized() if flat.length() > 0.1 else -global_transform.basis.z
-		var boosted := wall_speed * (1.0 + config.dismount_boost_factor)
+		var boosted := minf(wall_speed * (1.0 + config.dismount_boost_factor),
+				config.terminal_velocity)
 		velocity.x = dir.x * boosted + wall_normal.x * config.dismount_push_off
 		velocity.z = dir.z * boosted + wall_normal.z * config.dismount_push_off
 		velocity.y = maxf(velocity.y, config.dismount_up_velocity)
@@ -317,21 +406,30 @@ func _probe_wall_at(dir: Vector3, dist_scale := 1.0) -> Dictionary:
 
 
 func _handle_dashes() -> void:
-	if move_locked or state == MoveState.WALLRUN:
+	if move_locked:
 		return
-	if not Input.is_action_just_pressed("dash"):
+	if not cmd_dash:
 		return
-	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var vert := _vertical_input()
+	var input := cmd_move
+	var vert := cmd_vert
 	if input == Vector2.ZERO and vert == 0.0:
 		return  # bare Shift is inert: dash requires a held direction
+	var on_wall := state == MoveState.WALLRUN
 	if input == Vector2.ZERO and vert < 0.0:
-		# Shift+Q alone is the down dash (DESIGN.md 4.4): own tuning, no cooldown
-		if state == MoveState.AIRBORNE and _spend(config.down_dash_cost):
+		# Shift+Q alone is the down dash (DESIGN.md 4.4): own tuning, no
+		# cooldown. On a wall you STAY attached and slide down it fast.
+		if (on_wall or state == MoveState.AIRBORNE) and _spend(config.down_dash_cost):
 			velocity.y = minf(velocity.y, -config.down_dash_speed)
 		return
 	if dash_cooldown_timer > 0.0 or not _spend(config.air_dash_cost):
 		return
+	if on_wall:
+		# Dashing off the wall is a real dismount: same fuel grant and speed
+		# boost as jumping off, with the dash impulse stacked on top — but
+		# the wall you left is locked out for longer (anti-pogo: dashing
+		# straight back in compounded boosts to absurd speeds)
+		_dismount(true)
+		wall_rearm_timer = config.dash_wall_rearm_time
 	# Camera-aimed: W+Shift dashes wherever you're looking (pitch included);
 	# E/Q contribute world-vertical on top.
 	var cb := camera.global_transform.basis
@@ -341,10 +439,12 @@ func _handle_dashes() -> void:
 
 
 func _handle_arms() -> void:
-	if Input.is_action_just_pressed("fire_left"):
-		arm_left.try_charge()
-	if Input.is_action_just_pressed("fire_right"):
-		arm_right.try_charge()
+	if cmd_swap:
+		_cycle_loadout()
+	if cmd_fire_l:
+		_trigger_arm(0)
+	if cmd_fire_r:
+		_trigger_arm(1)
 	if pending_arms.is_empty():
 		return
 	# 7.1: completed charges fire in press order, never closer than min_shot_gap
@@ -352,6 +452,82 @@ func _handle_arms() -> void:
 	if now - last_shot_time >= combat.min_shot_gap:
 		_fire_rail(pending_arms.pop_front())
 		last_shot_time = now
+
+
+func _trigger_arm(index: int) -> void:
+	if arm_types[index] == "rail":
+		(arm_left if index == 0 else arm_right).try_charge()
+		return
+	# Sword lunge (DESIGN.md 8.2): movement ability that is also the kill.
+	# Cheaper per meter and longer than a dash, per-arm cooldown, no freeze.
+	if move_locked or state == MoveState.WALLRUN:
+		return
+	if sword_cd[index] > 0.0 or not _spend(combat.sword_lunge_cost):
+		return
+	sword_cd[index] = combat.sword_lunge_cooldown
+	sword_active = combat.sword_active_time
+	sword_side = "L" if index == 0 else "R"
+	velocity = -camera.global_transform.basis.z * combat.sword_lunge_speed
+	ramp_grace_timer = config.ramp_grace_window
+	var vm := vm_left if index == 0 else vm_right
+	vm.position += Vector3(0.0, -0.06, -0.5)
+	vm.rotation.x += 0.4
+
+
+## While the blade is live, anything in reach dies (one hit per lunge).
+func _sword_hit_check() -> void:
+	var candidates: Array[Node] = []
+	candidates.append_array(get_tree().get_nodes_in_group("player"))
+	candidates.append_array(get_tree().get_nodes_in_group("target"))
+	for node: Node in candidates:
+		if node == self or (node is AirfuelPlayer and node.ghost_controlled):
+			continue
+		var pos := (node as Node3D).global_position
+		if node is TargetDummy:
+			pos += Vector3.UP * 2.55
+		if global_position.distance_to(pos) > combat.sword_hit_range:
+			continue
+		sword_active = 0.0
+		if node is TargetDummy:
+			node.take_hit(99)
+			shot_fired.emit(sword_side, "kill")
+		elif node is AirfuelPlayer:
+			node.take_damage.rpc_id(node.get_multiplayer_authority(), 99,
+					multiplayer.get_unique_id())
+		return
+
+
+func _cycle_loadout() -> void:
+	loadout_index = (loadout_index + 1) % LOADOUTS.size()
+	arm_types = LOADOUTS[loadout_index]
+	arm_left.reset()
+	arm_right.reset()
+	pending_arms.clear()
+	sword_cd = [0.0, 0.0]
+	sword_active = 0.0
+	_apply_loadout_visuals()
+
+
+## First-person weapon identity: rail = chunky block held level, sword = a
+## long thin blade rolled inward and tilted up. Pose is stored as meta so
+## the recovery lerp returns to the weapon's stance, not to zero.
+func _apply_loadout_visuals() -> void:
+	for i in 2:
+		var vm := vm_left if i == 0 else vm_right
+		var mat := vm.material_override as StandardMaterial3D
+		var is_sword: bool = arm_types[i] == "sword"
+		mat.albedo_color = SWORD_VM_COLOR if is_sword else RAIL_VM_COLOR
+		vm.mesh = _sword_vm_mesh if is_sword else _rail_vm_mesh
+		var rest: Vector3 = vm.get_meta("rest_rot")
+		var pose := rest
+		if is_sword:
+			pose = rest + Vector3(0.12, 0.0, 0.35 if i == 0 else -0.35)
+		vm.rotation = pose
+		vm.set_meta("pose_rot", pose)
+
+
+func loadout_name() -> String:
+	return "L %s | R %s" % [arm_types[0].to_upper(), arm_types[1].to_upper()]
 
 
 func _fire_rail(arm: RailArm) -> void:
@@ -374,7 +550,7 @@ func _fire_rail(arm: RailArm) -> void:
 			var target := (collider as Node).get_parent()
 			if target is TargetDummy:
 				result = "kill" if target.take_hit(damage) else zone
-		elif collider is AirfuelPlayer:
+		elif collider is AirfuelPlayer and not collider.ghost_controlled:
 			result = "body"
 			collider.take_damage.rpc_id(
 					collider.get_multiplayer_authority(), combat.damage_body,
@@ -420,14 +596,18 @@ func _spawn_beam(from: Vector3, to: Vector3) -> void:
 
 
 func _update_viewmodels(delta: float) -> void:
-	_drive_viewmodel(vm_left, arm_left, delta)
-	_drive_viewmodel(vm_right, arm_right, delta)
-
-
-func _drive_viewmodel(vm: MeshInstance3D, arm: RailArm, delta: float) -> void:
-	var mat := vm.material_override as StandardMaterial3D
-	mat.emission_energy_multiplier = arm.progress() * 3.0
-	vm.position = vm.position.lerp(vm.get_meta("rest_pos"), 1.0 - exp(-12.0 * delta))
+	for i in 2:
+		var vm := vm_left if i == 0 else vm_right
+		var mat := vm.material_override as StandardMaterial3D
+		if arm_types[i] == "rail":
+			var arm := arm_left if i == 0 else arm_right
+			mat.emission_energy_multiplier = arm.progress() * 3.0
+		else:
+			# only the lunging blade flares; the other idles warm
+			var flaring: bool = sword_active > 0.0 and sword_side == ("L" if i == 0 else "R")
+			mat.emission_energy_multiplier = 2.5 if flaring else 0.3
+		vm.position = vm.position.lerp(vm.get_meta("rest_pos"), 1.0 - exp(-12.0 * delta))
+		vm.rotation = vm.rotation.lerp(vm.get_meta("pose_rot"), 1.0 - exp(-10.0 * delta))
 
 
 func _spawn_canister(side_sign: float, cam: Transform3D) -> void:
@@ -513,7 +693,8 @@ func _apply_glide(pre_vel: Vector3) -> void:
 func _coyote_walljump() -> void:
 	var flat := Vector3(velocity.x, 0.0, velocity.z)
 	var dir := flat.normalized() if flat.length() > 0.1 else -global_transform.basis.z
-	var boosted := coyote_wall_speed * (1.0 + config.dismount_boost_factor)
+	var boosted := minf(coyote_wall_speed * (1.0 + config.dismount_boost_factor),
+			config.terminal_velocity)
 	velocity.x = dir.x * boosted + coyote_wall_normal.x * config.dismount_push_off
 	velocity.z = dir.z * boosted + coyote_wall_normal.z * config.dismount_push_off
 	velocity.y = maxf(velocity.y, config.dismount_up_velocity)
@@ -528,17 +709,29 @@ func _spend(amount: float) -> bool:
 	return true
 
 
+func _gather_input() -> void:
+	if ghost_controlled:
+		return  # controller wrote the cmds (process_physics_priority < 0)
+	cmd_move = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	cmd_vert = -1.0 if Input.is_action_pressed("strafe_down") else 0.0
+	cmd_jump = Input.is_action_just_pressed("jump")
+	cmd_dash = Input.is_action_just_pressed("dash")
+	cmd_fire_l = Input.is_action_just_pressed("fire_left")
+	cmd_fire_r = Input.is_action_just_pressed("fire_right")
+	cmd_swap = Input.is_action_just_pressed("swap_loadout")
+	cmd_respawn = Input.is_action_just_pressed("respawn")
+	if Input.is_action_just_pressed("record"):
+		_toggle_recording()
+
+
 func _wish_dir() -> Vector3:
-	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	if input == Vector2.ZERO:
+	if cmd_move == Vector2.ZERO:
 		return Vector3.ZERO
 	var b := global_transform.basis
-	return (b.x * input.x + -b.z * -input.y).normalized()
+	return (b.x * cmd_move.x + -b.z * -cmd_move.y).normalized()
 
 
-func _vertical_input() -> float:
-	# Down only (Q). Going up is the double jump's job.
-	return -1.0 if Input.is_action_pressed("strafe_down") else 0.0
+
 
 
 func _camera_feel(delta: float) -> void:
@@ -565,7 +758,8 @@ func take_damage(amount: int, from_id: int) -> void:
 		return
 	hp -= amount
 	if hp <= 0:
-		Net.kill_scored.rpc_id(from_id)
+		died.emit()
+		Net.report_kill.rpc(from_id)
 		_respawn()
 
 
@@ -583,11 +777,55 @@ func _remote_shot_fx(from: Vector3, to: Vector3) -> void:
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")
-func _send_state(pos: Vector3, vel: Vector3, yaw: float, pitch: float) -> void:
+func _send_state(pos: Vector3, vel: Vector3, yaw: float, pitch: float,
+		prog_l: float, prog_r: float, l_idx: int) -> void:
 	_net_target_pos = pos
 	velocity = vel
 	rotation.y = yaw
 	head.rotation.x = pitch
+	_net_prog = Vector2(prog_l, prog_r)
+	if l_idx != loadout_index:
+		loadout_index = l_idx
+		arm_types = LOADOUTS[l_idx]
+		for i in 2:
+			var mat := (puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
+			mat.albedo_color = SWORD_VM_COLOR if arm_types[i] == "sword" else RAIL_VM_COLOR
+
+
+## F5: record this run's inputs, one line per physics tick, for TAS ghost
+## playback. Starting a recording respawns you first so the tape begins from
+## the exact spawn state; stopping writes user://tas/ and prints the path.
+func _toggle_recording() -> void:
+	if not recording:
+		_respawn()
+		_tape_lines.clear()
+		_tape_lines.append("# airfuel-tas v1 map=%s tick_hz=%d" % [
+				get_tree().current_scene.scene_file_path,
+				Engine.physics_ticks_per_second])
+		recording = true
+		return
+	recording = false
+	DirAccess.make_dir_recursive_absolute("user://tas")
+	var fname := "user://tas/run_%s.tas" % Time.get_datetime_string_from_system().replace(":", "-")
+	var f := FileAccess.open(fname, FileAccess.WRITE)
+	if f == null:
+		push_error("Airfuel: could not write %s" % fname)
+		return
+	f.store_string("\n".join(_tape_lines))
+	f.close()
+	print("Airfuel: TAS tape saved: %s (%d ticks) — real path: %s" % [
+			fname, _tape_lines.size() - 1,
+			ProjectSettings.globalize_path(fname)])
+
+
+## Crossing a FinishZone: freeze the run clock; a live recording stops and
+## saves here too, so a finished run yields a complete tape of itself.
+func finish_run() -> void:
+	if run_finished:
+		return
+	run_finished = true
+	if recording:
+		_toggle_recording()
 
 
 func _respawn() -> void:
@@ -595,6 +833,16 @@ func _respawn() -> void:
 	velocity = Vector3.ZERO
 	fuel = config.fuel_max
 	hp = combat.hp_max
+	run_time = 0.0
+	run_finished = false
+	if recording:
+		# any reset (T, fall, F5) restarts the tape: a recording is always
+		# one clean spawn-to-finish attempt, never a spliced teleport
+		_tape_lines.clear()
+		_tape_lines.append("# airfuel-tas v1 map=%s tick_hz=%d" % [
+				get_tree().current_scene.scene_file_path,
+				Engine.physics_ticks_per_second])
+	respawned.emit()
 	state = MoveState.AIRBORNE
 	ramp_grace_timer = 0.0
 	wallrun_time = 0.0
@@ -607,10 +855,14 @@ func horizontal_speed() -> float:
 
 
 func arm_progress_left() -> float:
+	if arm_types[0] == "sword":
+		return 1.0 - clampf(sword_cd[0] / combat.sword_lunge_cooldown, 0.0, 1.0)
 	return arm_left.progress()
 
 
 func arm_progress_right() -> float:
+	if arm_types[1] == "sword":
+		return 1.0 - clampf(sword_cd[1] / combat.sword_lunge_cooldown, 0.0, 1.0)
 	return arm_right.progress()
 
 

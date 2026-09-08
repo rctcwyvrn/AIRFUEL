@@ -17,7 +17,8 @@ editor; the nix devshell verify binary is 4.6.1, which warns but runs).
 - Input actions defined here and consumed by `player.gd`:
   `move_forward/back/left/right` (WASD), `strafe_down` (Q),
   `jump` (Space), `dash` (Shift, combines with held direction keys),
-  `fire_left` (mouse left), `fire_right` (mouse right), `respawn` (T — moved off R, too close to E). Keys
+  `fire_left` (mouse left), `fire_right` (mouse right), `swap_loadout`
+  (Tab, cycles the three 8.3 loadouts), `respawn` (T — moved off R, too close to E), `record` (F5, TAS tape). Keys
   use `physical_keycode` (layout-independent). `ui_cancel` (Esc) is the
   built-in default.
 - `physics/common/physics_ticks_per_second = 120`.

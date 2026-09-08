@@ -7,7 +7,8 @@ The game's main scene: title + three ways in (solo / host / join-by-IP).
 ## Interface
 
 - Root `MainMenu` (full-rect Control, `main_menu.gd`).
-- Children the script requires: `VBox/SoloButton`, `VBox/HostButton`,
+- Children the script requires: `VBox/SoloButton`, `VBox/ParkourButton`,
+  `VBox/HostButton`,
   `VBox/JoinRow/IpEdit` (LineEdit), `VBox/JoinRow/JoinButton`.
 
 ## Implementation

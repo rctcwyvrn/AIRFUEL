@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://src/hud/hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://src/hud/minimap.gd" id="2_map"]
 
 [sub_resource type="StyleBoxFlat" id="sb_bar_bg"]
 bg_color = Color(0.086, 0.094, 0.11, 0.7)
@@ -152,3 +153,71 @@ offset_top = -152.0
 offset_right = 170.0
 offset_bottom = -16.0
 mouse_filter = 2
+
+[node name="ScoreLabel" type="Label" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 12.0
+offset_right = -16.0
+offset_bottom = 120.0
+theme_override_colors/font_color = Color(1, 0.55, 0.1, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 2
+visible = false
+text = ""
+
+[node name="LoadoutLabel" type="Label" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -44.0
+offset_right = -16.0
+offset_bottom = -16.0
+theme_override_colors/font_color = Color(0.78, 0.8, 0.83, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+text = "L RAIL | R RAIL"
+
+[node name="DeathFlash" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.9, 0.08, 0.08, 0)
+
+[node name="MapBack" type="ColorRect" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -240.0
+offset_top = 116.0
+offset_right = -12.0
+offset_bottom = 284.0
+mouse_filter = 2
+visible = false
+color = Color(0.086, 0.094, 0.11, 0.75)
+
+
+[node name="MapPrism" type="Control" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -236.0
+offset_top = 120.0
+offset_right = -16.0
+offset_bottom = 280.0
+mouse_filter = 2
+visible = false
+script = ExtResource("2_map")
+
+[node name="TimerLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 14.0
+offset_right = 120.0
+offset_bottom = 54.0
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+visible = false
+text = "0:00.000"

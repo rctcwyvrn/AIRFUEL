@@ -16,6 +16,7 @@ const PLAYER_SCENE := preload("res://src/player/player.tscn")
 var active := false
 var is_host := false
 var players: Dictionary = {}  # peer id -> AirfuelPlayer
+var scores: Dictionary = {}   # peer id -> kills (tallied identically on all peers)
 
 
 func _ready() -> void:
@@ -134,14 +135,17 @@ func _despawn_player(id: int) -> void:
 		players.erase(id)
 
 
-## Sent by a dying player's authority to the killer's peer: reset the
-## killer's own player too (kills reset the round, both duelists respawn).
-@rpc("any_peer", "call_remote", "reliable")
-func kill_scored() -> void:
-	for p: Node in get_tree().get_nodes_in_group("player"):
-		if p.is_multiplayer_authority():
-			p.round_reset(true)
-			return
+## Broadcast by a dying player's authority: every peer tallies the kill
+## identically; the killer's peer also resets its own player (kills reset
+## the round — both duelists respawn).
+@rpc("any_peer", "call_local", "reliable")
+func report_kill(killer_id: int) -> void:
+	scores[killer_id] = int(scores.get(killer_id, 0)) + 1
+	if killer_id == multiplayer.get_unique_id():
+		for p: Node in get_tree().get_nodes_in_group("player"):
+			if p.is_multiplayer_authority():
+				p.round_reset(true)
+				return
 
 
 @rpc("authority", "call_remote", "reliable")

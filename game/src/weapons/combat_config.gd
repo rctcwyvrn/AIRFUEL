@@ -19,3 +19,10 @@ extends Resource
 
 @export_group("Dual Rail")
 @export var min_shot_gap := 0.35
+
+@export_group("Sword")
+@export var sword_lunge_cost := 15.0
+@export var sword_lunge_speed := 120.0
+@export var sword_lunge_cooldown := 1.2
+@export var sword_hit_range := 4.0
+@export var sword_active_time := 0.35

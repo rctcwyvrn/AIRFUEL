@@ -12,9 +12,38 @@ networking — that's Step 4.
 - `class_name AirfuelPlayer extends CharacterBody3D`; the scene root of
   `player.tscn`, always in group `"player"`.
 - Exports: `config: MovementConfig`, `combat: CombatConfig` (both required,
-  never null at runtime), `mouse_sensitivity: float`.
-- Signal `shot_fired(side: String, result: String)` — side "L"/"R", result
-  "miss"/"body"/"head"/"kill". The HUD connects for hitmarkers.
+  never null at runtime), `mouse_sensitivity: float`, and
+  `ghost_controlled: bool` — when true the body is a TAS/bot puppet: no
+  camera claim, no mouse, no Input reads; a controller node writes the
+  `cmd_*` fields directly (translucent orange body, excluded from HUD
+  adoption and from rail/sword damage).
+- **Command layer**: all gameplay input flows through per-tick `cmd_move/
+  cmd_vert/cmd_jump/cmd_dash/cmd_fire_l/cmd_fire_r/cmd_swap/cmd_respawn`,
+  filled by `_gather_input` from the Input singleton for humans, or by a
+  controller (with `process_physics_priority < 0`) for ghosts/bots. New
+  input reads in physics code MUST go through cmds, never Input directly.
+- Signals: `shot_fired(side, result)` (side "L"/"R", result "miss"/"body"/
+  "head"/"kill" — HUD hitmarkers), `died` (HUD death flash), `respawned`
+  (ghost restart sync).
+- **Loadouts (8.3)**: Tab (`swap_loadout`) cycles rail+rail → rail+sword →
+  sword+sword; `arm_types` holds "rail"/"sword" per side, `loadout_name()`
+  feeds the HUD. Swapping resets both rail arms, pending shots, and sword
+  cooldowns; `_apply_loadout_visuals` swaps viewmodel mesh + stance (rail:
+  level block; sword: long blade, rolled inward/tilted up — pose stored as
+  `pose_rot` meta so recovery lerps return to stance, not zero). Lunges
+  play a stab (position + rotation kick, blade emission flare while live).
+- **Remote weapon telegraph**: `_send_state` also carries both arms'
+  progress + `loadout_index`; puppets tint their shoulder `PuppetArm`
+  blocks per loadout and glow rail arms with charge — the §8.1 "loud
+  charge" tell, visually. Keep this synced: an invisible charge on the
+  enemy would gut the dodge duel.
+- **Sword (8.2)**: `_trigger_arm` on a sword side lunges toward the camera —
+  a full-commit redirect to `sword_lunge_speed` (120, deliberately **above**
+  terminal velocity; the soft ceiling bleeds it back to 80), arming ramp
+  grace so the post-burst speed persists. Fueled, per-arm cooldown, blocked
+  while charge-locked or wallrunning. For `sword_active_time` after, `_sword_hit_check`
+  kills the first player/dummy within `sword_hit_range` (99 dmg, one hit
+  per lunge). No freeze, no ranged component, ever.
 - Read by the HUD (poll, no signals yet): `fuel`, `ramp_grace_timer`, `config`,
   `horizontal_speed() -> float`, `state_name() -> String`.
 - Expected children: `Head` (Node3D, pitch) → `Head/Camera3D` (roll + FOV
@@ -88,6 +117,15 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   Vertical strafe (`_vertical_input`) is Q-down only, fueled, capped at
   `air_strafe_vertical_cap`, airborne only; upward mobility is the double
   jump.
+- **Wallrun exits**: jump and dash leave the wall; Shift+Q does NOT — on a
+  wall it's a stick-and-slide (down-dash velocity while staying attached).
+  A dash off the wall is a full jump-grade dismount (fuel + speed boost)
+  with the dash impulse stacked on top — dashing must never leave you
+  stuck — but it arms the longer `dash_wall_rearm_time` so you can't
+  pogo the same wall. **Dismount/coyote boosts are capped at
+  `terminal_velocity`**: uncapped, the dash-off→re-attach loop compounded
+  to hundreds of m/s (shipped once). The sword lunge stays the only thing
+  allowed past terminal.
 - **Dash is Shift + held direction, camera-aimed** (Lily's scheme, revised
   2026-09-08 from yaw-plane to full camera): WASD components follow the
   camera basis including pitch — W+Shift goes wherever you look; Q adds
@@ -109,6 +147,25 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   available briefly. **Jump buffer**: any jump press is buffered
   `jump_buffer_time`; landing consumes it. Air jump priority: wall coyote →
   ground coyote → fueled double jump.
+- **Speed trail**: the `Trail` particles emit above 1.2× base run speed —
+  authority sets it per physics tick, puppets from synced velocity in
+  `_process` (puppets have no physics, so it must live on both paths).
+- **TAS recording (F5, `record` action)**: toggling on respawns you (clean
+  tape from spawn state) and logs one line per physics tick — absolute
+  yaw/pitch + cmd fields + button bitmask — with a header naming the map
+  and tick rate; toggling off writes `user://tas/run_<datetime>.tas` and
+  prints the real filesystem path. F5 is a dev-only tool for authoring the
+  repo ghost; T is the player-facing run reset. Any respawn mid-recording
+  restarts the tape, so a saved tape is always one clean spawn-to-finish
+  attempt (a teleport mid-tape would desync replay). Feed a tape to the parkour ghost via
+  `TasController.tape_path`. Tapes assume the tuning they were recorded
+  under — retune movement, re-record the tape.
+- Also the ghost body sets `collision_layer = 0` — players and rays phase
+  through it; its own physics (mask 1) still collides with the world.
+- **Run timer**: `run_time` accumulates per tick until `run_finished`;
+  every `_respawn` zeroes and restarts it. `finish_run()` (called by a
+  `FinishZone`) freezes the clock and auto-saves an active TAS recording —
+  a finished run yields its own tape.
 - Respawn on `respawn` action (solo only — disabled when `Net.active`, a
   free escape would break duels) or falling below `config.kill_y`.
 - **Networking (LAN-trust, gated on `Net.active`)**: the authority peer
@@ -117,13 +174,12 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   physics + input + camera + viewmodels, show the red dummy-sized
   `BodyMesh`, and lerp toward the last state in `_process`. Hits on remote players rpc
   `take_damage` to the victim's authority (shooter-decided, LAN-trust);
-  victim at 0 hp calls `Net.kill_scored.rpc_id(killer)` and `_respawn`s;
-  the killer's peer resolves its own authority player via Net and
-  `round_reset(true)`s it (KILL hitmarker + respawn) — **a kill resets both
-  duelists to their spawns with full hp/fuel**. Kill rpcs must route through
-  `Net` (same node path on every peer); an rpc on the victim's own node
-  lands on the victim's *puppet* at the killer's end, which is how the
-  original hitmarker silently never fired. `_remote_shot_fx` mirrors beams.
+  victim at 0 hp emits `died`, broadcasts `Net.report_kill(killer)` (all
+  peers tally the scoreboard; the killer's peer `round_reset(true)`s its
+  own player) and `_respawn`s — **a kill resets both duelists** to their
+  spawns with full hp/fuel. Kill rpcs must route through `Net` (same node
+  path on every peer); an rpc on the victim's own node lands on the
+  victim's *puppet* at the killer's end — that bug shipped once. `_remote_shot_fx` mirrors beams.
   `hp` initialized from `combat.hp_max` (2; rail body dmg 1 = 2 shots).
 - The authority player must claim `camera.current = true` explicitly in
   `_ready` — Godot's auto-current fails on clients because the host puppet's
@@ -140,8 +196,10 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
 - `state == WALLRUN` implies not on floor; `_wallrun_move` bails to
   `_dismount(false)` on floor contact, lost wall, timeout, or speed below
   `min_wallrun_speed`.
-- After the clamp step, `velocity.length() <= terminal_velocity` and
-  `velocity.y >= -terminal_fall_speed` every tick.
+- The speed ceiling is **soft**: above `terminal_velocity`, speed decays at
+  `overspeed_decay` (fast) instead of hard-clamping — only the sword lunge
+  legitimately enters that regime. `velocity.y >= -terminal_fall_speed`
+  stays hard every tick, as does the charge cap.
 - No gameplay literals: any new tunable must be a `MovementConfig` field.
   (Current known exceptions to fix if touched: the vertical-settle rate `20.0`
   in `_wallrun_move`, camera-feel lerp rates and FOV factor, the 12-ray count,

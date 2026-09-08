@@ -9,6 +9,12 @@ extends CanvasLayer
 @onready var hit_label: Label = $HitLabel
 @onready var lock_label: Label = $LockLabel
 @onready var controls_hint: Control = $ControlsHint
+@onready var score_label: Label = $ScoreLabel
+@onready var loadout_label: Label = $LoadoutLabel
+@onready var death_flash: ColorRect = $DeathFlash
+@onready var map_prism: Control = $MapPrism
+@onready var map_back: ColorRect = $MapBack
+@onready var timer_label: Label = $TimerLabel
 
 const KEY_DIM := Color(0.5, 0.5, 0.55, 0.25)
 const KEY_LIT := Color(1.0, 0.75, 0.3, 0.9)
@@ -27,6 +33,7 @@ const KEY_LAYOUT: Array = [
 
 var player: AirfuelPlayer
 var hit_timer := 0.0
+var flash_alpha := 0.0
 var key_rects: Dictionary = {}
 
 
@@ -55,12 +62,14 @@ func _process(_delta: float) -> void:
 	if player == null or not is_instance_valid(player):
 		player = null
 		for p: Node in get_tree().get_nodes_in_group("player"):
-			if p.is_multiplayer_authority():
+			if p.is_multiplayer_authority() and not p.ghost_controlled:
 				player = p as AirfuelPlayer
 				break
 		if player == null:
 			return
 		player.shot_fired.connect(_on_shot_fired)
+		player.died.connect(_on_died)
+		map_prism.track = player
 	fuel_bar.max_value = player.config.fuel_max
 	fuel_bar.value = player.fuel
 	fuel_label.text = "AIRFUEL %d" % roundi(player.fuel)
@@ -68,7 +77,16 @@ func _process(_delta: float) -> void:
 	var extra := ""
 	if player.ramp_grace_timer > 0.0:
 		extra = "   RAMP %.1f" % player.ramp_grace_timer
-	state_label.text = "HP %d   %s%s" % [player.hp, player.state_name(), extra]
+	if get_tree().get_first_node_in_group("finish") != null:
+		timer_label.visible = true
+		var t := player.run_time
+		timer_label.text = "%d:%06.3f" % [int(t) / 60, fmod(t, 60.0)]
+		timer_label.modulate = Color(0.3, 1.0, 0.4) if player.run_finished \
+				else Color(1, 1, 1)
+	else:
+		timer_label.visible = false
+	var rec := "● REC   " if player.recording else ""
+	state_label.text = "%sHP %d   %s%s" % [rec, player.hp, player.state_name(), extra]
 	charge_l.value = player.arm_progress_left()
 	charge_r.value = player.arm_progress_right()
 	lock_label.visible = player.move_locked
@@ -78,6 +96,27 @@ func _process(_delta: float) -> void:
 			hit_label.visible = false
 	for action: String in key_rects:
 		key_rects[action].color = KEY_LIT if Input.is_action_pressed(action) else KEY_DIM
+	loadout_label.text = player.loadout_name()
+	if flash_alpha > 0.0:
+		flash_alpha = maxf(0.0, flash_alpha - _delta * 1.6)
+		death_flash.color.a = flash_alpha
+	score_label.visible = Net.active
+	map_prism.visible = Net.active
+	map_back.visible = Net.active
+	if Net.active:
+		var my_id := multiplayer.get_unique_id()
+		var lines: PackedStringArray = []
+		var ids: Array = Net.players.keys()
+		ids.sort_custom(func(a: int, b: int) -> bool: return a == my_id)
+		for id: int in ids:
+			var tag := "YOU" if id == my_id else "P%d" % (id % 1000)
+			lines.append("%s  %d" % [tag, int(Net.scores.get(id, 0))])
+		score_label.text = "\n".join(lines)
+
+
+func _on_died() -> void:
+	flash_alpha = 0.7
+	death_flash.color.a = flash_alpha
 
 
 func _on_shot_fired(_side: String, result: String) -> void:

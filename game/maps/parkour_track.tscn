@@ -1,0 +1,2051 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
+[ext_resource type="Script" path="res://src/ghost/ghost.gd" id="3_ghost"]
+[ext_resource type="Script" path="res://src/race/finish_zone.gd" id="4_finish"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.25, 0.32, 0.45, 1)
+sky_horizon_color = Color(0.55, 0.58, 0.62, 1)
+ground_bottom_color = Color(0.12, 0.12, 0.14, 1)
+ground_horizon_color = Color(0.55, 0.58, 0.62, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.1
+
+[sub_resource type="StandardMaterial3D" id="mat_floor"]
+albedo_color = Color(0.42, 0.44, 0.47, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_wall"]
+albedo_color = Color(0.55, 0.62, 0.72, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_panel"]
+albedo_color = Color(0.3, 0.72, 0.65, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_obstacle"]
+albedo_color = Color(0.95, 0.08, 0.08, 1)
+emission_enabled = true
+emission = Color(1, 0.1, 0.1, 1)
+emission_energy_multiplier = 0.8
+
+[sub_resource type="StandardMaterial3D" id="mat_arrow"]
+albedo_color = Color(1, 0.55, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.55, 0.1, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="mat_light"]
+albedo_color = Color(1, 1, 0.95, 1)
+emission_enabled = true
+emission = Color(1, 0.98, 0.9, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="StandardMaterial3D" id="mat_finish"]
+albedo_color = Color(0.1, 0.85, 0.25, 1)
+emission_enabled = true
+emission = Color(0.15, 1, 0.3, 1)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="BoxShape3D" id="finish_shape"]
+size = Vector3(24, 30, 3)
+
+[sub_resource type="StandardMaterial3D" id="mat_cyl"]
+albedo_color = Color(0.85, 0.5, 0.2, 1)
+
+[node name="ParkourTrack" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0, -0.5, -0.353553, 0.707107, -0.612372, 0.353553, 0.707107, 0.612372, 0, 120, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 600.0
+
+[node name="StartPad" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 39.500, -12.000)
+use_collision = true
+size = Vector3(24.0, 1, 26)
+material = SubResource("mat_floor")
+
+[node name="StartWallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 12.500, 54.000, -12.000)
+use_collision = true
+size = Vector3(1, 30.0, 26)
+material = SubResource("mat_wall")
+
+[node name="StartWallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -12.500, 54.000, -12.000)
+use_collision = true
+size = Vector3(1, 30.0, 26)
+material = SubResource("mat_wall")
+
+[node name="StartCap" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 54.000, -25.500)
+use_collision = true
+size = Vector3(26.0, 30.0, 1)
+material = SubResource("mat_wall")
+
+[node name="StartRoof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 69.500, -12.000)
+use_collision = true
+size = Vector3(26.0, 1, 26)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H1p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.000, 39.000, 60.000)
+use_collision = true
+size = Vector3(24.0, 2, 125.0)
+material = SubResource("mat_floor")
+
+[node name="H1p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 12.500, 54.000, 60.000)
+use_collision = true
+size = Vector3(1, 32.0, 128.0)
+material = SubResource("mat_wall")
+
+[node name="H1p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -12.500, 54.000, 60.000)
+use_collision = true
+size = Vector3(1, 32.0, 128.0)
+material = SubResource("mat_wall")
+
+[node name="H1p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.000, 70.000, 60.000)
+use_collision = true
+size = Vector3(26.0, 2, 125.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C1Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 39.000, 132.000)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 70.000, 132.000)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C1Far" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 54.000, 144.500)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C1Side" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 12.500, 54.000, 132.000)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C1PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 12.500, 54.000, 144.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C1PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 12.500, 54.000, 119.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C1PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -12.500, 54.000, 144.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C1PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -12.500, 54.000, 119.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C1Light" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 68.800, 132.000)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C1Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, 66.00, 132.00)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C1Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.000, 39.000, 132.000)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C1Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, -0.70711, 0.00000, 0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, 0.000, 54.000, 143.600)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C1Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, 0.70711, 0.00000, -0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, 0.000, 50.000, 143.600)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H2p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 39.000, 132.000)
+use_collision = true
+size = Vector3(24.0, 2, 33.0)
+material = SubResource("mat_floor")
+
+[node name="H2p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 54.000, 144.500)
+use_collision = true
+size = Vector3(1, 32.0, 36.0)
+material = SubResource("mat_wall")
+
+[node name="H2p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 54.000, 119.500)
+use_collision = true
+size = Vector3(1, 32.0, 36.0)
+material = SubResource("mat_wall")
+
+[node name="H2p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 70.000, 132.000)
+use_collision = true
+size = Vector3(26.0, 2, 33.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 54.000, 137.500)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="H2p2Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -45.666, 39.492, 132.000)
+use_collision = true
+size = Vector3(24.0, 2, 16.200000000000003)
+material = SubResource("mat_floor")
+
+[node name="H2p2WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -44.359, 54.435, 144.500)
+use_collision = true
+size = Vector3(1, 32.0, 19.200000000000003)
+material = SubResource("mat_wall")
+
+[node name="H2p2WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -44.359, 54.435, 119.500)
+use_collision = true
+size = Vector3(1, 32.0, 19.200000000000003)
+material = SubResource("mat_wall")
+
+[node name="H2p2Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -42.964, 70.374, 132.000)
+use_collision = true
+size = Vector3(26.0, 2, 16.200000000000003)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H2p3Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, -0.98481, 0.00000, 0.98481, 0.17365, 1.00000, -0.00000, 0.00000, -81.663, 45.340, 132.000)
+use_collision = true
+size = Vector3(24.0, 2, 66.6)
+material = SubResource("mat_floor")
+
+[node name="H2p3WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, -0.98481, 0.00000, 0.98481, 0.17365, 1.00000, -0.00000, 0.00000, -79.058, 60.112, 144.500)
+use_collision = true
+size = Vector3(1, 32.0, 69.6)
+material = SubResource("mat_wall")
+
+[node name="H2p3WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, -0.98481, 0.00000, 0.98481, 0.17365, 1.00000, -0.00000, 0.00000, -79.058, 60.112, 119.500)
+use_collision = true
+size = Vector3(1, 32.0, 69.6)
+material = SubResource("mat_wall")
+
+[node name="H2p3Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, -0.98481, 0.00000, 0.98481, 0.17365, 1.00000, -0.00000, 0.00000, -76.280, 75.869, 132.000)
+use_collision = true
+size = Vector3(26.0, 2, 66.6)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H2p4Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -117.487, 51.165, 132.000)
+use_collision = true
+size = Vector3(24.0, 2, 16.200000000000003)
+material = SubResource("mat_floor")
+
+[node name="H2p4WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -116.180, 66.108, 144.500)
+use_collision = true
+size = Vector3(1, 32.0, 19.200000000000003)
+material = SubResource("mat_wall")
+
+[node name="H2p4WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -116.180, 66.108, 119.500)
+use_collision = true
+size = Vector3(1, 32.0, 19.200000000000003)
+material = SubResource("mat_wall")
+
+[node name="H2p4Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -114.786, 82.047, 132.000)
+use_collision = true
+size = Vector3(26.0, 2, 16.200000000000003)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H2p5Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 51.649, 132.000)
+use_collision = true
+size = Vector3(24.0, 2, 33.0)
+material = SubResource("mat_floor")
+
+[node name="H2p5WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 66.649, 144.500)
+use_collision = true
+size = Vector3(1, 32.0, 36.0)
+material = SubResource("mat_wall")
+
+[node name="H2p5WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 66.649, 119.500)
+use_collision = true
+size = Vector3(1, 32.0, 36.0)
+material = SubResource("mat_wall")
+
+[node name="H2p5Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 82.649, 132.000)
+use_collision = true
+size = Vector3(26.0, 2, 33.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 66.649, 132.000)
+use_collision = true
+size = Vector3(5, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C2Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -162.979, 51.649, 132.000)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C2Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -162.979, 82.649, 132.000)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C2Far" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -175.479, 66.649, 132.000)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C2Side" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -162.979, 66.649, 119.500)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C2PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -175.479, 66.649, 144.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C2PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -150.479, 66.649, 144.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C2PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -175.479, 66.649, 119.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C2PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -150.479, 66.649, 119.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C2Light" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -162.979, 81.449, 132.000)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C2Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -162.98, 78.65, 132.00)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C2Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -162.979, 51.649, 126.000)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C2Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, -0.70711, 0.70711, 0.00000, 0.70711, 0.70711, 0.00000, -174.579, 66.649, 132.000)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C2Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.00000, -1.00000, 0.70711, 0.70711, 0.00000, 0.70711, -0.70711, 0.00000, -174.579, 62.649, 132.000)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H3p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -162.979, 51.649, 194.000)
+use_collision = true
+size = Vector3(24.0, 2, 105.0)
+material = SubResource("mat_floor")
+
+[node name="H3p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -150.479, 66.649, 194.000)
+use_collision = true
+size = Vector3(1, 32.0, 108.0)
+material = SubResource("mat_wall")
+
+[node name="H3p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -175.479, 66.649, 194.000)
+use_collision = true
+size = Vector3(1, 32.0, 108.0)
+material = SubResource("mat_wall")
+
+[node name="H3p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -162.979, 82.649, 194.000)
+use_collision = true
+size = Vector3(26.0, 2, 105.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst3" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -168.479, 66.649, 194.000)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C3Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -162.979, 51.649, 256.000)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C3Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -162.979, 82.649, 256.000)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C3Far" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -162.979, 66.649, 268.500)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C3Side" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -175.479, 66.649, 256.000)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C3PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -150.479, 66.649, 268.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C3PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -150.479, 66.649, 243.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C3PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -175.479, 66.649, 268.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C3PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -175.479, 66.649, 243.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C3Light" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -162.979, 81.449, 256.000)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C3Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -162.98, 78.65, 256.00)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C3Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -168.979, 51.649, 256.000)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C3Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, 0.70711, 0.00000, -0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, -162.979, 66.649, 267.600)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C3Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, -0.70711, 0.00000, 0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, -162.979, 62.649, 267.600)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H4p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 51.649, 256.000)
+use_collision = true
+size = Vector3(24.0, 2, 35.0)
+material = SubResource("mat_floor")
+
+[node name="H4p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 66.649, 243.500)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H4p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 66.649, 268.500)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H4p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 82.649, 256.000)
+use_collision = true
+size = Vector3(26.0, 2, 35.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst4" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 62.649, 256.000)
+use_collision = true
+size = Vector3(24.0, 8, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="H4p2Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -115.089, 51.130, 256.000)
+use_collision = true
+size = Vector3(24.0, 2, 17.0)
+material = SubResource("mat_floor")
+
+[node name="H4p2WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -113.782, 66.073, 243.500)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H4p2WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -113.782, 66.073, 268.500)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H4p2Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -112.387, 82.012, 256.000)
+use_collision = true
+size = Vector3(26.0, 2, 17.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H4p3Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, 0.98481, 0.00000, 0.98481, -0.17365, -1.00000, 0.00000, 0.00000, -76.700, 44.888, 256.000)
+use_collision = true
+size = Vector3(24.0, 2, 71.0)
+material = SubResource("mat_floor")
+
+[node name="H4p3WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, 0.98481, 0.00000, 0.98481, -0.17365, -1.00000, 0.00000, 0.00000, -74.095, 59.660, 243.500)
+use_collision = true
+size = Vector3(1, 32.0, 74.0)
+material = SubResource("mat_wall")
+
+[node name="H4p3WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, 0.98481, 0.00000, 0.98481, -0.17365, -1.00000, 0.00000, 0.00000, -74.095, 59.660, 268.500)
+use_collision = true
+size = Vector3(1, 32.0, 74.0)
+material = SubResource("mat_wall")
+
+[node name="H4p3Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, 0.98481, 0.00000, 0.98481, -0.17365, -1.00000, 0.00000, 0.00000, -71.316, 75.417, 256.000)
+use_collision = true
+size = Vector3(26.0, 2, 71.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H4p4Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -38.137, 38.623, 256.000)
+use_collision = true
+size = Vector3(24.0, 2, 17.0)
+material = SubResource("mat_floor")
+
+[node name="H4p4WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -36.830, 53.566, 243.500)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H4p4WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -36.830, 53.566, 268.500)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H4p4Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -35.435, 69.505, 256.000)
+use_collision = true
+size = Vector3(26.0, 2, 17.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H4p5Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 38.096, 256.000)
+use_collision = true
+size = Vector3(24.0, 2, 35.0)
+material = SubResource("mat_floor")
+
+[node name="H4p5WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 53.096, 243.500)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H4p5WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 53.096, 268.500)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H4p5Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 69.096, 256.000)
+use_collision = true
+size = Vector3(26.0, 2, 35.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst5" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 53.096, 250.500)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C4Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 9.927, 38.096, 256.000)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C4Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 9.927, 69.096, 256.000)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C4Far" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 22.427, 53.096, 256.000)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C4Side" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 9.927, 53.096, 243.500)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C4PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 22.427, 53.096, 243.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C4PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -2.573, 53.096, 243.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C4PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 22.427, 53.096, 268.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C4PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -2.573, 53.096, 268.500)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C4Light" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 9.927, 67.896, 256.000)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C4Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.93, 65.10, 256.00)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C4Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.927, 38.096, 250.000)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C4Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.00000, 1.00000, 0.70711, 0.70711, 0.00000, -0.70711, 0.70711, 0.00000, 21.527, 53.096, 256.000)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C4Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, -0.70711, 0.70711, 0.00000, -0.70711, -0.70711, 0.00000, 21.527, 49.096, 256.000)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H5p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 38.096, 281.000)
+use_collision = true
+size = Vector3(24.0, 2, 31.0)
+material = SubResource("mat_floor")
+
+[node name="H5p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 22.427, 53.096, 281.000)
+use_collision = true
+size = Vector3(1, 32.0, 34.0)
+material = SubResource("mat_wall")
+
+[node name="H5p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -2.573, 53.096, 281.000)
+use_collision = true
+size = Vector3(1, 32.0, 34.0)
+material = SubResource("mat_wall")
+
+[node name="H5p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 69.096, 281.000)
+use_collision = true
+size = Vector3(26.0, 2, 31.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst6" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 53.096, 281.000)
+use_collision = true
+size = Vector3(5, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="H5p2Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 38.646, 299.276)
+use_collision = true
+size = Vector3(24.0, 2, 15.4)
+material = SubResource("mat_floor")
+
+[node name="H5p2WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 22.427, 53.563, 297.708)
+use_collision = true
+size = Vector3(1, 32.0, 18.4)
+material = SubResource("mat_wall")
+
+[node name="H5p2WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, -2.573, 53.563, 297.708)
+use_collision = true
+size = Vector3(1, 32.0, 18.4)
+material = SubResource("mat_wall")
+
+[node name="H5p2Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 69.476, 296.036)
+use_collision = true
+size = Vector3(26.0, 2, 15.4)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H5p3Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, 0.20791, 0.00000, -0.20791, 0.97815, 9.927, 45.152, 332.526)
+use_collision = true
+size = Vector3(24.0, 2, 62.2)
+material = SubResource("mat_floor")
+
+[node name="H5p3WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, 0.20791, 0.00000, -0.20791, 0.97815, 22.427, 59.824, 329.407)
+use_collision = true
+size = Vector3(1, 32.0, 65.2)
+material = SubResource("mat_wall")
+
+[node name="H5p3WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, 0.20791, 0.00000, -0.20791, 0.97815, -2.573, 59.824, 329.407)
+use_collision = true
+size = Vector3(1, 32.0, 65.2)
+material = SubResource("mat_wall")
+
+[node name="H5p3Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, 0.20791, 0.00000, -0.20791, 0.97815, 9.927, 75.474, 326.081)
+use_collision = true
+size = Vector3(26.0, 2, 62.2)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H5p4Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 51.625, 365.569)
+use_collision = true
+size = Vector3(24.0, 2, 15.4)
+material = SubResource("mat_floor")
+
+[node name="H5p4WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 22.427, 66.543, 364.001)
+use_collision = true
+size = Vector3(1, 32.0, 18.4)
+material = SubResource("mat_wall")
+
+[node name="H5p4WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, -2.573, 66.543, 364.001)
+use_collision = true
+size = Vector3(1, 32.0, 18.4)
+material = SubResource("mat_wall")
+
+[node name="H5p4Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 82.455, 362.329)
+use_collision = true
+size = Vector3(26.0, 2, 15.4)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H5p5Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 52.163, 383.636)
+use_collision = true
+size = Vector3(24.0, 2, 31.0)
+material = SubResource("mat_floor")
+
+[node name="H5p5WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 22.427, 67.163, 383.636)
+use_collision = true
+size = Vector3(1, 32.0, 34.0)
+material = SubResource("mat_wall")
+
+[node name="H5p5WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -2.573, 67.163, 383.636)
+use_collision = true
+size = Vector3(1, 32.0, 34.0)
+material = SubResource("mat_wall")
+
+[node name="H5p5Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 83.163, 383.636)
+use_collision = true
+size = Vector3(26.0, 2, 31.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst7" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 4.427, 67.163, 383.636)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C5Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 9.927, 52.163, 408.636)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C5Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 9.927, 83.163, 408.636)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C5Far" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 9.927, 67.163, 421.136)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C5Side" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 22.427, 67.163, 408.636)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C5PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 22.427, 67.163, 421.136)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C5PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 22.427, 67.163, 396.136)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C5PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -2.573, 67.163, 421.136)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C5PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -2.573, 67.163, 396.136)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C5Light" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 9.927, 81.963, 408.636)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C5Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.93, 79.16, 408.64)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C5Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.927, 52.163, 408.636)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C5Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, -0.70711, 0.00000, 0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 67.163, 420.236)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C5Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, 0.70711, 0.00000, -0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 63.163, 420.236)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H6p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 52.163, 408.636)
+use_collision = true
+size = Vector3(24.0, 2, 145.0)
+material = SubResource("mat_floor")
+
+[node name="H6p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 67.163, 421.136)
+use_collision = true
+size = Vector3(1, 32.0, 148.0)
+material = SubResource("mat_wall")
+
+[node name="H6p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 67.163, 396.136)
+use_collision = true
+size = Vector3(1, 32.0, 148.0)
+material = SubResource("mat_wall")
+
+[node name="H6p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 83.163, 408.636)
+use_collision = true
+size = Vector3(26.0, 2, 145.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst8" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 63.163, 408.636)
+use_collision = true
+size = Vector3(24.0, 8, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C6Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -154.073, 52.163, 408.636)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C6Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -154.073, 83.163, 408.636)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C6Far" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -166.573, 67.163, 408.636)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C6Side" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -154.073, 67.163, 396.136)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C6PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -166.573, 67.163, 421.136)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C6PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -141.573, 67.163, 421.136)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C6PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -166.573, 67.163, 396.136)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C6PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -141.573, 67.163, 396.136)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C6Light" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -154.073, 81.963, 408.636)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C6Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.07, 79.16, 408.64)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C6Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.073, 52.163, 402.636)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C6Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, -0.70711, 0.70711, 0.00000, 0.70711, 0.70711, 0.00000, -165.673, 67.163, 408.636)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C6Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.00000, -1.00000, 0.70711, 0.70711, 0.00000, 0.70711, -0.70711, 0.00000, -165.673, 63.163, 408.636)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H7p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 52.163, 432.636)
+use_collision = true
+size = Vector3(24.0, 2, 29.0)
+material = SubResource("mat_floor")
+
+[node name="H7p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -141.573, 67.163, 432.636)
+use_collision = true
+size = Vector3(1, 32.0, 32.0)
+material = SubResource("mat_wall")
+
+[node name="H7p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -166.573, 67.163, 432.636)
+use_collision = true
+size = Vector3(1, 32.0, 32.0)
+material = SubResource("mat_wall")
+
+[node name="H7p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 83.163, 432.636)
+use_collision = true
+size = Vector3(26.0, 2, 29.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst9" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -148.573, 67.163, 432.636)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="H7p2Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 51.667, 449.305)
+use_collision = true
+size = Vector3(24.0, 2, 14.6)
+material = SubResource("mat_floor")
+
+[node name="H7p2WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -141.573, 66.585, 450.873)
+use_collision = true
+size = Vector3(1, 32.0, 17.6)
+material = SubResource("mat_wall")
+
+[node name="H7p2WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -166.573, 66.585, 450.873)
+use_collision = true
+size = Vector3(1, 32.0, 17.6)
+material = SubResource("mat_wall")
+
+[node name="H7p2Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 82.497, 452.546)
+use_collision = true
+size = Vector3(26.0, 2, 14.6)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H7p3Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, -0.20791, 0.00000, 0.20791, 0.97815, -154.073, 45.693, 479.799)
+use_collision = true
+size = Vector3(24.0, 2, 57.8)
+material = SubResource("mat_floor")
+
+[node name="H7p3WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, -0.20791, 0.00000, 0.20791, 0.97815, -141.573, 60.365, 482.917)
+use_collision = true
+size = Vector3(1, 32.0, 60.8)
+material = SubResource("mat_wall")
+
+[node name="H7p3WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, -0.20791, 0.00000, 0.20791, 0.97815, -166.573, 60.365, 482.917)
+use_collision = true
+size = Vector3(1, 32.0, 60.8)
+material = SubResource("mat_wall")
+
+[node name="H7p3Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, -0.20791, 0.00000, 0.20791, 0.97815, -154.073, 76.015, 486.244)
+use_collision = true
+size = Vector3(26.0, 2, 57.8)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H7p4Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 39.686, 510.499)
+use_collision = true
+size = Vector3(24.0, 2, 14.6)
+material = SubResource("mat_floor")
+
+[node name="H7p4WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -141.573, 54.604, 512.067)
+use_collision = true
+size = Vector3(1, 32.0, 17.6)
+material = SubResource("mat_wall")
+
+[node name="H7p4WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -166.573, 54.604, 512.067)
+use_collision = true
+size = Vector3(1, 32.0, 17.6)
+material = SubResource("mat_wall")
+
+[node name="H7p4Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 70.516, 513.739)
+use_collision = true
+size = Vector3(26.0, 2, 14.6)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H7p5Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 39.179, 527.377)
+use_collision = true
+size = Vector3(24.0, 2, 29.0)
+material = SubResource("mat_floor")
+
+[node name="H7p5WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -141.573, 54.179, 527.377)
+use_collision = true
+size = Vector3(1, 32.0, 32.0)
+material = SubResource("mat_wall")
+
+[node name="H7p5WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -166.573, 54.179, 527.377)
+use_collision = true
+size = Vector3(1, 32.0, 32.0)
+material = SubResource("mat_wall")
+
+[node name="H7p5Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 70.179, 527.377)
+use_collision = true
+size = Vector3(26.0, 2, 29.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst10" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 54.179, 527.377)
+use_collision = true
+size = Vector3(5, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C7Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -154.073, 39.179, 551.377)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C7Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -154.073, 70.179, 551.377)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C7Far" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -154.073, 54.179, 563.877)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C7Side" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -166.573, 54.179, 551.377)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C7PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -141.573, 54.179, 563.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C7PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -141.573, 54.179, 538.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C7PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -166.573, 54.179, 563.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C7PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -166.573, 54.179, 538.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C7Light" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -154.073, 68.979, 551.377)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C7Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.07, 66.18, 551.38)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C7Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.073, 39.179, 551.377)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C7Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, 0.70711, 0.00000, -0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 54.179, 562.977)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C7Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, -0.70711, 0.00000, 0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 50.179, 562.977)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H8p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 39.179, 551.377)
+use_collision = true
+size = Vector3(24.0, 2, 35.0)
+material = SubResource("mat_floor")
+
+[node name="H8p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 54.179, 538.877)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H8p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 54.179, 563.877)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H8p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 70.179, 551.377)
+use_collision = true
+size = Vector3(26.0, 2, 35.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst11" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 54.179, 556.877)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="H8p2Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -106.009, 39.705, 551.377)
+use_collision = true
+size = Vector3(24.0, 2, 17.0)
+material = SubResource("mat_floor")
+
+[node name="H8p2WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -107.316, 54.648, 538.877)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H8p2WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -107.316, 54.648, 563.877)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H8p2Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -108.710, 70.587, 551.377)
+use_collision = true
+size = Vector3(26.0, 2, 17.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H8p3Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.17365, 0.98481, 0.00000, 0.98481, 0.17365, -1.00000, -0.00000, 0.00000, -67.446, 45.970, 551.377)
+use_collision = true
+size = Vector3(24.0, 2, 71.0)
+material = SubResource("mat_floor")
+
+[node name="H8p3WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.17365, 0.98481, 0.00000, 0.98481, 0.17365, -1.00000, -0.00000, 0.00000, -70.051, 60.742, 538.877)
+use_collision = true
+size = Vector3(1, 32.0, 74.0)
+material = SubResource("mat_wall")
+
+[node name="H8p3WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.17365, 0.98481, 0.00000, 0.98481, 0.17365, -1.00000, -0.00000, 0.00000, -70.051, 60.742, 563.877)
+use_collision = true
+size = Vector3(1, 32.0, 74.0)
+material = SubResource("mat_wall")
+
+[node name="H8p3Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.17365, 0.98481, 0.00000, 0.98481, 0.17365, -1.00000, -0.00000, 0.00000, -72.829, 76.499, 551.377)
+use_collision = true
+size = Vector3(26.0, 2, 71.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H8p4Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -29.057, 52.212, 551.377)
+use_collision = true
+size = Vector3(24.0, 2, 17.0)
+material = SubResource("mat_floor")
+
+[node name="H8p4WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -30.364, 67.155, 538.877)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H8p4WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -30.364, 67.155, 563.877)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H8p4Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -31.759, 83.094, 551.377)
+use_collision = true
+size = Vector3(26.0, 2, 17.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H8p5Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 52.731, 551.377)
+use_collision = true
+size = Vector3(24.0, 2, 35.0)
+material = SubResource("mat_floor")
+
+[node name="H8p5WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 67.731, 538.877)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H8p5WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 67.731, 563.877)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H8p5Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 83.731, 551.377)
+use_collision = true
+size = Vector3(26.0, 2, 35.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst12" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 63.731, 551.377)
+use_collision = true
+size = Vector3(24.0, 8, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C8Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 18.833, 52.731, 551.377)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C8Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 18.833, 83.731, 551.377)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C8Far" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 31.333, 67.731, 551.377)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C8Side" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 18.833, 67.731, 538.877)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C8PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 31.333, 67.731, 538.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C8PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 6.333, 67.731, 538.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C8PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 31.333, 67.731, 563.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C8PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 6.333, 67.731, 563.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C8Light" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 18.833, 82.531, 551.377)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C8Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.83, 79.73, 551.38)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C8Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.833, 52.731, 545.377)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C8Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.00000, 1.00000, 0.70711, 0.70711, 0.00000, -0.70711, 0.70711, 0.00000, 30.433, 67.731, 551.377)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C8Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, -0.70711, 0.70711, 0.00000, -0.70711, -0.70711, 0.00000, 30.433, 63.731, 551.377)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H9p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 18.833, 52.731, 628.377)
+use_collision = true
+size = Vector3(24.0, 2, 135.0)
+material = SubResource("mat_floor")
+
+[node name="H9p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 31.333, 67.731, 628.377)
+use_collision = true
+size = Vector3(1, 32.0, 138.0)
+material = SubResource("mat_wall")
+
+[node name="H9p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 6.333, 67.731, 628.377)
+use_collision = true
+size = Vector3(1, 32.0, 138.0)
+material = SubResource("mat_wall")
+
+[node name="H9p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 18.833, 83.731, 628.377)
+use_collision = true
+size = Vector3(26.0, 2, 135.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst13" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 24.333, 67.731, 628.377)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C9Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 18.833, 52.731, 705.377)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C9Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 18.833, 83.731, 705.377)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C9Far" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 18.833, 67.731, 717.877)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C9Side" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 6.333, 67.731, 705.377)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C9PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 31.333, 67.731, 717.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C9PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 31.333, 67.731, 692.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C9PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 6.333, 67.731, 717.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C9PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 6.333, 67.731, 692.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C9Light" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 18.833, 82.531, 705.377)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C9Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.83, 79.73, 705.38)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C9Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.833, 52.731, 705.377)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C9Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, 0.70711, 0.00000, -0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, 18.833, 67.731, 716.977)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C9Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.70711, -0.70711, 0.00000, 0.70711, 0.70711, 0.00000, 0.00000, 0.00000, 1.00000, 18.833, 63.731, 716.977)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H10p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 52.731, 705.377)
+use_collision = true
+size = Vector3(24.0, 2, 29.0)
+material = SubResource("mat_floor")
+
+[node name="H10p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 67.731, 692.877)
+use_collision = true
+size = Vector3(1, 32.0, 32.0)
+material = SubResource("mat_wall")
+
+[node name="H10p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 67.731, 717.877)
+use_collision = true
+size = Vector3(1, 32.0, 32.0)
+material = SubResource("mat_wall")
+
+[node name="H10p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 83.731, 705.377)
+use_collision = true
+size = Vector3(26.0, 2, 29.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst14" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 67.731, 705.377)
+use_collision = true
+size = Vector3(5, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="H10p2Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 59.552, 52.399, 705.377)
+use_collision = true
+size = Vector3(24.0, 2, 14.6)
+material = SubResource("mat_floor")
+
+[node name="H10p2WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 60.598, 67.362, 692.877)
+use_collision = true
+size = Vector3(1, 32.0, 17.6)
+material = SubResource("mat_wall")
+
+[node name="H10p2WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 60.598, 67.362, 717.877)
+use_collision = true
+size = Vector3(1, 32.0, 17.6)
+material = SubResource("mat_wall")
+
+[node name="H10p2Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 61.714, 83.323, 705.377)
+use_collision = true
+size = Vector3(26.0, 2, 14.6)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H10p3Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.13917, 0.99027, 0.00000, 0.99027, -0.13917, -1.00000, 0.00000, 0.00000, 90.414, 48.397, 705.377)
+use_collision = true
+size = Vector3(24.0, 2, 57.8)
+material = SubResource("mat_floor")
+
+[node name="H10p3WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.13917, 0.99027, 0.00000, 0.99027, -0.13917, -1.00000, 0.00000, 0.00000, 92.501, 63.251, 692.877)
+use_collision = true
+size = Vector3(1, 32.0, 60.8)
+material = SubResource("mat_wall")
+
+[node name="H10p3WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.13917, 0.99027, 0.00000, 0.99027, -0.13917, -1.00000, 0.00000, 0.00000, 92.501, 63.251, 717.877)
+use_collision = true
+size = Vector3(1, 32.0, 60.8)
+material = SubResource("mat_wall")
+
+[node name="H10p3Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.13917, 0.99027, 0.00000, 0.99027, -0.13917, -1.00000, 0.00000, 0.00000, 94.728, 79.095, 705.377)
+use_collision = true
+size = Vector3(26.0, 2, 57.8)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H10p4Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 121.414, 44.381, 705.377)
+use_collision = true
+size = Vector3(24.0, 2, 14.6)
+material = SubResource("mat_floor")
+
+[node name="H10p4WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 122.461, 59.344, 692.877)
+use_collision = true
+size = Vector3(1, 32.0, 17.6)
+material = SubResource("mat_wall")
+
+[node name="H10p4WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 122.461, 59.344, 717.877)
+use_collision = true
+size = Vector3(1, 32.0, 17.6)
+material = SubResource("mat_wall")
+
+[node name="H10p4Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 123.577, 75.305, 705.377)
+use_collision = true
+size = Vector3(26.0, 2, 14.6)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H10p5Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 44.043, 705.377)
+use_collision = true
+size = Vector3(24.0, 2, 29.0)
+material = SubResource("mat_floor")
+
+[node name="H10p5WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 59.043, 692.877)
+use_collision = true
+size = Vector3(1, 32.0, 32.0)
+material = SubResource("mat_wall")
+
+[node name="H10p5WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 59.043, 717.877)
+use_collision = true
+size = Vector3(1, 32.0, 32.0)
+material = SubResource("mat_wall")
+
+[node name="H10p5Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 75.043, 705.377)
+use_collision = true
+size = Vector3(26.0, 2, 29.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst15" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 59.043, 710.877)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="C10Pad" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 162.272, 44.043, 705.377)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+material = SubResource("mat_floor")
+
+[node name="C10Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 162.272, 75.043, 705.377)
+use_collision = true
+size = Vector3(30.0, 2, 30.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="C10Far" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 174.772, 59.043, 705.377)
+use_collision = true
+size = Vector3(30.0, 32.0, 1)
+material = SubResource("mat_wall")
+
+[node name="C10Side" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 162.272, 59.043, 692.877)
+use_collision = true
+size = Vector3(1, 32.0, 30.0)
+material = SubResource("mat_wall")
+
+[node name="C10PostPP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 174.772, 59.043, 692.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C10PostPN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 149.772, 59.043, 692.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C10PostNP" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 174.772, 59.043, 717.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C10PostNN" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 149.772, 59.043, 717.877)
+use_collision = true
+size = Vector3(3, 32.0, 3)
+material = SubResource("mat_obstacle")
+
+[node name="C10Light" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 162.272, 73.843, 705.377)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+cast_shadow = 0
+material = SubResource("mat_light")
+
+[node name="C10Omni" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 162.27, 71.04, 705.38)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="C10Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 162.272, 44.043, 699.377)
+use_collision = true
+radius = 2.5
+height = 26.0
+material = SubResource("mat_cyl")
+
+[node name="C10Arrow1" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, -0.00000, 1.00000, 0.70711, 0.70711, 0.00000, -0.70711, 0.70711, 0.00000, 173.872, 59.043, 705.377)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="C10Arrow2" type="CSGBox3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, -0.70711, 0.70711, 0.00000, -0.70711, -0.70711, 0.00000, 173.872, 55.043, 705.377)
+use_collision = true
+size = Vector3(6, 1.4, 0.6)
+cast_shadow = 0
+material = SubResource("mat_arrow")
+
+[node name="H11p1Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 44.043, 732.377)
+use_collision = true
+size = Vector3(24.0, 2, 35.0)
+material = SubResource("mat_floor")
+
+[node name="H11p1WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 174.772, 59.043, 732.377)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H11p1WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 149.772, 59.043, 732.377)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H11p1Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 75.043, 732.377)
+use_collision = true
+size = Vector3(26.0, 2, 35.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst16" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 55.043, 732.377)
+use_collision = true
+size = Vector3(24.0, 8, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="H11p2Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 44.464, 753.432)
+use_collision = true
+size = Vector3(24.0, 2, 17.0)
+material = SubResource("mat_floor")
+
+[node name="H11p2WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 174.772, 59.428, 752.386)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H11p2WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 149.772, 59.428, 752.386)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H11p2Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 75.389, 751.270)
+use_collision = true
+size = Vector3(26.0, 2, 17.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H11p3Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99027, 0.13917, 0.00000, -0.13917, 0.99027, 162.272, 49.483, 792.166)
+use_collision = true
+size = Vector3(24.0, 2, 71.0)
+material = SubResource("mat_floor")
+
+[node name="H11p3WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99027, 0.13917, 0.00000, -0.13917, 0.99027, 174.772, 64.337, 790.078)
+use_collision = true
+size = Vector3(1, 32.0, 74.0)
+material = SubResource("mat_wall")
+
+[node name="H11p3WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99027, 0.13917, 0.00000, -0.13917, 0.99027, 149.772, 64.337, 790.078)
+use_collision = true
+size = Vector3(1, 32.0, 74.0)
+material = SubResource("mat_wall")
+
+[node name="H11p3Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99027, 0.13917, 0.00000, -0.13917, 0.99027, 162.272, 80.181, 787.852)
+use_collision = true
+size = Vector3(26.0, 2, 71.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H11p4Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 54.487, 830.761)
+use_collision = true
+size = Vector3(24.0, 2, 17.0)
+material = SubResource("mat_floor")
+
+[node name="H11p4WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 174.772, 69.450, 829.714)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H11p4WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 149.772, 69.450, 829.714)
+use_collision = true
+size = Vector3(1, 32.0, 20.0)
+material = SubResource("mat_wall")
+
+[node name="H11p4Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 85.411, 828.598)
+use_collision = true
+size = Vector3(26.0, 2, 17.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="H11p5Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 54.903, 851.676)
+use_collision = true
+size = Vector3(24.0, 2, 35.0)
+material = SubResource("mat_floor")
+
+[node name="H11p5WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 174.772, 69.903, 851.676)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H11p5WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 149.772, 69.903, 851.676)
+use_collision = true
+size = Vector3(1, 32.0, 38.0)
+material = SubResource("mat_wall")
+
+[node name="H11p5Roof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 85.903, 851.676)
+use_collision = true
+size = Vector3(26.0, 2, 35.0)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="Obst17" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 167.772, 69.903, 851.676)
+use_collision = true
+size = Vector3(13, 29, 1.5)
+material = SubResource("mat_obstacle")
+
+[node name="EndCapFloor" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 162.272, 55.403, 878.676)
+use_collision = true
+size = Vector3(24.0, 1, 26)
+material = SubResource("mat_floor")
+
+[node name="EndCapWall" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 162.272, 69.903, 891.176)
+use_collision = true
+size = Vector3(26.0, 30.0, 1)
+material = SubResource("mat_finish")
+
+[node name="FinishZone" type="Area3D" parent="." groups=["finish"]]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 162.272, 69.903, 889.176)
+script = ExtResource("4_finish")
+
+[node name="FinishShape" type="CollisionShape3D" parent="FinishZone"]
+shape = SubResource("finish_shape")
+
+[node name="EndCapRoof" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 162.272, 85.403, 878.676)
+use_collision = true
+size = Vector3(26.0, 1, 26)
+cast_shadow = 0
+material = SubResource("mat_floor")
+
+[node name="EndCapWallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 174.772, 69.903, 878.676)
+use_collision = true
+size = Vector3(1, 30.0, 26)
+material = SubResource("mat_wall")
+
+[node name="EndCapWallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 149.772, 69.903, 878.676)
+use_collision = true
+size = Vector3(1, 30.0, 26)
+material = SubResource("mat_wall")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 42.6, -18)
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]
+
+[node name="GhostRunner" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 42.6, -18)
+ghost_controlled = true
+
+[node name="TasController" type="Node" parent="GhostRunner"]
+script = ExtResource("3_ghost")
+tape_path = "res://tas/parkour.tas"
+waypoints = PackedVector3Array(0.00, 43.00, -14.00, 0.00, 43.20, 60.00, 0.00, 43.20, 132.00, -26.00, 43.20, 132.00, -45.58, 43.69, 132.00, -81.49, 49.52, 132.00, -117.40, 55.36, 132.00, -136.98, 55.85, 132.00, -162.98, 55.85, 132.00, -162.98, 55.85, 194.00, -162.98, 55.85, 256.00, -135.98, 55.85, 256.00, -115.00, 55.33, 256.00, -76.53, 49.07, 256.00, -38.05, 42.82, 256.00, -17.07, 42.30, 256.00, 9.93, 42.30, 256.00, 9.93, 42.30, 281.00, 9.93, 42.84, 299.17, 9.93, 49.33, 332.32, 9.93, 55.82, 365.46, 9.93, 56.36, 383.64, 9.93, 56.36, 408.64, -72.07, 56.36, 408.64, -154.07, 56.36, 408.64, -154.07, 56.36, 432.64, -154.07, 55.86, 449.41, -154.07, 49.87, 480.01, -154.07, 43.88, 510.60, -154.07, 43.38, 527.38, -154.07, 43.38, 551.38, -127.07, 43.38, 551.38, -106.10, 43.90, 551.38, -67.62, 50.15, 551.38, -29.14, 56.41, 551.38, -8.17, 56.93, 551.38, 18.83, 56.93, 551.38, 18.83, 56.93, 628.38, 18.83, 56.93, 705.38, 42.83, 56.93, 705.38, 59.62, 56.60, 705.38, 90.55, 52.59, 705.38, 121.48, 48.58, 705.38, 138.27, 48.24, 705.38, 162.27, 48.24, 705.38, 162.27, 48.24, 732.38, 162.27, 48.66, 753.36, 162.27, 53.67, 792.03, 162.27, 58.68, 830.69, 162.27, 59.10, 851.68, 162.27, 59.10, 874.68)

@@ -23,11 +23,22 @@ in PvP, per Lily) centered on the origin, so the body origin is at capsule
 center, not the feet — spawn transforms need y ≥ ~2.3. Head sits at +1.7
 (eye near the capsule top). `BodyMesh` is a matching red emissive capsule,
 hidden for the authority (your own camera is inside it) and shown on remote
-puppets. `ShadowMesh` is a matching capsule with `cast_shadow = 3`
+puppets, along with `PuppetArmL/R` — shoulder weapon blocks whose tint
+(grey rail / silver sword) and charge glow are driven from synced state;
+non-authority code duplicates their materials so multiple puppets tint
+independently. Viewmodel meshes are swapped in code per loadout (chunky
+rail block vs long thin blade with rolled/tilted pose) — the tscn only
+ships the rail default. `ShadowMesh` is a matching capsule with `cast_shadow = 3`
 (shadows-only) so you still cast your own shadow first-person. Viewmodels are 0.12×0.12×0.5 boxes at
 (±0.35, −0.28, −0.55) under the camera, yawed ~4° inward, `cast_shadow` off,
 each with its OWN emissive material (orange emission, energy 0 at rest) —
 `player.gd` drives emission with charge progress and kicks position on fire.
+
+`Trail` is a world-space (`local_coords = false`) GPUParticles3D behind the
+back: small orange puffs fading over 0.7 s — the speed trail. `player.gd`
+toggles `emitting` above 1.2× base run speed (authority: physics tick;
+puppets: from synced velocity in `_process`), so trails read on both your
+own player and remotes.
 
 ## Assertions
 

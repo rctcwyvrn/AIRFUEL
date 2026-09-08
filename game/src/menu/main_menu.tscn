@@ -98,6 +98,9 @@ horizontal_alignment = 1
 [node name="SoloButton" type="Button" parent="VBox"]
 text = "PLAY SOLO"
 
+[node name="ParkourButton" type="Button" parent="VBox"]
+text = "PARKOUR TRACK"
+
 [node name="HostButton" type="Button" parent="VBox"]
 text = "HOST LAN GAME"
 

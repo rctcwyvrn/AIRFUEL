@@ -67,6 +67,10 @@ pairs).
   need a new number, add a config field + tres value, don't inline it.
 - Scenes are hand-written `.tscn` — keep them minimal and diffable. Omit `uid`
   attributes; the editor adds them.
+- **tscn `Transform3D(a,b,c, d,e,f, g,h,i, ox,oy,oz)` basis is ROW-major** —
+  emitting axis vectors (columns) transposes the rotation. Symmetric for
+  yaw-only boxes, silently wrong for compound rotations (this shipped once
+  as "giant holes in the parkour track").
 - Format/lint via `gdformat` / `gdlint` (in the devshell) if in doubt.
 
 ### Process

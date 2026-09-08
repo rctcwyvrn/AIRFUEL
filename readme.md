@@ -1,5 +1,7 @@
 # Airfuel
 
+Game state: Pre-alpha, movement-tests-and-local-lan only. Not open source yet.
+
 ## What is it?
 A frenetic, highly challenging, absurdly fast 6v6 movement shooter
 
@@ -33,4 +35,4 @@ This is a for fun project made by a single developer, using LLMs to assist with 
 
 The full source code is available on GitHub, submit bugfixes and propose patches there. Download the game on itch.io
 
-Stay swift, Runners.
+_Stay swift, Runners._

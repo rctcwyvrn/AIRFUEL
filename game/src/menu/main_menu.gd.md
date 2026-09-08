@@ -8,7 +8,8 @@ only collects the choice — all networking lives in the `Net` autoload.
 ## Interface
 
 - Script of `main_menu.tscn` root. No exports, no signals out.
-- Calls: `get_tree().change_scene_to_file(ARENA)` (solo), `Net.host()`,
+- Calls: `get_tree().change_scene_to_file` with `ARENA` (solo corridor) or
+  `PARKOUR` (parkour track), `Net.host()`,
   `Net.join(ip)` (blank IP field defaults to 127.0.0.1; Enter in the field
   submits).
 - Ensures the mouse is visible on entry (the player captures it later).

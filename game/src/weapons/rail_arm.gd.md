@@ -12,7 +12,8 @@ in `player.tscn` (`ArmLeft`, `ArmRight`).
 - API for the player: `try_charge() -> bool` (false unless IDLE),
   `on_fired()` (starts cooldown), `progress() -> float` (0–1, 1.0 while
   PENDING), `is_locking() -> bool` (CHARGING or PENDING — drives the
-  movement freeze), signal `charge_complete`.
+  movement freeze), `reset()` (hard idle — used on loadout swaps), signal
+  `charge_complete`.
 - States: `IDLE → CHARGING → PENDING → COOLDOWN → IDLE`.
 
 ## Implementation

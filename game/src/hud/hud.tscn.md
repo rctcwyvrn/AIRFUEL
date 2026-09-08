@@ -15,7 +15,13 @@ the player.
   ProgressBars flanking the crosshair, fill bottom-to-top, max_value 1),
   `HitLabel` (below crosshair, hidden by default), `LockLabel` ("LOCKED",
   below that, hidden by default), `ControlsHint` (empty bottom-left Control,
-  154×136 — `hud.gd` populates the key grid at runtime).
+  154×136 — `hud.gd` populates the key grid at runtime), `ScoreLabel`
+  (top-right, orange, hidden offline), `LoadoutLabel` (bottom-right),
+  `TimerLabel` (top-center, 30px, hidden by default — hud.gd
+  drives it), `DeathFlash` (full-rect red ColorRect at alpha 0, MUST keep
+  `mouse_filter = 2` and stays above gameplay readouts), `MapBack` (dark backdrop ColorRect under the map) + `MapPrism`
+  (Control with `minimap.gd`, top-right, hidden offline — draws the
+  rotating prism + player dots itself).
 
 ## Implementation
 

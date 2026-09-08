@@ -10,8 +10,12 @@ portion). Same philosophy as `MovementConfig`: numbers are data, not literals.
 - `class_name CombatConfig extends Resource`, pure data.
 - Consumed by `player.gd` (`combat` export) and both `RailArm` nodes
   (`config` export). Groups: Railgun (charge_time, cooldown, damage_body/head,
-  range_max), Aim Crush (floor = sensitivity multiplier at full charge,
-  exponent = curve shape), Dual Rail (min_shot_gap).
+  range_max, charge_speed_cap, hp_max), Aim Crush (floor = sensitivity
+  multiplier at full charge, exponent = curve shape), Dual Rail
+  (min_shot_gap), Sword (lunge cost / `sword_lunge_speed` — a burst ABOVE terminal
+  velocity that the movement system's overspeed decay bleeds back down —
+  cooldown, hit range, active window; 8.2: cheaper per meter and longer
+  than a dash).
 
 ## Implementation
 

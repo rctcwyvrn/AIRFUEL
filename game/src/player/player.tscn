@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://src/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://src/player/default_tuning.tres" id="2_cfg"]
@@ -22,6 +22,52 @@ albedo_color = Color(0.85, 0.12, 0.12, 1)
 emission_enabled = true
 emission = Color(1, 0.1, 0.1, 1)
 emission_energy_multiplier = 0.5
+
+[sub_resource type="Gradient" id="grad_trail"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(1, 0.55, 0.1, 0.9, 1, 0.3, 0.05, 0)
+
+[sub_resource type="GradientTexture1D" id="gradtex_trail"]
+gradient = SubResource("grad_trail")
+
+[sub_resource type="ParticleProcessMaterial" id="ppm_trail"]
+lifetime_randomness = 0.25
+emission_shape = 1
+emission_sphere_radius = 0.6
+spread = 180.0
+initial_velocity_min = 0.5
+initial_velocity_max = 1.5
+gravity = Vector3(0, 0, 0)
+scale_min = 0.5
+scale_max = 1.0
+color_ramp = SubResource("gradtex_trail")
+
+[sub_resource type="StandardMaterial3D" id="mat_trail"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="SphereMesh" id="mesh_trail"]
+material = SubResource("mat_trail")
+radius = 0.08
+height = 0.16
+radial_segments = 6
+rings = 3
+
+[sub_resource type="BoxMesh" id="mesh_parm"]
+size = Vector3(0.35, 0.35, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="mat_parm_l"]
+albedo_color = Color(0.45, 0.47, 0.5, 1)
+emission_enabled = true
+emission = Color(1, 0.55, 0.15, 1)
+emission_energy_multiplier = 0.0
+
+[sub_resource type="StandardMaterial3D" id="mat_parm_r"]
+albedo_color = Color(0.45, 0.47, 0.5, 1)
+emission_enabled = true
+emission = Color(1, 0.55, 0.15, 1)
+emission_energy_multiplier = 0.0
 
 [sub_resource type="BoxMesh" id="mesh_vm"]
 size = Vector3(0.12, 0.12, 0.5)
@@ -80,3 +126,24 @@ cast_shadow = 0
 visible = false
 mesh = SubResource("mesh_body")
 material_override = SubResource("mat_body")
+
+[node name="PuppetArmL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.45, 0.7, -0.3)
+visible = false
+mesh = SubResource("mesh_parm")
+material_override = SubResource("mat_parm_l")
+
+[node name="PuppetArmR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.45, 0.7, -0.3)
+visible = false
+mesh = SubResource("mesh_parm")
+material_override = SubResource("mat_parm_r")
+
+[node name="Trail" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 1.0)
+emitting = false
+amount = 48
+lifetime = 0.7
+local_coords = false
+process_material = SubResource("ppm_trail")
+draw_pass_1 = SubResource("mesh_trail")

@@ -22,11 +22,16 @@ godot4 --path game             # just play
 | Q | Strafe down in the air (fuel) |
 | Space | Jump / double jump (fuel) / wallrun dismount |
 | Shift + WASD/Q | Dash in that direction (fuel); Shift+Q alone = down dash |
-| LMB / RMB | Charge left / right rail arm (auto-fires after 1s, locks movement) |
-| T | Respawn (solo only) |
+| LMB / RMB | Fire left / right arm — rail: 1s charge, auto-fire, locks movement; sword: fueled lunge-kill |
+| Tab | Cycle loadout: rail+rail / rail+sword / sword+sword |
+| T | Reset the run (solo only; restarts timer, ghost, and any recording) |
+| F5 | Dev: record a TAS ghost tape (toggle; finish line auto-saves) |
 | Esc | Release mouse |
 
-Bare Shift does nothing — a dash always needs a held direction. WASD dashes
+Bare Shift does nothing — a dash always needs a held direction. Dashing
+while wallrunning dismounts with the full jump boost + dash impulse
+(the wall you left locks out briefly); Shift+Q on the wall slides you
+down it without detaching. WASD dashes
 follow the camera (W+Shift = wherever you're looking, pitch included);
 Q dashes straight down. Up is the double jump's job.
 
@@ -70,4 +75,6 @@ inspector while the game runs for live tuning.
 - `src/weapons/` — rail arm state machine, combat tuning, canister prop
 - `src/targets/` — self-respawning 2 HP practice dummy (orange head = lethal)
 - `src/hud/` — fuel bar, speed/state readout, charge bars, hitmarkers
-- `maps/graybox_corridor.tscn` — the test corridor (main scene)
+- `maps/graybox_corridor.tscn` — the test corridor (solo range + LAN arena)
+- `maps/parkour_track.tscn` — snaking high-speed parkour time trial (solo;
+  timer stops at the green wall, F5 tapes auto-save there)
