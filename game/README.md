@@ -19,15 +19,16 @@ godot4 --path game             # just play
 | Input | Action |
 |---|---|
 | WASD + mouse | Strafe / look |
-| E / Q | Strafe up / down in the air (fuel) |
+| Q | Strafe down in the air (fuel) |
 | Space | Jump / double jump (fuel) / wallrun dismount |
-| Shift + WASD/E/Q | Dash in that direction (fuel); Shift+Q alone = down dash |
+| Shift + WASD/Q | Dash in that direction (fuel); Shift+Q alone = down dash |
 | LMB / RMB | Charge left / right rail arm (auto-fires after 1s, locks movement) |
-| R | Respawn |
+| T | Respawn |
 | Esc | Release mouse |
 
 Bare Shift does nothing — a dash always needs a held direction. WASD dashes
-are in the facing (yaw) plane; E/Q dash straight up/down.
+follow the camera (W+Shift = wherever you're looking, pitch included);
+Q dashes straight down. Up is the double jump's job.
 
 ## What to test (Step 1 + 2 questions from the design doc)
 

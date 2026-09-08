@@ -14,7 +14,8 @@ the game runs.
 - Consumed by `player.gd` via its `config` export. Nothing else reads it yet
   (the HUD reaches it through `player.config`).
 - Fields are grouped with `@export_group`: Fuel, Ground, Air, Dash, Wallrun,
-  Dismount, Ramp Persistence, Misc. Units: meters/seconds/degrees; costs and
+  Dismount, Assists (glide retention/angle, coyote windows, jump buffer),
+  Ramp Persistence, Misc. Units: meters/seconds/degrees; costs and
   grants in fuel points; `dismount_fuel_per_speed` is fuel per (m/s above
   `min_wallrun_speed`).
 

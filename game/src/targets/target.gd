@@ -41,5 +41,5 @@ func _die() -> void:
 func _respawn() -> void:
 	hp = max_hp
 	visible = true
-	body.collision_layer = 1
-	head.collision_layer = 1
+	body.collision_layer = 2
+	head.collision_layer = 2

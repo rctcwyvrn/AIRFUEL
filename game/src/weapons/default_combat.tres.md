@@ -17,6 +17,12 @@ principle: every shot takes the same time so the dodge is learnable. Damage
 (1 body / 2 head vs 2 HP) is design-fixed, not really tunable.
 `min_shot_gap` is the "generous defender window" knob (7.1) — tune by feel.
 
+**Aim crush is currently DISABLED** (`aim_crush_floor = 1.0`, 2026-09-08,
+Lily's call during solo range practice). The mechanism (DESIGN.md 8.1) exists
+so a charging shooter must predict rather than track — it is half of the
+charge-vs-dodge duel. Revisit when Step 3's bot makes that duel real; the
+code path is intact, re-enable by lowering the floor.
+
 ## Assertions
 
 - Every `CombatConfig` field has a line here.

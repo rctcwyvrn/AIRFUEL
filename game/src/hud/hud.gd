@@ -8,9 +8,45 @@ extends CanvasLayer
 @onready var charge_r: ProgressBar = $ChargeR
 @onready var hit_label: Label = $HitLabel
 @onready var lock_label: Label = $LockLabel
+@onready var controls_hint: Control = $ControlsHint
+
+const KEY_DIM := Color(0.5, 0.5, 0.55, 0.25)
+const KEY_LIT := Color(1.0, 0.75, 0.3, 0.9)
+const KEY_LAYOUT: Array = [
+	["move_forward", "W", 34, 0, 30],
+	["move_left", "A", 0, 34, 30],
+	["move_back", "S", 34, 34, 30],
+	["move_right", "D", 68, 34, 30],
+	["strafe_down", "Q", 110, 34, 30],
+	["dash", "SHIFT", 0, 68, 64],
+	["jump", "SPACE", 68, 68, 72],
+	["fire_left", "LMB", 0, 102, 47],
+	["fire_right", "RMB", 51, 102, 47],
+	["respawn", "T", 110, 102, 30],
+]
 
 var player: AirfuelPlayer
 var hit_timer := 0.0
+var key_rects: Dictionary = {}
+
+
+func _ready() -> void:
+	for k: Array in KEY_LAYOUT:
+		var cr := ColorRect.new()
+		cr.position = Vector2(k[2], k[3])
+		cr.size = Vector2(k[4], 30)
+		cr.color = KEY_DIM
+		cr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var lb := Label.new()
+		lb.text = k[1]
+		lb.set_anchors_preset(Control.PRESET_FULL_RECT)
+		lb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lb.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lb.add_theme_font_size_override("font_size", 12)
+		lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cr.add_child(lb)
+		controls_hint.add_child(cr)
+		key_rects[k[0]] = cr
 
 
 func _process(_delta: float) -> void:
@@ -34,6 +70,8 @@ func _process(_delta: float) -> void:
 		hit_timer -= _delta
 		if hit_timer <= 0.0:
 			hit_label.visible = false
+	for action: String in key_rects:
+		key_rects[action].color = KEY_LIT if Input.is_action_pressed(action) else KEY_DIM
 
 
 func _on_shot_fired(_side: String, result: String) -> void:

@@ -14,7 +14,8 @@ the player.
   `Crosshair` (4×4 ColorRect, screen center), `ChargeL`/`ChargeR` (vertical
   ProgressBars flanking the crosshair, fill bottom-to-top, max_value 1),
   `HitLabel` (below crosshair, hidden by default), `LockLabel` ("LOCKED",
-  below that, hidden by default).
+  below that, hidden by default), `ControlsHint` (empty bottom-left Control,
+  154×136 — `hud.gd` populates the key grid at runtime).
 
 ## Implementation
 
@@ -29,3 +30,8 @@ overwrites it every frame.
   together.
 - Keep this scene player-agnostic: no references into `player.tscn`, the
   script discovers the player by group.
+- Every non-Label Control (ColorRect, ProgressBars) must keep
+  `mouse_filter = 2` (IGNORE). The captured cursor sits at screen center —
+  a default-filter Control there (the Crosshair!) consumes
+  InputEventMouseMotion before the player's `_unhandled_input` sees it,
+  killing mouse look entirely. This bug shipped once; don't re-ship it.

@@ -5,7 +5,8 @@
 Steps 1+2 diagnostic HUD (DESIGN.md §15 is far future — this is just the
 instruments the prototype questions need): Airfuel meter, horizontal speed,
 movement state, ramp-grace countdown, per-arm charge bars, crosshair,
-hitmarker, and a LOCKED indicator during the charge freeze.
+hitmarker, a LOCKED indicator during the charge freeze, and a controls
+highlighter (bottom-left key cluster that lights up pressed inputs).
 
 ## Interface
 
@@ -19,7 +20,8 @@ hitmarker, and a LOCKED indicator during the charge freeze.
   `shot_fired(side, result)` signal for hitmarkers.
 - Expected children: `FuelBar`, `ChargeL`, `ChargeR` (ProgressBars),
   `FuelLabel`, `SpeedLabel`, `StateLabel`, `HitLabel`, `LockLabel` (Labels),
-  `Crosshair` (ColorRect).
+  `Crosshair` (ColorRect), `ControlsHint` (empty Control anchor —
+  `_ready` builds the key grid into it from `KEY_LAYOUT`).
 
 ## Implementation
 
@@ -29,6 +31,9 @@ because hitmarkers are events, not state. Hit results map to distinct
 text+color (HIT white / HEADSHOT orange / KILL red — §17's "distinct for
 body vs head"), shown for 0.45s. Misses show nothing. `fuel_bar.max_value`
 is re-set from config every frame so live tuning reflects immediately.
+The controls highlighter is data-driven: `KEY_LAYOUT` rows are
+`[action, label, x, y, width]`; `_ready` builds a ColorRect+Label per row
+and `_process` polls `Input.is_action_pressed` to swap KEY_DIM/KEY_LIT.
 
 ## Assertions
 
@@ -40,3 +45,7 @@ is re-set from config every frame so live tuning reflects immediately.
   horizontal separately.
 - Hitmarker must stay visually distinct per zone (body vs head vs kill) —
   §17 makes unambiguous hit confirmation load-bearing.
+- Every runtime-built key Control gets `MOUSE_FILTER_IGNORE` — same
+  mouse-look-eating hazard as the hud.tscn assertion.
+- `KEY_LAYOUT` action names must exist in project.godot; renaming an input
+  action must touch this table too.

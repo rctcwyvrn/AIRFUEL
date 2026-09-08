@@ -36,6 +36,11 @@ var wall_rearm_timer := 0.0
 var ramp_grace_timer := 0.0
 var dash_cooldown_timer := 0.0
 var double_jump_timer := 0.0
+var wall_coyote_timer := 0.0
+var coyote_wall_normal := Vector3.ZERO
+var coyote_wall_speed := 0.0
+var ground_coyote_timer := 0.0
+var jump_buffer_timer := 0.0
 
 var base_fov := 100.0
 var spawn_transform: Transform3D
@@ -71,6 +76,11 @@ func _physics_process(delta: float) -> void:
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
 	double_jump_timer = maxf(0.0, double_jump_timer - delta)
 	wall_rearm_timer = maxf(0.0, wall_rearm_timer - delta)
+	wall_coyote_timer = maxf(0.0, wall_coyote_timer - delta)
+	ground_coyote_timer = maxf(0.0, ground_coyote_timer - delta)
+	jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
+	if Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = config.jump_buffer_time
 
 	move_locked = arm_left.is_locking() or arm_right.is_locking()
 	_handle_arms()
@@ -88,9 +98,15 @@ func _physics_process(delta: float) -> void:
 	_handle_dashes()
 
 	velocity = velocity.limit_length(config.terminal_velocity)
+	if move_locked:
+		# Charging bleeds you down to a slower, more readable trajectory
+		velocity = velocity.limit_length(combat.charge_speed_cap)
 	velocity.y = maxf(velocity.y, -config.terminal_fall_speed)
 
+	var pre_slide_velocity := velocity
 	move_and_slide()
+	if state != MoveState.WALLRUN:
+		_apply_glide(pre_slide_velocity)
 	_update_state()
 	_camera_feel(delta)
 	_update_viewmodels(delta)
@@ -119,7 +135,8 @@ func _ground_move(wish: Vector3, delta: float) -> void:
 	velocity.z = h.z
 	velocity.y -= config.gravity * delta
 
-	if Input.is_action_just_pressed("jump"):
+	if jump_buffer_timer > 0.0:
+		jump_buffer_timer = 0.0
 		velocity.y = config.jump_velocity
 
 
@@ -132,7 +149,7 @@ func _air_move(wish: Vector3, delta: float) -> void:
 				and _spend(config.air_strafe_cost_per_sec * delta):
 			_air_accelerate(wish, config.air_strafe_accel, config.air_strafe_speed_cap, delta)
 
-	# Q/E vertical strafe: fueled only, no free tier (E up, Q down)
+	# Q vertical strafe: fueled downward thrust only
 	var vert := 0.0 if move_locked else _vertical_input()
 	if vert != 0.0:
 		var vdir := Vector3.UP * vert
@@ -145,10 +162,16 @@ func _air_move(wish: Vector3, delta: float) -> void:
 	else:
 		_decay_excess_speed(config.ramp_decay_rate, delta)
 
-	if not move_locked and Input.is_action_just_pressed("jump") and double_jump_timer == 0.0 \
-			and _spend(config.double_jump_cost):
-		velocity.y = maxf(velocity.y, config.double_jump_strength)
-		double_jump_timer = config.double_jump_cooldown
+	if not move_locked and Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = 0.0
+		if wall_coyote_timer > 0.0:
+			_coyote_walljump()
+		elif ground_coyote_timer > 0.0:
+			ground_coyote_timer = 0.0
+			velocity.y = config.jump_velocity
+		elif double_jump_timer == 0.0 and _spend(config.double_jump_cost):
+			velocity.y = maxf(velocity.y, config.double_jump_strength)
+			double_jump_timer = config.double_jump_cooldown
 
 
 func _wallrun_move(delta: float) -> void:
@@ -186,6 +209,7 @@ func _wallrun_move(delta: float) -> void:
 	velocity.y = move_toward(velocity.y, 0.0, 20.0 * delta) - config.wallrun_gravity * delta
 
 	if not move_locked and Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = 0.0
 		_dismount(true)
 
 
@@ -204,6 +228,14 @@ func _dismount(jumped: bool) -> void:
 		velocity.x = dir.x * boosted + wall_normal.x * config.dismount_push_off
 		velocity.z = dir.z * boosted + wall_normal.z * config.dismount_push_off
 		velocity.y = maxf(velocity.y, config.dismount_up_velocity)
+
+	if not jumped:
+		# Wall coyote (Celeste-style): the dismount jump stays available briefly
+		wall_coyote_timer = config.wall_coyote_time
+		coyote_wall_normal = wall_normal
+		coyote_wall_speed = wall_speed
+	else:
+		wall_coyote_timer = 0.0
 
 	ramp_grace_timer = config.ramp_grace_window
 	last_wall_normal = wall_normal
@@ -240,6 +272,7 @@ func _try_attach_wall() -> void:
 	wall_normal = best.normal
 	wallrun_time = 0.0
 	wall_speed = flat.slide(wall_normal).length()
+	wall_coyote_timer = 0.0
 	state = MoveState.WALLRUN
 
 
@@ -271,8 +304,10 @@ func _handle_dashes() -> void:
 		return
 	if dash_cooldown_timer > 0.0 or not _spend(config.air_dash_cost):
 		return
-	var b := global_transform.basis
-	var dir := (b.x * input.x + -b.z * -input.y + Vector3.UP * vert).normalized()
+	# Camera-aimed: W+Shift dashes wherever you're looking (pitch included);
+	# E/Q contribute world-vertical on top.
+	var cb := camera.global_transform.basis
+	var dir := (cb.x * input.x + -cb.z * -input.y + Vector3.UP * vert).normalized()
 	velocity += dir * config.air_dash_impulse
 	dash_cooldown_timer = config.air_dash_cooldown
 
@@ -297,7 +332,8 @@ func _fire_rail(arm: RailArm) -> void:
 	var from := cam.origin
 	var to := from + -cam.basis.z * combat.range_max
 	var space := get_world_3d().direct_space_state
-	var params := PhysicsRayQueryParameters3D.create(from, to, collision_mask, [get_rid()])
+	# mask: world geometry (player's mask) + targets (layer 2, movement-transparent)
+	var params := PhysicsRayQueryParameters3D.create(from, to, collision_mask | 2, [get_rid()])
 	var hit := space.intersect_ray(params)
 	var end := to
 	var result := "miss"
@@ -380,6 +416,8 @@ func _update_state() -> void:
 	if is_on_floor():
 		state = MoveState.GROUNDED
 		return
+	if state == MoveState.GROUNDED and velocity.y <= 1.0:
+		ground_coyote_timer = config.ground_coyote_time  # walked off an edge, not a jump
 	state = MoveState.AIRBORNE
 	_try_attach_wall()
 
@@ -400,6 +438,54 @@ func _decay_excess_speed(rate: float, delta: float) -> void:
 	velocity.z *= ns / hs
 
 
+## Momentum-preserving glide (Celeste-style): a glancing hit on a wall-ish
+## surface redirects horizontal speed along the surface instead of eating it.
+## Near-head-on impacts (past glide_max_impact_angle_deg from the surface)
+## still stop you — commitment reads as a real collision, grazing doesn't.
+func _apply_glide(pre_vel: Vector3) -> void:
+	if get_slide_collision_count() == 0:
+		return
+	var pre_h := Vector3(pre_vel.x, 0.0, pre_vel.z)
+	var pre_speed := pre_h.length()
+	if pre_speed < 0.5:
+		return
+	var post_h := Vector3(velocity.x, 0.0, velocity.z)
+	if post_h.length() >= pre_speed * 0.98:
+		return
+	var normal := Vector3.ZERO
+	for i in get_slide_collision_count():
+		var n := get_slide_collision(i).get_normal()
+		if absf(n.y) < 0.4:
+			normal = n
+			break
+	if normal == Vector3.ZERO:
+		return
+	var pre_dir := pre_h / pre_speed
+	if absf(pre_dir.dot(normal)) > sin(deg_to_rad(config.glide_max_impact_angle_deg)):
+		return
+	var slide := pre_h.slide(normal)
+	if slide.length() < 0.05:
+		return
+	var target := pre_speed * config.glide_speed_retention
+	if target > post_h.length():
+		var dir := slide.normalized()
+		velocity.x = dir.x * target
+		velocity.z = dir.z * target
+
+
+## The jump-dismount boost, applied during the wall-coyote window after the
+## wall ended. Fuel was already granted at falloff — this only adds the boost.
+func _coyote_walljump() -> void:
+	var flat := Vector3(velocity.x, 0.0, velocity.z)
+	var dir := flat.normalized() if flat.length() > 0.1 else -global_transform.basis.z
+	var boosted := coyote_wall_speed * (1.0 + config.dismount_boost_factor)
+	velocity.x = dir.x * boosted + coyote_wall_normal.x * config.dismount_push_off
+	velocity.z = dir.z * boosted + coyote_wall_normal.z * config.dismount_push_off
+	velocity.y = maxf(velocity.y, config.dismount_up_velocity)
+	ramp_grace_timer = config.ramp_grace_window
+	wall_coyote_timer = 0.0
+
+
 func _spend(amount: float) -> bool:
 	if fuel < amount:
 		return false
@@ -416,12 +502,8 @@ func _wish_dir() -> Vector3:
 
 
 func _vertical_input() -> float:
-	var vert := 0.0
-	if Input.is_action_pressed("strafe_up"):
-		vert += 1.0
-	if Input.is_action_pressed("strafe_down"):
-		vert -= 1.0
-	return vert
+	# Down only (Q). Going up is the double jump's job.
+	return -1.0 if Input.is_action_pressed("strafe_down") else 0.0
 
 
 func _camera_feel(delta: float) -> void:
@@ -429,10 +511,13 @@ func _camera_feel(delta: float) -> void:
 	if state == MoveState.WALLRUN:
 		var side := signf((-wall_normal).dot(global_transform.basis.x))
 		target_roll = side * deg_to_rad(config.wallrun_camera_roll_deg)
-	camera.rotation.z = lerpf(camera.rotation.z, target_roll, 1.0 - exp(-10.0 * delta))
+	camera.rotation.z = lerpf(camera.rotation.z, target_roll,
+			1.0 - exp(-config.wallrun_camera_roll_speed * delta))
 
 	var hs := Vector3(velocity.x, 0.0, velocity.z).length()
 	var target_fov := base_fov + clampf(hs - config.base_run_speed, 0.0, 25.0) * 0.6
+	if state == MoveState.WALLRUN:
+		target_fov += config.wallrun_fov_bonus
 	camera.fov = lerpf(camera.fov, target_fov, 1.0 - exp(-6.0 * delta))
 
 

@@ -20,9 +20,9 @@ networking — that's Step 4.
 - Expected children: `Head` (Node3D, pitch) → `Head/Camera3D` (roll + FOV
   feel); `ArmLeft`/`ArmRight` (`RailArm` nodes). Yaw goes on the body itself.
 - HUD-facing reads: `move_locked`, `arm_progress_left/right()`.
-- Consumes input actions: `move_forward/back/left/right`, `strafe_up` (E),
-  `strafe_down` (Q), `jump`, `dash` (Shift), `fire_left` (LMB), `fire_right`
-  (RMB), `respawn`, `ui_cancel` (mouse release toggle).
+- Consumes input actions: `move_forward/back/left/right`, `strafe_down`
+  (Q — up was removed; double jump covers it), `jump`, `dash` (Shift),
+  `fire_left` (LMB), `fire_right` (RMB), `respawn`, `ui_cancel`.
 - `MoveState { GROUNDED, AIRBORNE, WALLRUN }` in `state`.
 
 ## Implementation
@@ -31,21 +31,27 @@ Per-physics-tick order in `_physics_process` (order is load-bearing):
 timers → `move_locked` recompute + `_handle_arms` (charge starts, pending
 fires) → per-state move (`_ground_move` / `_air_move` / `_wallrun_move`) →
 `_handle_dashes` → terminal-velocity clamps → `move_and_slide()` →
-`_update_state` (floor check, wall attach) → `_camera_feel` → respawn check.
+`_update_state` (floor check, wall attach) → `_camera_feel` (speed FOV;
+wallrun banks the camera `wallrun_camera_roll_deg` at
+`wallrun_camera_roll_speed` and adds `wallrun_fov_bonus`) → respawn check.
 
 **Charge freeze (§7.2)**: `move_locked` is true while either arm
 `is_locking()`. Grounded → horizontal velocity zeroed (rooted). Airborne →
 ballistic: gravity/ramp decay continue, all steering (wish, Q/E, double jump,
 dashes) gated off. Wallrunning → the run *continues* (Lily's call: the wall
 is your trajectory) but the dismount jump is ignored; running off the wall
-end drops into the airborne lock. **Aim crush**: mouse sensitivity ×
+end drops into the airborne lock. While locked, total speed is clamped to `combat.charge_speed_cap`
+(charging at high speed instantly bleeds you to 40 — the freeze makes you
+slower and more readable, not just steerless). **Aim crush**: mouse
+sensitivity ×
 `_aim_crush_mult()` = `lerp(1, aim_crush_floor, progress^exponent)` over the
 max progress of both arms.
 
 **Firing (§7.1, §8.1)**: `_handle_arms` starts charges on trigger press;
 completed charges queue in `pending_arms` (FIFO = press order) and fire no
 closer than `min_shot_gap` apart. `_fire_rail` raycasts from the camera
-center (`range_max`), reads `hit_zone` meta off the collider for body/head
+center (`range_max`, mask = player mask OR layer 2 so it hits
+movement-transparent targets), reads `hit_zone` meta off the collider for body/head
 damage against `TargetDummy`, then spawns the beam from the firing arm's
 viewmodel muzzle (`vm.global_transform * (0,0,-0.35)`), kicks that viewmodel
 back, spawns a `canister.tscn` rigid body with inherited velocity +
@@ -79,16 +85,30 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   only up to a cap along the wish direction). Free control caps at
   `base_run_speed`; the fueled strafe tier caps at `air_strafe_speed_cap` and
   drains `air_strafe_cost_per_sec` only when it can actually add speed.
-  Vertical strafe (E up / Q down, `_vertical_input`) is fueled-only — no free
-  tier — capped at `air_strafe_vertical_cap`, airborne only.
-- **Dash is Shift + held direction** (Lily's control scheme, chosen over an
-  assumed camera-aimed dash): WASD components in the body yaw plane, E/Q as
-  pure vertical — camera pitch never affects dash direction. Bare Shift is
-  inert. Shift+Q with no WASD held fires the §4.4 down dash instead, with its
+  Vertical strafe (`_vertical_input`) is Q-down only, fueled, capped at
+  `air_strafe_vertical_cap`, airborne only; upward mobility is the double
+  jump.
+- **Dash is Shift + held direction, camera-aimed** (Lily's scheme, revised
+  2026-09-08 from yaw-plane to full camera): WASD components follow the
+  camera basis including pitch — W+Shift goes wherever you look; Q adds
+  world-down. Bare Shift is inert. Shift+Q with no WASD held fires the §4.4 down dash instead, with its
   own `down_dash_*` tuning and no cooldown (fuel is its limiter); every other
   direction uses `air_dash_impulse`/`air_dash_cost`/`air_dash_cooldown`.
   Double jump is fuel-gated plus a short cooldown (interpretation of §4.5:
   fuel is the constraint, cooldown just prevents hover-spam).
+- **Feel assists (Celeste-inspired, all in the Assists config group)**:
+  `_apply_glide` runs after `move_and_slide` (except during wallrun) — on a
+  glancing hit against a wall-ish surface it restores horizontal speed
+  (`glide_speed_retention`, default 90%) along the slide direction, so
+  obstacles deflect instead of stopping; impacts steeper than
+  `glide_max_impact_angle_deg` from the surface still stop you. **Wall
+  coyote**: falling off a wall arms `wall_coyote_timer` — jump within it
+  and `_coyote_walljump` applies the full dismount boost (fuel was already
+  granted at falloff, so no double-grant). **Ground coyote**: walking off
+  an edge (not jumping — gated on `velocity.y <= 1`) leaves the free jump
+  available briefly. **Jump buffer**: any jump press is buffered
+  `jump_buffer_time`; landing consumes it. Air jump priority: wall coyote →
+  ground coyote → fueled double jump.
 - Respawn on `respawn` action or falling below `config.kill_y`.
 
 ## Assertions
@@ -115,3 +135,7 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   trigger press to last pending shot, never during COOLDOWN.
 - Beam meshes always free themselves (tween callback) — a leaked beam per
   shot would accumulate fast.
+- Coyote walljump must never grant fuel (falloff already did); jumping
+  dismounts must clear `wall_coyote_timer` so boosts can't stack.
+- Glide only redirects horizontal speed — it must never add speed
+  (`target` is capped by pre-impact speed × retention).

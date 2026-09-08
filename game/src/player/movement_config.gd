@@ -41,7 +41,9 @@ extends Resource
 @export var wallrun_max_speed := 38.0
 @export var wallrun_gravity := 2.0
 @export var wall_stick_speed := 3.0
-@export var wallrun_camera_roll_deg := 10.0
+@export var wallrun_camera_roll_deg := 18.0
+@export var wallrun_camera_roll_speed := 14.0
+@export var wallrun_fov_bonus := 7.0
 
 @export_group("Dismount")
 @export var dismount_fuel_per_speed := 1.4
@@ -50,6 +52,13 @@ extends Resource
 @export var dismount_up_velocity := 6.0
 @export var dismount_push_off := 4.0
 @export var wall_rearm_time := 0.18
+
+@export_group("Assists")
+@export var glide_speed_retention := 0.9
+@export var glide_max_impact_angle_deg := 75.0
+@export var wall_coyote_time := 0.15
+@export var ground_coyote_time := 0.12
+@export var jump_buffer_time := 0.12
 
 @export_group("Ramp Persistence")
 @export var ramp_grace_window := 1.2

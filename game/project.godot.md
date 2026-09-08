@@ -2,15 +2,17 @@
 
 ## Function
 
-Godot 4.6 project configuration for the Step 1 prototype.
+Godot project configuration for the Steps 1+2 prototype. The `features` tag
+tracks whichever editor last saved the project (currently 4.7 — Lily's
+editor; the nix devshell verify binary is 4.6.1, which warns but runs).
 
 ## Interface
 
 - Main scene: `res://maps/graybox_corridor.tscn`.
 - Input actions defined here and consumed by `player.gd`:
-  `move_forward/back/left/right` (WASD), `strafe_up` (E), `strafe_down` (Q),
+  `move_forward/back/left/right` (WASD), `strafe_down` (Q),
   `jump` (Space), `dash` (Shift, combines with held direction keys),
-  `fire_left` (mouse left), `fire_right` (mouse right), `respawn` (R). Keys
+  `fire_left` (mouse left), `fire_right` (mouse right), `respawn` (T — moved off R, too close to E). Keys
   use `physical_keycode` (layout-independent). `ui_cancel` (Esc) is the
   built-in default.
 - `physics/common/physics_ticks_per_second = 120`.
@@ -20,8 +22,8 @@ Godot 4.6 project configuration for the Step 1 prototype.
 120 Hz physics because the movement ceiling (~55 m/s terminal) makes 60 Hz
 tunneling and wall-probe misses likelier; the controller does all its work in
 `_physics_process`, so this is also the input sampling rate for movement.
-Window 1600×900. `config/features` says 4.6 — opening in another 4.x minor
-just warns.
+Window 1600×900. The editor rewrites this file on save (header comment,
+event formatting, features tag) — hand edits survive but expect churny diffs.
 
 ## Assertions
 

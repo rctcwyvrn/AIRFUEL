@@ -6,6 +6,7 @@
 script = ExtResource("1_hud")
 
 [node name="FuelBar" type="ProgressBar" parent="."]
+mouse_filter = 2
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -54,6 +55,7 @@ theme_override_font_sizes/font_size = 20
 text = "AIRBORNE"
 
 [node name="Crosshair" type="ColorRect" parent="."]
+mouse_filter = 2
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -65,6 +67,7 @@ offset_bottom = 2.0
 color = Color(1, 1, 1, 0.9)
 
 [node name="ChargeL" type="ProgressBar" parent="."]
+mouse_filter = 2
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -79,6 +82,7 @@ value = 0.0
 show_percentage = false
 
 [node name="ChargeR" type="ProgressBar" parent="."]
+mouse_filter = 2
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -119,3 +123,12 @@ theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 visible = false
 text = "LOCKED"
+
+[node name="ControlsHint" type="Control" parent="."]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -152.0
+offset_right = 170.0
+offset_bottom = -16.0
+mouse_filter = 2

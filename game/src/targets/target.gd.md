@@ -19,7 +19,8 @@ never stalls.
 
 Hit feedback is a scale-punch tween (1.2 → 1.0). Death hides the whole node
 and zeroes both bodies' `collision_layer` so rays pass through the corpse,
-then a timer restores hp/visibility/collision. `take_hit` on a dead target
+then a timer restores hp/visibility/collision **to layer 2** (the
+shootable-but-not-walkable layer — never 1). `take_hit` on a dead target
 returns false (guards a ray racing the death frame).
 
 ## Assertions
