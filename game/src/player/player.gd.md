@@ -2,32 +2,62 @@
 
 ## Function
 
-The Step 1 kinematic character controller (DESIGN.md §4, §5, §24). Implements
-the entire movement economy: wallrun as the only in-play fuel refill, rewards
-on dismount, ramp persistence across gaps, fuel-costed air abilities, terminal
-velocity. No weapons, no networking — those are later roadmap steps.
+The Steps 1+2 player: kinematic movement controller (DESIGN.md §4, §5) plus
+the dual railgun arm system (§7, §8.1) — charge freeze/trajectory-lock, aim
+crush, staggered dual-rail firing, hitscan damage, canister ejection. No
+networking — that's Step 4.
 
 ## Interface
 
 - `class_name AirfuelPlayer extends CharacterBody3D`; the scene root of
   `player.tscn`, always in group `"player"`.
-- Exports: `config: MovementConfig` (required, never null at runtime),
-  `mouse_sensitivity: float`.
+- Exports: `config: MovementConfig`, `combat: CombatConfig` (both required,
+  never null at runtime), `mouse_sensitivity: float`.
+- Signal `shot_fired(side: String, result: String)` — side "L"/"R", result
+  "miss"/"body"/"head"/"kill". The HUD connects for hitmarkers.
 - Read by the HUD (poll, no signals yet): `fuel`, `ramp_grace_timer`, `config`,
   `horizontal_speed() -> float`, `state_name() -> String`.
-- Expected children: `Head` (Node3D, pitch) → `Head/Camera3D` (roll + FOV feel).
-  Yaw goes on the body itself.
+- Expected children: `Head` (Node3D, pitch) → `Head/Camera3D` (roll + FOV
+  feel); `ArmLeft`/`ArmRight` (`RailArm` nodes). Yaw goes on the body itself.
+- HUD-facing reads: `move_locked`, `arm_progress_left/right()`.
 - Consumes input actions: `move_forward/back/left/right`, `strafe_up` (E),
-  `strafe_down` (Q), `jump`, `dash` (Shift), `respawn`, `ui_cancel` (mouse
-  release toggle).
+  `strafe_down` (Q), `jump`, `dash` (Shift), `fire_left` (LMB), `fire_right`
+  (RMB), `respawn`, `ui_cancel` (mouse release toggle).
 - `MoveState { GROUNDED, AIRBORNE, WALLRUN }` in `state`.
 
 ## Implementation
 
 Per-physics-tick order in `_physics_process` (order is load-bearing):
-timers → per-state move (`_ground_move` / `_air_move` / `_wallrun_move`) →
+timers → `move_locked` recompute + `_handle_arms` (charge starts, pending
+fires) → per-state move (`_ground_move` / `_air_move` / `_wallrun_move`) →
 `_handle_dashes` → terminal-velocity clamps → `move_and_slide()` →
 `_update_state` (floor check, wall attach) → `_camera_feel` → respawn check.
+
+**Charge freeze (§7.2)**: `move_locked` is true while either arm
+`is_locking()`. Grounded → horizontal velocity zeroed (rooted). Airborne →
+ballistic: gravity/ramp decay continue, all steering (wish, Q/E, double jump,
+dashes) gated off. Wallrunning → the run *continues* (Lily's call: the wall
+is your trajectory) but the dismount jump is ignored; running off the wall
+end drops into the airborne lock. **Aim crush**: mouse sensitivity ×
+`_aim_crush_mult()` = `lerp(1, aim_crush_floor, progress^exponent)` over the
+max progress of both arms.
+
+**Firing (§7.1, §8.1)**: `_handle_arms` starts charges on trigger press;
+completed charges queue in `pending_arms` (FIFO = press order) and fire no
+closer than `min_shot_gap` apart. `_fire_rail` raycasts from the camera
+center (`range_max`), reads `hit_zone` meta off the collider for body/head
+damage against `TargetDummy`, then spawns the beam from the firing arm's
+viewmodel muzzle (`vm.global_transform * (0,0,-0.35)`), kicks that viewmodel
+back, spawns a `canister.tscn` rigid body with inherited velocity +
+randomized tumble, and emits `shot_fired`.
+
+**Graybox visuals**: `_spawn_beam` builds a thin emissive BoxMesh
+(0.05×0.05×length) at the midpoint, oriented with `look_at` (up-vector
+fallback for near-vertical shots), alpha+emission tweened to 0 over 0.2s
+then freed. `_update_viewmodels` (every tick, after `_camera_feel`) sets
+each viewmodel material's `emission_energy_multiplier` to
+`arm.progress() * 3.0` — the arm block glows as its charge builds — and
+lerps the viewmodel back to its `rest_pos` meta after the fire kick.
 
 - **Wall detection is ray-based, not collision-based**, so curved surfaces
   (cylinders) work. Attach: 12 radial horizontal rays from body center
@@ -78,3 +108,10 @@ timers → per-state move (`_ground_move` / `_air_move` / `_wallrun_move`) →
   in `_wallrun_move`, camera-feel lerp rates and FOV factor, the 12-ray count,
   probe rotation `0.6`, and the 25° rearm cone.)
 - `_update_state` never overrides WALLRUN — only wallrun code exits wallrun.
+- No charge cancel exists anywhere; a charge always ends in a shot. Dual
+  shots are never closer than `combat.min_shot_gap` (verified: same-tick
+  charges fire 0.352s apart with the default 0.35 gap).
+- `move_locked` must derive only from arm `is_locking()` — freeze from first
+  trigger press to last pending shot, never during COOLDOWN.
+- Beam meshes always free themselves (tween callback) — a leaked beam per
+  shot would accumulate fast.

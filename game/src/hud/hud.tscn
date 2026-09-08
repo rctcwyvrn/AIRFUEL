@@ -52,3 +52,70 @@ offset_right = 420.0
 offset_bottom = 44.0
 theme_override_font_sizes/font_size = 20
 text = "AIRBORNE"
+
+[node name="Crosshair" type="ColorRect" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+color = Color(1, 1, 1, 0.9)
+
+[node name="ChargeL" type="ProgressBar" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -34.0
+offset_top = -22.0
+offset_right = -26.0
+offset_bottom = 22.0
+fill_mode = 3
+max_value = 1.0
+value = 0.0
+show_percentage = false
+
+[node name="ChargeR" type="ProgressBar" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 26.0
+offset_top = -22.0
+offset_right = 34.0
+offset_bottom = 22.0
+fill_mode = 3
+max_value = 1.0
+value = 0.0
+show_percentage = false
+
+[node name="HitLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = 26.0
+offset_right = 100.0
+offset_bottom = 54.0
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+visible = false
+text = "HIT"
+
+[node name="LockLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = 54.0
+offset_right = 100.0
+offset_bottom = 78.0
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+visible = false
+text = "LOCKED"

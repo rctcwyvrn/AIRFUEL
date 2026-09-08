@@ -10,8 +10,9 @@ Godot 4.6 project configuration for the Step 1 prototype.
 - Input actions defined here and consumed by `player.gd`:
   `move_forward/back/left/right` (WASD), `strafe_up` (E), `strafe_down` (Q),
   `jump` (Space), `dash` (Shift, combines with held direction keys),
-  `respawn` (R). All use `physical_keycode` (layout-independent). `ui_cancel`
-  (Esc) is the built-in default.
+  `fire_left` (mouse left), `fire_right` (mouse right), `respawn` (R). Keys
+  use `physical_keycode` (layout-independent). `ui_cancel` (Esc) is the
+  built-in default.
 - `physics/common/physics_ticks_per_second = 120`.
 
 ## Implementation

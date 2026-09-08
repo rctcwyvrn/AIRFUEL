@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://src/targets/target.tscn" id="3_target"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
 sky_top_color = Color(0.25, 0.32, 0.45, 1)
@@ -15,6 +16,9 @@ sky_material = SubResource("sky_mat")
 [sub_resource type="Environment" id="env"]
 background_mode = 2
 sky = SubResource("sky")
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.1
 
 [sub_resource type="StandardMaterial3D" id="mat_floor"]
 albedo_color = Color(0.42, 0.44, 0.47, 1)
@@ -143,3 +147,12 @@ material = SubResource("mat_plat")
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 2, -100)
 
 [node name="HUD" parent="." instance=ExtResource("2_hud")]
+
+[node name="Target1" parent="." instance=ExtResource("3_target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -75)
+
+[node name="Target2" parent="." instance=ExtResource("3_target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 5)
+
+[node name="Target3" parent="." instance=ExtResource("3_target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 12.5, 92)

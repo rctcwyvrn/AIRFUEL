@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CombatConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/combat_config.gd" id="1_cfg"]
+
+[resource]
+script = ExtResource("1_cfg")
+charge_time = 1.0
+cooldown = 1.2
+damage_body = 1
+damage_head = 2
+range_max = 2000.0
+aim_crush_floor = 0.05
+aim_crush_exponent = 2.0
+min_shot_gap = 0.35

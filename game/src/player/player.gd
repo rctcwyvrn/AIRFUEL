@@ -1,18 +1,28 @@
 class_name AirfuelPlayer
 extends CharacterBody3D
 
-## Roadmap Step 1: movement alone.
+## Roadmap Steps 1 + 2: movement, plus dual railgun arms vs stationary targets.
 ## Wallrun (flat + curved via radial ray probes), dismount fuel/speed grants,
-## ramp persistence across gaps, air dash, down dash, double jump / fueled
-## air strafe, terminal velocity. No weapons, no network.
+## ramp persistence across gaps, dashes, fueled strafes, terminal velocity;
+## per-arm rail charge with freeze/trajectory-lock, aim crush, hitscan,
+## canister ejection. No network.
 
 enum MoveState { GROUNDED, AIRBORNE, WALLRUN }
 
+signal shot_fired(side: String, result: String)
+
+const CANISTER := preload("res://src/weapons/canister.tscn")
+
 @export var config: MovementConfig
+@export var combat: CombatConfig
 @export var mouse_sensitivity := 0.0022
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
+@onready var arm_left: RailArm = $ArmLeft
+@onready var arm_right: RailArm = $ArmRight
+@onready var vm_left: MeshInstance3D = $Head/Camera3D/ViewmodelL
+@onready var vm_right: MeshInstance3D = $Head/Camera3D/ViewmodelR
 
 var state := MoveState.AIRBORNE
 var fuel := 0.0
@@ -30,18 +40,27 @@ var double_jump_timer := 0.0
 var base_fov := 100.0
 var spawn_transform: Transform3D
 
+var move_locked := false
+var pending_arms: Array[RailArm] = []
+var last_shot_time := -1000.0
+
 
 func _ready() -> void:
 	fuel = config.fuel_max
 	spawn_transform = global_transform
+	arm_left.charge_complete.connect(func() -> void: pending_arms.append(arm_left))
+	arm_right.charge_complete.connect(func() -> void: pending_arms.append(arm_right))
+	vm_left.set_meta("rest_pos", vm_left.position)
+	vm_right.set_meta("rest_pos", vm_right.position)
 	base_fov = camera.fov
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		head.rotate_x(-event.relative.y * mouse_sensitivity)
+		var crush := _aim_crush_mult()
+		rotate_y(-event.relative.x * mouse_sensitivity * crush)
+		head.rotate_x(-event.relative.y * mouse_sensitivity * crush)
 		head.rotation.x = clampf(head.rotation.x, -PI / 2 + 0.05, PI / 2 - 0.05)
 	elif event.is_action_pressed("ui_cancel"):
 		var captured := Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
@@ -53,7 +72,10 @@ func _physics_process(delta: float) -> void:
 	double_jump_timer = maxf(0.0, double_jump_timer - delta)
 	wall_rearm_timer = maxf(0.0, wall_rearm_timer - delta)
 
-	var wish := _wish_dir()
+	move_locked = arm_left.is_locking() or arm_right.is_locking()
+	_handle_arms()
+
+	var wish := Vector3.ZERO if move_locked else _wish_dir()
 
 	match state:
 		MoveState.GROUNDED:
@@ -71,12 +93,19 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_state()
 	_camera_feel(delta)
+	_update_viewmodels(delta)
 
 	if Input.is_action_just_pressed("respawn") or global_position.y < config.kill_y:
 		_respawn()
 
 
 func _ground_move(wish: Vector3, delta: float) -> void:
+	if move_locked:
+		# Charging on the ground roots you (DESIGN.md 7.2)
+		velocity.x = 0.0
+		velocity.z = 0.0
+		velocity.y -= config.gravity * delta
+		return
 	var h := Vector3(velocity.x, 0.0, velocity.z)
 	if wish == Vector3.ZERO:
 		h = h.move_toward(Vector3.ZERO, config.ground_friction * delta)
@@ -104,7 +133,7 @@ func _air_move(wish: Vector3, delta: float) -> void:
 			_air_accelerate(wish, config.air_strafe_accel, config.air_strafe_speed_cap, delta)
 
 	# Q/E vertical strafe: fueled only, no free tier (E up, Q down)
-	var vert := _vertical_input()
+	var vert := 0.0 if move_locked else _vertical_input()
 	if vert != 0.0:
 		var vdir := Vector3.UP * vert
 		if velocity.dot(vdir) < config.air_strafe_vertical_cap \
@@ -116,7 +145,7 @@ func _air_move(wish: Vector3, delta: float) -> void:
 	else:
 		_decay_excess_speed(config.ramp_decay_rate, delta)
 
-	if Input.is_action_just_pressed("jump") and double_jump_timer == 0.0 \
+	if not move_locked and Input.is_action_just_pressed("jump") and double_jump_timer == 0.0 \
 			and _spend(config.double_jump_cost):
 		velocity.y = maxf(velocity.y, config.double_jump_strength)
 		double_jump_timer = config.double_jump_cooldown
@@ -156,7 +185,7 @@ func _wallrun_move(delta: float) -> void:
 	velocity.z = dir.z * wall_speed - wall_normal.z * config.wall_stick_speed
 	velocity.y = move_toward(velocity.y, 0.0, 20.0 * delta) - config.wallrun_gravity * delta
 
-	if Input.is_action_just_pressed("jump"):
+	if not move_locked and Input.is_action_just_pressed("jump"):
 		_dismount(true)
 
 
@@ -227,7 +256,7 @@ func _probe_wall_at(dir: Vector3, dist_scale := 1.0) -> Dictionary:
 
 
 func _handle_dashes() -> void:
-	if state == MoveState.WALLRUN:
+	if move_locked or state == MoveState.WALLRUN:
 		return
 	if not Input.is_action_just_pressed("dash"):
 		return
@@ -246,6 +275,103 @@ func _handle_dashes() -> void:
 	var dir := (b.x * input.x + -b.z * -input.y + Vector3.UP * vert).normalized()
 	velocity += dir * config.air_dash_impulse
 	dash_cooldown_timer = config.air_dash_cooldown
+
+
+func _handle_arms() -> void:
+	if Input.is_action_just_pressed("fire_left"):
+		arm_left.try_charge()
+	if Input.is_action_just_pressed("fire_right"):
+		arm_right.try_charge()
+	if pending_arms.is_empty():
+		return
+	# 7.1: completed charges fire in press order, never closer than min_shot_gap
+	var now := Time.get_ticks_msec() / 1000.0
+	if now - last_shot_time >= combat.min_shot_gap:
+		_fire_rail(pending_arms.pop_front())
+		last_shot_time = now
+
+
+func _fire_rail(arm: RailArm) -> void:
+	var side := "L" if arm == arm_left else "R"
+	var cam := camera.global_transform
+	var from := cam.origin
+	var to := from + -cam.basis.z * combat.range_max
+	var space := get_world_3d().direct_space_state
+	var params := PhysicsRayQueryParameters3D.create(from, to, collision_mask, [get_rid()])
+	var hit := space.intersect_ray(params)
+	var end := to
+	var result := "miss"
+	if not hit.is_empty():
+		end = hit.position
+		var collider: Object = hit.collider
+		if collider.has_meta("hit_zone"):
+			var zone: String = collider.get_meta("hit_zone")
+			var damage: int = combat.damage_head if zone == "head" else combat.damage_body
+			var target := (collider as Node).get_parent()
+			if target is TargetDummy:
+				result = "kill" if target.take_hit(damage) else zone
+	arm.on_fired()
+	var side_sign := 1.0 if side == "R" else -1.0
+	var vm := vm_right if side == "R" else vm_left
+	vm.position += Vector3(0.0, 0.02, 0.16)
+	var muzzle: Vector3 = vm.global_transform * Vector3(0, 0, -0.35)
+	_spawn_beam(muzzle, end)
+	_spawn_canister(side_sign, cam)
+	shot_fired.emit(side, result)
+
+
+func _spawn_beam(from: Vector3, to: Vector3) -> void:
+	var dir := to - from
+	var length := dir.length()
+	if length < 0.05:
+		return
+	var mi := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.05, 0.05, length)
+	mi.mesh = mesh
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(1.0, 0.85, 0.55, 0.9)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.7, 0.3)
+	mat.emission_energy_multiplier = 4.0
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	get_parent().add_child(mi)
+	mi.global_position = (from + to) * 0.5
+	var up := Vector3.UP if absf(dir.normalized().y) < 0.99 else Vector3.RIGHT
+	mi.look_at(to, up)
+	var tw := mi.create_tween()
+	tw.tween_property(mat, "albedo_color:a", 0.0, 0.2)
+	tw.parallel().tween_property(mat, "emission_energy_multiplier", 0.0, 0.2)
+	tw.tween_callback(mi.queue_free)
+
+
+func _update_viewmodels(delta: float) -> void:
+	_drive_viewmodel(vm_left, arm_left, delta)
+	_drive_viewmodel(vm_right, arm_right, delta)
+
+
+func _drive_viewmodel(vm: MeshInstance3D, arm: RailArm, delta: float) -> void:
+	var mat := vm.material_override as StandardMaterial3D
+	mat.emission_energy_multiplier = arm.progress() * 3.0
+	vm.position = vm.position.lerp(vm.get_meta("rest_pos"), 1.0 - exp(-12.0 * delta))
+
+
+func _spawn_canister(side_sign: float, cam: Transform3D) -> void:
+	var c := CANISTER.instantiate() as RigidBody3D
+	get_parent().add_child(c)
+	c.global_position = cam.origin + cam.basis.x * 0.35 * side_sign - cam.basis.y * 0.1
+	c.linear_velocity = velocity + cam.basis.x * side_sign * 2.5 + cam.basis.y * 2.0 + cam.basis.z * 1.5
+	c.angular_velocity = Vector3(randf_range(-12, 12), randf_range(-12, 12), randf_range(-12, 12))
+
+
+func _aim_crush_mult() -> float:
+	var p := maxf(arm_left.progress(), arm_right.progress())
+	if p <= 0.0:
+		return 1.0
+	return lerpf(1.0, combat.aim_crush_floor, pow(p, combat.aim_crush_exponent))
 
 
 func _update_state() -> void:
@@ -323,6 +449,14 @@ func _respawn() -> void:
 
 func horizontal_speed() -> float:
 	return Vector3(velocity.x, 0.0, velocity.z).length()
+
+
+func arm_progress_left() -> float:
+	return arm_left.progress()
+
+
+func arm_progress_right() -> float:
+	return arm_right.progress()
 
 
 func state_name() -> String:

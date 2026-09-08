@@ -10,7 +10,9 @@ main scene.
 ## Interface
 
 - Root `GrayboxCorridor` (Node3D); instances `player.tscn` (at z = -100,
-  y = 2, rotated 180° to face +Z) and `hud.tscn`.
+  y = 2, rotated 180° to face +Z), `hud.tscn`, and three `target.tscn`
+  dummies: Target1 (0, 0, −75) straight down the spawn sightline, Target2
+  (10, 0, 5) mid-corridor, Target3 (−2, 12.5, 92) on the high platform.
 - Any replacement map must provide the same two instances and solid geometry
   with default collision layers — the player probes walls via ray queries
   against `collision_mask` default.
@@ -30,9 +32,12 @@ layout stabilizes). Corridor runs along +Z, 30 m wide, ~220 m long, walls
   placed to carry a runner across the floor gaps.
 - **Teal panels** — floating mid-air walls forming a second vertical layer.
 - **Purple platform** (y = 12, far end) — down-dash target.
+- **Green/orange dummies** — Step 2 rail targets, placed for a point-blank
+  test, a mid-range shot, and a long vertical shot.
 
-Lighting: one DirectionalLight3D + ProceduralSky environment; enough to read
-speed and depth, nothing more.
+Lighting: one DirectionalLight3D + ProceduralSky environment with
+`glow_enabled` — glow is what makes the beam and charging-viewmodel emissive
+materials actually bloom; enough to read speed and depth, nothing more.
 
 ## Assertions
 

@@ -1,15 +1,37 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://src/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://src/player/default_tuning.tres" id="2_cfg"]
+[ext_resource type="Script" path="res://src/weapons/rail_arm.gd" id="3_arm"]
+[ext_resource type="Resource" path="res://src/weapons/default_combat.tres" id="4_combat"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.45
 height = 1.8
 
+[sub_resource type="CapsuleMesh" id="mesh_shadow"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="BoxMesh" id="mesh_vm"]
+size = Vector3(0.12, 0.12, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="mat_vm_l"]
+albedo_color = Color(0.45, 0.47, 0.5, 1)
+emission_enabled = true
+emission = Color(1, 0.55, 0.15, 1)
+emission_energy_multiplier = 0.0
+
+[sub_resource type="StandardMaterial3D" id="mat_vm_r"]
+albedo_color = Color(0.45, 0.47, 0.5, 1)
+emission_enabled = true
+emission = Color(1, 0.55, 0.15, 1)
+emission_energy_multiplier = 0.0
+
 [node name="Player" type="CharacterBody3D" groups=["player"]]
 script = ExtResource("1_player")
 config = ExtResource("2_cfg")
+combat = ExtResource("4_combat")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_body")
@@ -19,3 +41,27 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
 fov = 100.0
+
+[node name="ArmLeft" type="Node" parent="."]
+script = ExtResource("3_arm")
+config = ExtResource("4_combat")
+
+[node name="ArmRight" type="Node" parent="."]
+script = ExtResource("3_arm")
+config = ExtResource("4_combat")
+
+[node name="ShadowMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("mesh_shadow")
+cast_shadow = 3
+
+[node name="ViewmodelL" type="MeshInstance3D" parent="Head/Camera3D"]
+transform = Transform3D(0.99755, 0, -0.06994, 0, 1, 0, 0.06994, 0, 0.99755, -0.35, -0.28, -0.55)
+mesh = SubResource("mesh_vm")
+material_override = SubResource("mat_vm_l")
+cast_shadow = 0
+
+[node name="ViewmodelR" type="MeshInstance3D" parent="Head/Camera3D"]
+transform = Transform3D(0.99755, 0, 0.06994, 0, 1, 0, -0.06994, 0, 0.99755, 0.35, -0.28, -0.55)
+mesh = SubResource("mesh_vm")
+material_override = SubResource("mat_vm_r")
+cast_shadow = 0
