@@ -64,6 +64,9 @@ func _ready() -> void:
 	vm_right.set_meta("rest_pos", vm_right.position)
 	base_fov = camera.fov
 	if is_multiplayer_authority():
+		# Explicit claim: auto-current fails when a remote puppet's camera
+		# entered the viewport first (client-side join order)
+		camera.current = true
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
 		# Remote puppet: rendered + state-synced, never simulated here
@@ -71,7 +74,7 @@ func _ready() -> void:
 		set_physics_process(false)
 		vm_left.visible = false
 		vm_right.visible = false
-		$ShadowMesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		$BodyMesh.visible = true
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -554,21 +557,24 @@ func _camera_feel(delta: float) -> void:
 
 
 ## LAN-trust damage: the shooter reports the hit, the victim's authority
-## applies it. 2 HP, every rail hit = 1 -> two shots to kill; death resets
-## you to your spawn (design 9: no regen, no partial states).
+## applies it. 2 HP, every rail hit = 1 -> two shots to kill; a kill resets
+## BOTH duelists to spawn (design 9: no regen, no partial states).
 @rpc("any_peer", "call_remote", "reliable")
 func take_damage(amount: int, from_id: int) -> void:
 	if not is_multiplayer_authority():
 		return
 	hp -= amount
 	if hp <= 0:
-		_confirm_kill.rpc_id(from_id)
+		Net.kill_scored.rpc_id(from_id)
 		_respawn()
 
 
-@rpc("any_peer", "call_remote", "reliable")
-func _confirm_kill() -> void:
-	shot_fired.emit("", "kill")
+## Round reset: both duelists return to spawn after a kill. Called locally
+## (victim) and via Net.kill_scored (killer, with the KILL hitmarker).
+func round_reset(scored_kill: bool) -> void:
+	if scored_kill:
+		shot_fired.emit("", "kill")
+	_respawn()
 
 
 @rpc("authority", "call_remote", "unreliable")

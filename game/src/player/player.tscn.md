@@ -18,11 +18,13 @@ The playable character scene for Step 1. Instanced once by the active map.
 
 ## Implementation
 
-Capsule 0.45 r × 1.8 h centered on the origin, so the body origin is at
-capsule center (~waist), not the feet — spawn transforms need y ≥ ~1. Head
-sits at +0.65 (eye height ~1.55). `ShadowMesh` is a matching capsule with
-`cast_shadow = 3` (shadows-only): the player stays invisible first-person but
-casts a shadow for platforming depth. Viewmodels are 0.12×0.12×0.5 boxes at
+Capsule **1.2 r × 4.5 h** (dummy-sized — both players are big red targets
+in PvP, per Lily) centered on the origin, so the body origin is at capsule
+center, not the feet — spawn transforms need y ≥ ~2.3. Head sits at +1.7
+(eye near the capsule top). `BodyMesh` is a matching red emissive capsule,
+hidden for the authority (your own camera is inside it) and shown on remote
+puppets. `ShadowMesh` is a matching capsule with `cast_shadow = 3`
+(shadows-only) so you still cast your own shadow first-person. Viewmodels are 0.12×0.12×0.5 boxes at
 (±0.35, −0.28, −0.55) under the camera, yawed ~4° inward, `cast_shadow` off,
 each with its OWN emissive material (orange emission, energy 0 at rest) —
 `player.gd` drives emission with charge progress and kicks position on fire.
@@ -39,5 +41,8 @@ each with its OWN emissive material (orange emission, energy 0 at rest) —
   or freeze timing and fire timing diverge.
 - `mat_vm_l`/`mat_vm_r` must stay separate sub_resources — a shared material
   would make both arms glow when one charges.
-- `ShadowMesh` keeps `cast_shadow = 3`; making it visible would clip the
-  first-person camera.
+- `ShadowMesh` keeps `cast_shadow = 3` and `BodyMesh` stays `visible =
+  false` in-scene; only non-authority code flips BodyMesh on — visible
+  locally, either would fill your camera with red capsule interior.
+- Collision capsule, ShadowMesh, and BodyMesh must stay the same size —
+  the visual IS the hitbox; a mismatch makes shots feel wrong.

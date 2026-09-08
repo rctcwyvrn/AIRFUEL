@@ -114,12 +114,21 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
 - **Networking (LAN-trust, gated on `Net.active`)**: the authority peer
   simulates everything above and broadcasts `_send_state` (pos/vel/yaw/
   pitch, unreliable_ordered) each tick; non-authority instances disable
-  physics + input + camera + viewmodels, show the body capsule, and lerp
-  toward the last state in `_process`. Hits on remote players rpc
+  physics + input + camera + viewmodels, show the red dummy-sized
+  `BodyMesh`, and lerp toward the last state in `_process`. Hits on remote players rpc
   `take_damage` to the victim's authority (shooter-decided, LAN-trust);
-  victim at 0 hp rpcs `_confirm_kill` back (killer's HUD shows KILL) and
-  `_respawn`s — full reset at own spawn. `_remote_shot_fx` mirrors beams.
+  victim at 0 hp calls `Net.kill_scored.rpc_id(killer)` and `_respawn`s;
+  the killer's peer resolves its own authority player via Net and
+  `round_reset(true)`s it (KILL hitmarker + respawn) — **a kill resets both
+  duelists to their spawns with full hp/fuel**. Kill rpcs must route through
+  `Net` (same node path on every peer); an rpc on the victim's own node
+  lands on the victim's *puppet* at the killer's end, which is how the
+  original hitmarker silently never fired. `_remote_shot_fx` mirrors beams.
   `hp` initialized from `combat.hp_max` (2; rail body dmg 1 = 2 shots).
+- The authority player must claim `camera.current = true` explicitly in
+  `_ready` — Godot's auto-current fails on clients because the host puppet's
+  camera enters the viewport first and is then disabled, leaving no current
+  camera (this shipped once as "joiner stuck staring at a grey wall").
 
 ## Assertions
 

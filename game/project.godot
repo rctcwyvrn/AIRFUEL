@@ -13,6 +13,8 @@ config_version=5
 config/name="Airfuel"
 config/description="Prototype — Roadmap Steps 1+2: movement + railgun."
 run/main_scene="res://src/menu/main_menu.tscn"
+config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.086, 0.094, 0.11, 1)
 config/features=PackedStringArray("4.7")
 
 [autoload]

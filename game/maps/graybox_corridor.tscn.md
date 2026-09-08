@@ -10,7 +10,7 @@ main scene.
 ## Interface
 
 - Root `GrayboxCorridor` (Node3D); instances `player.tscn` (at z = −430,
-  y = 2, rotated 180° to face +Z), `hud.tscn`, and three `target.tscn`
+  y = 2.6, rotated 180° to face +Z), `hud.tscn`, and three `target.tscn`
   17 `target.tscn` dummies (`Target1-17`): Target1
   (0, 0, −405) down the spawn sightline, most scattered at ground level
   every ~60–80 m across varied x, two on elevated platforms (Target16-17).
@@ -68,8 +68,8 @@ makes the beam and charging-viewmodel emissive materials actually bloom.
   silently breaks wallrun probing and floor detection.
 - Wallrunnable surfaces must be near-vertical: the controller rejects normals
   with `|y| > 0.4`.
-- Player spawn stays above floor level (body origin is capsule center —
-  y ≥ ~1) and inside the corridor.
+- Player spawn stays above floor level (body origin is capsule center of
+  the dummy-sized 4.5 m capsule — y ≥ ~2.3) and inside the corridor.
 - Layout changes are the *experiment* of Step 1: record distance/length
   findings in DESIGN.md §24 / Appendix B ("Corridor length" is explicitly
   blocked on this scene).

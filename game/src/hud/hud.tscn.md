@@ -20,7 +20,9 @@ the player.
 ## Implementation
 
 Anchor-based layout (bottom-center / top-left), so it survives window
-resizes. `FuelLabel` is declared after `FuelBar` and shares its rect —
+resizes. Identity styling: all three ProgressBars share grey-translucent
+background + orange (#FF8C1A) fill StyleBoxFlats; crosshair and LOCKED
+label are the same orange. `FuelLabel` is declared after `FuelBar` and shares its rect —
 declaration order keeps it drawn on top. All text is placeholder; `hud.gd`
 overwrites it every frame.
 

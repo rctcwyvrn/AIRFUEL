@@ -9,6 +9,9 @@ editor; the nix devshell verify binary is 4.6.1, which warns but runs).
 ## Interface
 
 - Main scene: `res://src/menu/main_menu.tscn` (menu → corridor).
+- Runtime/window icon: `res://icon.svg` (orange `>>>` chevrons — the brand
+  mark, matching `icon.ico` used by the Windows export preset). Boot splash
+  background is the identity dark grey (#16181C).
 - Autoload: `Net` (`src/net/network.gd`) — LAN multiplayer; inert without
   `--server`/`--client` user args.
 - Input actions defined here and consumed by `player.gd`:

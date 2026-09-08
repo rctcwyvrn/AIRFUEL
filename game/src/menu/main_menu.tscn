@@ -1,8 +1,62 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/menu/main_menu.gd" id="1_menu"]
 
+[sub_resource type="StyleBoxFlat" id="sb_btn"]
+bg_color = Color(0.16, 0.18, 0.21, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="sb_btn_hover"]
+bg_color = Color(1, 0.55, 0.1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="sb_btn_pressed"]
+bg_color = Color(0.8, 0.42, 0.06, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="sb_line"]
+bg_color = Color(0.1, 0.11, 0.13, 1)
+border_width_bottom = 2
+border_color = Color(1, 0.55, 0.1, 1)
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+
+[sub_resource type="Theme" id="theme_menu"]
+Button/colors/font_color = Color(0.78, 0.8, 0.83, 1)
+Button/colors/font_hover_color = Color(0.09, 0.09, 0.1, 1)
+Button/colors/font_pressed_color = Color(0.09, 0.09, 0.1, 1)
+Button/font_sizes/font_size = 20
+Button/styles/hover = SubResource("sb_btn_hover")
+Button/styles/normal = SubResource("sb_btn")
+Button/styles/pressed = SubResource("sb_btn_pressed")
+LineEdit/colors/font_color = Color(0.85, 0.87, 0.9, 1)
+LineEdit/styles/normal = SubResource("sb_line")
+
 [node name="MainMenu" type="Control"]
+theme = SubResource("theme_menu")
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_menu")
@@ -10,7 +64,7 @@ script = ExtResource("1_menu")
 [node name="Background" type="ColorRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.08, 0.09, 0.12, 1)
+color = Color(0.086, 0.094, 0.11, 1)
 
 [node name="VBox" type="VBoxContainer" parent="."]
 anchor_left = 0.5
@@ -23,12 +77,20 @@ offset_right = 160.0
 offset_bottom = 170.0
 theme_override_constants/separation = 18
 
+[node name="Chevrons" type="Label" parent="VBox"]
+theme_override_colors/font_color = Color(1, 0.55, 0.1, 1)
+theme_override_font_sizes/font_size = 30
+text = ">>>"
+horizontal_alignment = 1
+
 [node name="Title" type="Label" parent="VBox"]
+theme_override_colors/font_color = Color(1, 0.55, 0.1, 1)
 theme_override_font_sizes/font_size = 52
 text = "AIRFUEL"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="VBox"]
+theme_override_colors/font_color = Color(0.55, 0.58, 0.63, 1)
 theme_override_font_sizes/font_size = 13
 text = "prototype — movement + railgun"
 horizontal_alignment = 1
@@ -50,6 +112,7 @@ placeholder_text = "host IP (blank = 127.0.0.1)"
 text = "JOIN"
 
 [node name="Hint" type="Label" parent="VBox"]
+theme_override_colors/font_color = Color(0.55, 0.58, 0.63, 1)
 theme_override_font_sizes/font_size = 12
 text = "LAN uses udp 27555 — same machine: host, then join 127.0.0.1"
 horizontal_alignment = 1

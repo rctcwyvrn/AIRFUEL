@@ -22,13 +22,21 @@ that). Listen-server over ENet, client-authoritative movement: correct at
 
 Server-driven roster: on `peer_connected`, the server sends the new peer
 each existing id, broadcasts the new id to everyone, and spawns locally —
-every peer runs the same `_spawn_player` so state stays deterministic.
+every peer runs the same `_spawn_player` so state stays deterministic
+(each spawn prints id/position/authority/camera — keep these, they were
+what caught the client-camera bug).
 `_load_arena` switches from the menu to the corridor, awaits the swap,
 then `free()`s the corridor's offline `Player` and every `"target"`-group
 dummy (LAN is PvP-only; dummies are solo practice). Peer creation happens only
 AFTER the arena is current, so no spawn rpc can land in the menu scene. Spawn
-transforms: host at −z end (yaw 180°), all joiners at +z end — fine for
-1v1 duels, revisit for >2 players. Client quits on `server_disconnected`.
+transforms (`_spawn_transform_for_index`): spawn-order index alternates
+ends (even → −z facing +z, odd → +z facing −z) with +8 m lateral spread
+per pair, so 1v1 is always opposite ends and 3+ players don't stack. The
+index is `players.size()` at spawn time — identical on all peers because
+the server-driven roster delivers spawns in the same order everywhere. Client quits on `server_disconnected`.
+
+`kill_scored` (any_peer rpc) is the round-reset channel: the victim's
+authority targets the killer's peer, which resets its own authority player.
 
 ## Assertions
 

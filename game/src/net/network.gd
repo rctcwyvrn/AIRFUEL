@@ -11,10 +11,7 @@ const ARENA := "res://maps/graybox_corridor.tscn"
 const PORT := 27555
 const MAX_PEERS := 8
 const PLAYER_SCENE := preload("res://src/player/player.tscn")
-const SPAWNS: Array[Transform3D] = [
-	Transform3D(Basis(Vector3.UP, PI), Vector3(0, 2, -430)),  # host: -z end, faces +z
-	Transform3D(Basis(), Vector3(0, 2, 430)),                 # joiners: +z end, faces -z
-]
+
 
 var active := false
 var is_host := false
@@ -113,15 +110,38 @@ func _spawn_player(id: int) -> void:
 	var p := PLAYER_SCENE.instantiate() as CharacterBody3D
 	p.name = str(id)
 	p.set_multiplayer_authority(id)
-	p.transform = SPAWNS[0] if id == 1 else SPAWNS[1]
+	p.transform = _spawn_transform_for_index(players.size())
 	get_tree().current_scene.add_child(p)
 	players[id] = p
+	print("Airfuel net: spawned player %d at %s (mine: %s, cam: %s)" % [
+			id, p.global_position, p.is_multiplayer_authority(),
+			(p.get_node("Head/Camera3D") as Camera3D).current])
+
+
+## Spawns alternate ends (even index: -z facing +z, odd: +z facing -z) and
+## spread laterally for 3+ players. Index = spawn order (players.size() at
+## spawn time), which the server-driven roster keeps identical on all peers.
+func _spawn_transform_for_index(index: int) -> Transform3D:
+	var x := float(index / 2 * 8)
+	if index % 2 == 0:
+		return Transform3D(Basis(Vector3.UP, PI), Vector3(x, 2.6, -430.0))
+	return Transform3D(Basis(), Vector3(x, 2.6, 430.0))
 
 
 func _despawn_player(id: int) -> void:
 	if players.has(id):
 		players[id].queue_free()
 		players.erase(id)
+
+
+## Sent by a dying player's authority to the killer's peer: reset the
+## killer's own player too (kills reset the round, both duelists respawn).
+@rpc("any_peer", "call_remote", "reliable")
+func kill_scored() -> void:
+	for p: Node in get_tree().get_nodes_in_group("player"):
+		if p.is_multiplayer_authority():
+			p.round_reset(true)
+			return
 
 
 @rpc("authority", "call_remote", "reliable")
