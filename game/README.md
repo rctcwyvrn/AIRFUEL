@@ -23,12 +23,29 @@ godot4 --path game             # just play
 | Space | Jump / double jump (fuel) / wallrun dismount |
 | Shift + WASD/Q | Dash in that direction (fuel); Shift+Q alone = down dash |
 | LMB / RMB | Charge left / right rail arm (auto-fires after 1s, locks movement) |
-| T | Respawn |
+| T | Respawn (solo only) |
 | Esc | Release mouse |
 
 Bare Shift does nothing — a dash always needs a held direction. WASD dashes
 follow the camera (W+Shift = wherever you're looking, pitch included);
 Q dashes straight down. Up is the double jump's job.
+
+## LAN multiplayer (prototype tier)
+
+Use the main menu: **HOST LAN GAME** on one machine, **JOIN** with the
+host's IP on the other (blank = 127.0.0.1 for two instances locally).
+CLI equivalents for scripted/headless runs:
+
+```sh
+godot4 --path game -- --server
+godot4 --path game -- --client <ip>
+```
+
+Client-authoritative movement (LAN-trust — not the shipping §20.2 netcode).
+Host spawns at the −z end, joiners at +z. 2 HP, every rail hit = 1 damage
+(two shots to kill), death resets you to your spawn with full fuel.
+No args = offline solo, unchanged. WSL2 note: for a real two-machine LAN
+test, run the Windows build or forward udp/27555 out of WSL.
 
 ## What to test (Step 1 + 2 questions from the design doc)
 

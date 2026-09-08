@@ -23,8 +23,9 @@ main scene.
 All geometry is CSG with `use_collision = true` — cheapest possible editing
 while the layout is in flux (swap for meshes + static bodies only when a
 layout stabilizes). Corridor runs along +Z, **80 m wide, 880 m long**
-(z −440…440), sealed at the sides: two continuous 40 m walls (x = ±40) and
-a roof at y 40. Only the corridor ends (z = ±440) are open. The node placement is loop-generated in
+(z −440…440), fully sealed: two continuous 40 m walls (x = ±40), a roof at
+y 40, and end walls (`EndWallN`/`EndWallS` at z = ±440) — the map is a
+closed box; falling out is impossible (kill_y remains as a safety net). The node placement is loop-generated in
 bands (see git history for the generator) but checked in as plain tscn.
 Color code:
 

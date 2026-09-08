@@ -11,9 +11,10 @@ highlighter (bottom-left key cluster that lights up pressed inputs).
 ## Interface
 
 - Extends `CanvasLayer`; script of `hud.tscn`'s root.
-- Finds the player via group `"player"` (first node), lazily in `_process` —
-  no exports to wire, works in any map that instances both scenes in either
-  order.
+- Finds the player via group `"player"`, picking the node that
+  `is_multiplayer_authority()` (offline: the only player; networked: yours,
+  not a remote puppet), lazily in `_process`, re-resolving if it's freed.
+  Shows `player.hp` in the state line.
 - Reads only public player surface: `fuel`, `config.fuel_max`,
   `ramp_grace_timer`, `horizontal_speed()`, `state_name()`,
   `arm_progress_left/right()`, `move_locked`; connects to the player's
@@ -33,6 +34,7 @@ body vs head"), shown for 0.45s. Misses show nothing. `fuel_bar.max_value`
 is re-set from config every frame so live tuning reflects immediately.
 The controls highlighter is data-driven: `KEY_LAYOUT` rows are
 `[action, label, x, y, width]`; `_ready` builds a ColorRect+Label per row
+(skipping the respawn key when `Net.active` — T is solo-only)
 and `_process` polls `Input.is_action_pressed` to swap KEY_DIM/KEY_LIT.
 
 ## Assertions

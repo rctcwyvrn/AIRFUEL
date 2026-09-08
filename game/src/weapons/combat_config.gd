@@ -11,6 +11,7 @@ extends Resource
 @export var damage_head := 2
 @export var range_max := 2000.0
 @export var charge_speed_cap := 40.0
+@export var hp_max := 2
 
 @export_group("Aim Crush")
 @export var aim_crush_floor := 0.05

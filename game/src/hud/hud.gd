@@ -32,6 +32,8 @@ var key_rects: Dictionary = {}
 
 func _ready() -> void:
 	for k: Array in KEY_LAYOUT:
+		if k[0] == "respawn" and Net.active:
+			continue  # manual reset is solo-only
 		var cr := ColorRect.new()
 		cr.position = Vector2(k[2], k[3])
 		cr.size = Vector2(k[4], 30)
@@ -50,8 +52,12 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if player == null:
-		player = get_tree().get_first_node_in_group("player") as AirfuelPlayer
+	if player == null or not is_instance_valid(player):
+		player = null
+		for p: Node in get_tree().get_nodes_in_group("player"):
+			if p.is_multiplayer_authority():
+				player = p as AirfuelPlayer
+				break
 		if player == null:
 			return
 		player.shot_fired.connect(_on_shot_fired)
@@ -62,7 +68,7 @@ func _process(_delta: float) -> void:
 	var extra := ""
 	if player.ramp_grace_timer > 0.0:
 		extra = "   RAMP %.1f" % player.ramp_grace_timer
-	state_label.text = player.state_name() + extra
+	state_label.text = "HP %d   %s%s" % [player.hp, player.state_name(), extra]
 	charge_l.value = player.arm_progress_left()
 	charge_r.value = player.arm_progress_right()
 	lock_label.visible = player.move_locked

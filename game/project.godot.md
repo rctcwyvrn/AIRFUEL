@@ -8,7 +8,9 @@ editor; the nix devshell verify binary is 4.6.1, which warns but runs).
 
 ## Interface
 
-- Main scene: `res://maps/graybox_corridor.tscn`.
+- Main scene: `res://src/menu/main_menu.tscn` (menu → corridor).
+- Autoload: `Net` (`src/net/network.gd`) — LAN multiplayer; inert without
+  `--server`/`--client` user args.
 - Input actions defined here and consumed by `player.gd`:
   `move_forward/back/left/right` (WASD), `strafe_down` (Q),
   `jump` (Space), `dash` (Shift, combines with held direction keys),

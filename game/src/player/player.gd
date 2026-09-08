@@ -49,19 +49,34 @@ var move_locked := false
 var pending_arms: Array[RailArm] = []
 var last_shot_time := -1000.0
 
+var hp := 2
+var _net_target_pos := Vector3.ZERO
+
 
 func _ready() -> void:
 	fuel = config.fuel_max
+	hp = combat.hp_max
 	spawn_transform = global_transform
+	_net_target_pos = global_position
 	arm_left.charge_complete.connect(func() -> void: pending_arms.append(arm_left))
 	arm_right.charge_complete.connect(func() -> void: pending_arms.append(arm_right))
 	vm_left.set_meta("rest_pos", vm_left.position)
 	vm_right.set_meta("rest_pos", vm_right.position)
 	base_fov = camera.fov
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	if is_multiplayer_authority():
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	else:
+		# Remote puppet: rendered + state-synced, never simulated here
+		camera.current = false
+		set_physics_process(false)
+		vm_left.visible = false
+		vm_right.visible = false
+		$ShadowMesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not is_multiplayer_authority():
+		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		var crush := _aim_crush_mult()
 		rotate_y(-event.relative.x * mouse_sensitivity * crush)
@@ -111,8 +126,18 @@ func _physics_process(delta: float) -> void:
 	_camera_feel(delta)
 	_update_viewmodels(delta)
 
-	if Input.is_action_just_pressed("respawn") or global_position.y < config.kill_y:
+	var manual_respawn := Input.is_action_just_pressed("respawn") and not Net.active
+	if manual_respawn or global_position.y < config.kill_y:
 		_respawn()
+
+	if Net.active:
+		_send_state.rpc(global_position, velocity, rotation.y, head.rotation.x)
+
+
+func _process(delta: float) -> void:
+	if is_multiplayer_authority():
+		return
+	global_position = global_position.lerp(_net_target_pos, 1.0 - exp(-20.0 * delta))
 
 
 func _ground_move(wish: Vector3, delta: float) -> void:
@@ -346,6 +371,11 @@ func _fire_rail(arm: RailArm) -> void:
 			var target := (collider as Node).get_parent()
 			if target is TargetDummy:
 				result = "kill" if target.take_hit(damage) else zone
+		elif collider is AirfuelPlayer:
+			result = "body"
+			collider.take_damage.rpc_id(
+					collider.get_multiplayer_authority(), combat.damage_body,
+					multiplayer.get_unique_id())
 	arm.on_fired()
 	var side_sign := 1.0 if side == "R" else -1.0
 	var vm := vm_right if side == "R" else vm_left
@@ -353,6 +383,8 @@ func _fire_rail(arm: RailArm) -> void:
 	var muzzle: Vector3 = vm.global_transform * Vector3(0, 0, -0.35)
 	_spawn_beam(muzzle, end)
 	_spawn_canister(side_sign, cam)
+	if Net.active:
+		_remote_shot_fx.rpc(muzzle, end)
 	shot_fired.emit(side, result)
 
 
@@ -521,10 +553,42 @@ func _camera_feel(delta: float) -> void:
 	camera.fov = lerpf(camera.fov, target_fov, 1.0 - exp(-6.0 * delta))
 
 
+## LAN-trust damage: the shooter reports the hit, the victim's authority
+## applies it. 2 HP, every rail hit = 1 -> two shots to kill; death resets
+## you to your spawn (design 9: no regen, no partial states).
+@rpc("any_peer", "call_remote", "reliable")
+func take_damage(amount: int, from_id: int) -> void:
+	if not is_multiplayer_authority():
+		return
+	hp -= amount
+	if hp <= 0:
+		_confirm_kill.rpc_id(from_id)
+		_respawn()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _confirm_kill() -> void:
+	shot_fired.emit("", "kill")
+
+
+@rpc("authority", "call_remote", "unreliable")
+func _remote_shot_fx(from: Vector3, to: Vector3) -> void:
+	_spawn_beam(from, to)
+
+
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _send_state(pos: Vector3, vel: Vector3, yaw: float, pitch: float) -> void:
+	_net_target_pos = pos
+	velocity = vel
+	rotation.y = yaw
+	head.rotation.x = pitch
+
+
 func _respawn() -> void:
 	global_transform = spawn_transform
 	velocity = Vector3.ZERO
 	fuel = config.fuel_max
+	hp = combat.hp_max
 	state = MoveState.AIRBORNE
 	ramp_grace_timer = 0.0
 	wallrun_time = 0.0

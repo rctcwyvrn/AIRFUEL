@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/menu/main_menu.gd" id="1_menu"]
+
+[node name="MainMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.09, 0.12, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -170.0
+offset_right = 160.0
+offset_bottom = 170.0
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="VBox"]
+theme_override_font_sizes/font_size = 52
+text = "AIRFUEL"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="VBox"]
+theme_override_font_sizes/font_size = 13
+text = "prototype — movement + railgun"
+horizontal_alignment = 1
+
+[node name="SoloButton" type="Button" parent="VBox"]
+text = "PLAY SOLO"
+
+[node name="HostButton" type="Button" parent="VBox"]
+text = "HOST LAN GAME"
+
+[node name="JoinRow" type="HBoxContainer" parent="VBox"]
+theme_override_constants/separation = 8
+
+[node name="IpEdit" type="LineEdit" parent="VBox/JoinRow"]
+size_flags_horizontal = 3
+placeholder_text = "host IP (blank = 127.0.0.1)"
+
+[node name="JoinButton" type="Button" parent="VBox/JoinRow"]
+text = "JOIN"
+
+[node name="Hint" type="Label" parent="VBox"]
+theme_override_font_sizes/font_size = 12
+text = "LAN uses udp 27555 — same machine: host, then join 127.0.0.1"
+horizontal_alignment = 1

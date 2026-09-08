@@ -8,7 +8,8 @@ purpose for early range practice while aim crush is being tuned.
 
 ## Interface
 
-- Root `Target` (Node3D, `target.gd`).
+- Root `Target` (Node3D, `target.gd`), in group `"target"` — `Net` frees
+  every group member when a LAN session starts (dummies are solo-only).
 - `Body` (StaticBody3D at y 2.55, capsule r 1.2 × 4.5) with
   `metadata/hit_zone = "body"`; `Head` (StaticBody3D at y 5.55, sphere
   r 0.66) with `metadata/hit_zone = "head"`. Both live on

@@ -72,6 +72,18 @@ use_collision = true
 size = Vector3(1, 40, 880)
 material = SubResource("mat_wall")
 
+[node name="EndWallN" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, -440.5)
+use_collision = true
+size = Vector3(82, 42, 1)
+material = SubResource("mat_wall")
+
+[node name="EndWallS" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 440.5)
+use_collision = true
+size = Vector3(82, 42, 1)
+material = SubResource("mat_wall")
+
 [node name="Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40.5, 0)
 use_collision = true

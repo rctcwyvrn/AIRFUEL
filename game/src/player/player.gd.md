@@ -2,7 +2,7 @@
 
 ## Function
 
-The Steps 1+2 player: kinematic movement controller (DESIGN.md §4, §5) plus
+The Steps 1+2 player (plus prototype LAN netplay): kinematic movement controller (DESIGN.md §4, §5) plus
 the dual railgun arm system (§7, §8.1) — charge freeze/trajectory-lock, aim
 crush, staggered dual-rail firing, hitscan damage, canister ejection. No
 networking — that's Step 4.
@@ -109,7 +109,17 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   available briefly. **Jump buffer**: any jump press is buffered
   `jump_buffer_time`; landing consumes it. Air jump priority: wall coyote →
   ground coyote → fueled double jump.
-- Respawn on `respawn` action or falling below `config.kill_y`.
+- Respawn on `respawn` action (solo only — disabled when `Net.active`, a
+  free escape would break duels) or falling below `config.kill_y`.
+- **Networking (LAN-trust, gated on `Net.active`)**: the authority peer
+  simulates everything above and broadcasts `_send_state` (pos/vel/yaw/
+  pitch, unreliable_ordered) each tick; non-authority instances disable
+  physics + input + camera + viewmodels, show the body capsule, and lerp
+  toward the last state in `_process`. Hits on remote players rpc
+  `take_damage` to the victim's authority (shooter-decided, LAN-trust);
+  victim at 0 hp rpcs `_confirm_kill` back (killer's HUD shows KILL) and
+  `_respawn`s — full reset at own spawn. `_remote_shot_fx` mirrors beams.
+  `hp` initialized from `combat.hp_max` (2; rail body dmg 1 = 2 shots).
 
 ## Assertions
 

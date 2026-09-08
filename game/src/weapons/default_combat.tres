@@ -10,6 +10,7 @@ damage_body = 1
 damage_head = 2
 range_max = 2000.0
 charge_speed_cap = 40.0
+hp_max = 2
 aim_crush_floor = 1.0
 aim_crush_exponent = 0.7
 min_shot_gap = 0.35

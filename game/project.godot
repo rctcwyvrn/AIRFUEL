@@ -12,8 +12,12 @@ config_version=5
 
 config/name="Airfuel"
 config/description="Prototype — Roadmap Steps 1+2: movement + railgun."
-run/main_scene="res://maps/graybox_corridor.tscn"
+run/main_scene="res://src/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7")
+
+[autoload]
+
+Net="*res://src/net/network.gd"
 
 [display]
 
