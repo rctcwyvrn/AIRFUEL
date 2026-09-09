@@ -7,6 +7,8 @@ extends Node
 ##   host:  godot4 --path game -- --server
 ##   join:  godot4 --path game -- --client <ip>
 
+signal kill_reported(killer_id: int, victim_id: int)
+
 const ARENA := "res://maps/graybox_corridor.tscn"
 const PORT := 27555
 const MAX_PEERS := 8
@@ -136,11 +138,13 @@ func _despawn_player(id: int) -> void:
 
 
 ## Broadcast by a dying player's authority: every peer tallies the kill
-## identically; the killer's peer also resets its own player (kills reset
-## the round — both duelists respawn).
+## identically (and re-emits it as kill_reported for the HUD's feed/banner);
+## the killer's peer also resets its own player (kills reset the round —
+## both duelists respawn).
 @rpc("any_peer", "call_local", "reliable")
-func report_kill(killer_id: int) -> void:
+func report_kill(killer_id: int, victim_id: int) -> void:
 	scores[killer_id] = int(scores.get(killer_id, 0)) + 1
+	kill_reported.emit(killer_id, victim_id)
 	if killer_id == multiplayer.get_unique_id():
 		for p: Node in get_tree().get_nodes_in_group("player"):
 			if p.is_multiplayer_authority():

@@ -13,10 +13,6 @@ extends Resource
 @export var charge_speed_cap := 40.0
 @export var hp_max := 2
 
-@export_group("Aim Crush")
-@export var aim_crush_floor := 0.05
-@export var aim_crush_exponent := 2.0
-
 @export_group("Dual Rail")
 @export var min_shot_gap := 0.35
 
@@ -26,3 +22,4 @@ extends Resource
 @export var sword_lunge_cooldown := 1.2
 @export var sword_hit_range := 4.0
 @export var sword_active_time := 0.35
+@export var sword_warning_range := 60.0

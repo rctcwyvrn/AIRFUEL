@@ -4,7 +4,5 @@
 
 [resource]
 script = ExtResource("1_cfg")
-aim_crush_floor = 1.0
-aim_crush_exponent = 0.7
 sword_lunge_cooldown = 3
 sword_active_time = 0.2

@@ -360,9 +360,11 @@ Reference feel: the Armored Core 6 railgun. Loud, heavy, committal.
   undodgeable by accident and unaimable on purpose. Hitscan is acceptable here
   *because* of the charge telegraph.
 - **Freezes you** (or locks your air trajectory) for the duration of the charge.
-- **Aim crush:** your turn rate degrades progressively as the charge builds. By
-  the end you are nearly locked to a direction. This is what makes the dodge
-  possible — the shooter must predict, not track.
+- **Aim stays free.** Charging never degrades your turn rate (an earlier "aim
+  crush" mechanic did — cut, see Appendix A). What makes the dodge possible is
+  the target: the shooter must land a hitscan shot on someone who can dash in
+  any of 8 directions at the last instant. Tracking that dash is the skill
+  check.
 - **Loud.** A charging railgun is audible and directional.
 - **Bolt action.** Ejects a spent canister on fire — aesthetic and satisfaction,
   and a load-bearing feedback beat (see §17).
@@ -748,24 +750,19 @@ attention goes into movement and timing rather than into scanning.
 
 Audio may be redundant with the UI. That is acceptable — the UI is primary.
 
-### 15.2 Aim-cone warnings — the key rule
+### 15.2 Charge warnings
 
-The naive version ("warn about everything") collapses in 6v6: twelve players
-charging constantly turns every tell into ambient noise, and the mechanic that
-makes combat fair in a duel stops working in the main mode.
+**Warn on every charge.** Any enemy railgun charge produces a loud,
+directional warning that escalates with charge progress. Simple, honest, and
+nothing to compute — the defender always gets the tell.
 
-**Only warn about threats whose aim cone contains you.**
-
-The railgun's progressive aim crush means a charging player has committed to a
-narrowing direction, so the game knows precisely whether you are in it.
-
-- Six people charging across the map → zero warnings.
-- One person charging *at you* → a loud, directional, escalating warning that
-  intensifies as their aim cone tightens on you.
-
-This makes the HUD "show what can kill me right now" instead of "show
-everything," which is more legible *and* dramatically less UI to build. It also
-makes the aim-crush mechanic do double duty as a feel beat.
+The earlier version of this rule filtered warnings by the shooter's aim cone,
+which depended on the aim-crush mechanic (the cone narrowed as the charge
+built, so the game knew who was actually threatened). Aim crush is cut
+(Appendix A), so the cone no longer exists. The known risk of warn-on-every-
+charge is 6v6: twelve players charging constantly may turn every tell into
+ambient noise. Whether that happens in practice — and what filter would fix
+it if so — is deliberately deferred to playtesting (see 23, Combat).
 
 ### 15.3 What the HUD surfaces
 
@@ -1004,7 +1001,9 @@ pit where six telegraphs happen at once. Tuning for one can break the other.
 
 - Exact charge time, and the tuned "generous" gap between staggered dual-rail
   shots.
-- Aim-crush curve: how fast does turn rate degrade, and does it reach a full lock?
+- Threat-warning filtering in 6v6: the current plan is to warn on *every*
+  charge (see 15.2); if playtests show that's ambient noise, what filter
+  replaces the cut aim-crush cone?
 - Does the gunshield block missiles?
 - Missile upgrade: once per life, or a long cooldown? (Note this interacts with
   teleport jamming -- a jammed defender cannot refresh it.)
@@ -1051,14 +1050,19 @@ curved-surface wallrun viable in Godot? How far apart can platforms be before
 flow breaks? **How long should the corridor actually be?**
 
 **Step 2 — Railgun against a stationary target.**
-Charge, freeze/trajectory-lock, aim crush, auto-fire, canister ejection, hit
+Charge, freeze/trajectory-lock, auto-fire, canister ejection, hit
 confirmation.
 
-*Answers:* does the charge feel good to commit to? Is the aim crush legible from
-the shooter's side?
+*Answers:* does the charge feel good to commit to?
 
-**Step 3 — One bot that shoots back.**
-The real test. Charge → tell → dodge, in both directions.
+**Step 3 — Duel feedback + LAN playtesting.**
+The real test. Polish the HUD information layer — enemy charge warning,
+damage-taken feedback, sword proximity warning, kill/round presentation — so
+LAN duels carry the full information game, then answer the question in real
+1v1s. Charge → tell → dodge, in both directions.
+(This step was originally "one bot that shoots back" — replaced, see
+Appendix A: LAN multiplayer arrived early and a real human is the better
+instrument.)
 
 *Answers:* **is the charge-freeze-dodge rhythm a fun conversation or a coinflip?**
 Everything downstream depends on this.
@@ -1067,7 +1071,8 @@ Everything downstream depends on this.
 Two real clients. Sword only.
 
 *Answers:* is melee salvageable at these speeds over a network? Pulled early
-deliberately — see §22.
+deliberately — see §22. A prototype-tier networked sword already exists, so
+this folds into the same LAN playtesting sessions as Step 3.
 
 Everything else waits.
 
@@ -1107,6 +1112,21 @@ imposed a hard silhouette-readability constraint. Replaced by uniform HP.
 **Partial railgun charge / early release.** Rejected as insufficiently committal.
 Note that the feint layer it would have provided arrived anyway, in a fully
 committal form, through staggered dual-rail timing (§7.1).
+
+**Progressive aim crush.** Degrading the shooter's turn rate as the charge
+built felt bad to the shooter — like fighting the input device, not playing a
+mechanic. Commitment already comes from the freeze; the dodge stays viable
+because the shooter must track a very quick dash that can go in any of 8
+directions, and tracking that dash is the skill check. Cutting it also cost
+the aim-cone warning filter (§15.2), now replaced by warn-on-every-charge.
+
+**Step 3 bot opponent.** The prototype roadmap's "one bot that shoots back"
+was replaced by LAN 1v1 playtesting: working LAN multiplayer arrived early, a
+real human answers the charge→tell→dodge question with better signal, and bot
+AI quality would confound the feel test (a coinflip result could be the design
+failing or just bad dodge heuristics). A bot may still return later as an
+always-available *practice* opponent — that's an availability tool, not the
+validity test, and it shouldn't be re-proposed as the latter.
 
 **Tanky bomb carrier.** Rejected in favor of fast-and-fragile. The intended
 fantasy is a carrier dodging through cover with a team playing around them.
@@ -1166,7 +1186,7 @@ The full list of numbers that need values, gathered for convenience.
 - Airfuel: max capacity
 
 **Combat**
-- Railgun: charge time, aim crush curve, damage (body/head)
+- Railgun: charge time, damage (body/head)
 - Dual rail: minimum enforced gap between shots
 - Sword: lunge distance, lunge fuel cost, lunge cooldown per arm
 - Sword warning: proximity radius

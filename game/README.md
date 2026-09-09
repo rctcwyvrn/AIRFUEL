@@ -3,7 +3,7 @@
 **Roadmap Steps 1 + 2** (see `../design/DESIGN.md` §24). Gray box corridor,
 one player, three stationary targets. Wallrun economy, dismount grants, ramp
 persistence, dashes, terminal velocity, Airfuel meter — plus dual railgun
-arms: 1s auto-firing charge, movement freeze / trajectory lock, aim crush,
+arms: 1s auto-firing charge, movement freeze / trajectory lock,
 staggered dual-rail gap, hitscan (2 body / 1 head), canister ejection.
 
 ## Run
@@ -52,14 +52,17 @@ Host spawns at the −z end, joiners at +z. 2 HP, every rail hit = 1 damage
 No args = offline solo, unchanged. WSL2 note: for a real two-machine LAN
 test, run the Windows build or forward udp/27555 out of WSL.
 
-## What to test (Step 1 + 2 questions from the design doc)
+## What to test (Step 1–3 questions from the design doc)
 
 - Does chained-short-runs feel emerge from the dismount reward?
 - Is curved-surface wallrun viable (orange cylinders)?
 - How far apart can platforms be before flow breaks (floor gaps, teal panels)?
 - How long should the corridor actually be?
-- Does the rail charge feel good to commit to? (freeze + aim crush + no cancel)
+- Does the rail charge feel good to commit to? (freeze + no cancel)
 - Is the dual-rail stagger a usable rhythm instrument?
+- **In LAN 1v1s: is charge-freeze-dodge a fun conversation or a coinflip?**
+  Charge → tell → dodge in both directions; do the HUD warnings (enemy
+  charge, sword proximity, damage direction) carry the information game?
 
 ## Tuning
 

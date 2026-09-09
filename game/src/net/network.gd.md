@@ -15,7 +15,9 @@ that). Listen-server over ENet, client-authoritative movement: correct at
   `--server` / `--client <ip>` still work for headless testing. No args and
   no menu action → `active` stays false; offline solo untouched.
 - Read by `player.gd`: `Net.active` (gates all its rpc sends). Read by the
-  HUD: `Net.players` + `Net.scores` (the scoreboard).
+  HUD: `Net.players` + `Net.scores` (the scoreboard); the HUD also connects
+  `kill_reported(killer_id, victim_id)` (emitted on every peer by
+  `report_kill`) for its kill feed / kill-death banner.
 - `players: Dictionary` (peer id → node) is the roster; nodes are named
   `str(peer_id)` and get `set_multiplayer_authority(id)` **before** add.
 
@@ -36,10 +38,11 @@ per pair, so 1v1 is always opposite ends and 3+ players don't stack. The
 index is `players.size()` at spawn time — identical on all peers because
 the server-driven roster delivers spawns in the same order everywhere. Client quits on `server_disconnected`.
 
-`report_kill` (any_peer, call_local, broadcast by the victim) is both the
-scoreboard tally (`scores` increments identically on every peer — one
-reliable broadcast, no server arbitration) and the round-reset channel
-(the killer's peer resets its own authority player).
+`report_kill(killer_id, victim_id)` (any_peer, call_local, broadcast by the
+victim) is the scoreboard tally (`scores` increments identically on every
+peer — one reliable broadcast, no server arbitration), the round-reset
+channel (the killer's peer resets its own authority player), and the HUD
+event source (re-emitted locally as `kill_reported`).
 
 ## Assertions
 

@@ -4,12 +4,13 @@ extends CharacterBody3D
 ## Roadmap Steps 1 + 2: movement, plus dual railgun arms vs stationary targets.
 ## Wallrun (flat + curved via radial ray probes), dismount fuel/speed grants,
 ## ramp persistence across gaps, dashes, fueled strafes, terminal velocity;
-## per-arm rail charge with freeze/trajectory-lock, aim crush, hitscan,
-## canister ejection. No network.
+## per-arm rail charge with freeze/trajectory-lock, hitscan, canister
+## ejection. Plus prototype LAN netplay (client-authoritative, see Net).
 
 enum MoveState { GROUNDED, AIRBORNE, WALLRUN }
 
 signal shot_fired(side: String, result: String)
+signal damaged(amount: int, from_id: int)
 signal died
 signal respawned
 
@@ -162,9 +163,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
 		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		var crush := _aim_crush_mult()
-		rotate_y(-event.relative.x * mouse_sensitivity * crush)
-		head.rotate_x(-event.relative.y * mouse_sensitivity * crush)
+		rotate_y(-event.relative.x * mouse_sensitivity)
+		head.rotate_x(-event.relative.y * mouse_sensitivity)
 		head.rotation.x = clampf(head.rotation.x, -PI / 2 + 0.05, PI / 2 - 0.05)
 	elif event.is_action_pressed("ui_cancel"):
 		var captured := Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
@@ -674,13 +674,6 @@ func _spawn_canister(side_sign: float, cam: Transform3D) -> void:
 	c.angular_velocity = Vector3(randf_range(-12, 12), randf_range(-12, 12), randf_range(-12, 12))
 
 
-func _aim_crush_mult() -> float:
-	var p := maxf(arm_left.progress(), arm_right.progress())
-	if p <= 0.0:
-		return 1.0
-	return lerpf(1.0, combat.aim_crush_floor, pow(p, combat.aim_crush_exponent))
-
-
 func _update_state() -> void:
 	if state == MoveState.WALLRUN:
 		return
@@ -813,9 +806,10 @@ func take_damage(amount: int, from_id: int) -> void:
 	if not is_multiplayer_authority():
 		return
 	hp -= amount
+	damaged.emit(amount, from_id)
 	if hp <= 0:
 		died.emit()
-		Net.report_kill.rpc(from_id)
+		Net.report_kill.rpc(from_id, multiplayer.get_unique_id())
 		_respawn()
 
 
@@ -937,6 +931,12 @@ func arm_progress_right() -> float:
 	if arm_types[1] == "sword":
 		return 1.0 - clampf(sword_cd[1] / combat.sword_lunge_cooldown, 0.0, 1.0)
 	return arm_right.progress()
+
+
+## Synced arm progress of a remote puppet (from _send_state) — the HUD's
+## charge-warning source. Meaningless on locally simulated bodies.
+func remote_arm_progress(index: int) -> float:
+	return _net_prog.x if index == 0 else _net_prog.y
 
 
 func state_name() -> String:

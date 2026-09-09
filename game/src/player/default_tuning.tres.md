@@ -21,8 +21,10 @@ scarcity — running dry a few times a match, not constantly).
 
 ## Assertions
 
-- Every `MovementConfig` field has a line here (missing lines silently fall
-  back to script defaults).
+- Overrides-only: a line appears here iff the value differs from the
+  `MovementConfig` schema default (the editor drops default-valued lines on
+  save anyway). Absent lines mean the script default ships — when changing a
+  schema default, remember it changes live tuning (Lily's call, 2026-09-09).
 - Keep it consistent with the design intent when tuning: dismount reward must
   scale with wall speed (§4.2), wallrun stays free, and terminal velocity
   stays finite (§4.1 — the unbounded-acceleration exploit is why it exists).

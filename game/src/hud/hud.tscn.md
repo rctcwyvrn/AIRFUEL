@@ -2,8 +2,8 @@
 
 ## Function
 
-The diagnostic HUD layout for Step 1. Instanced by the active map alongside
-the player.
+The diagnostic HUD layout for Steps 1–3. Instanced by the active map
+alongside the player.
 
 ## Interface
 
@@ -19,8 +19,16 @@ the player.
   (top-right, orange, hidden offline), `LoadoutLabel` (bottom-right),
   `CountdownLabel` (center, 80px orange, hidden by default),
   `TimerLabel` (top-center, 30px, hidden by default — hud.gd
-  drives it), `DeathFlash` (full-rect red ColorRect at alpha 0, MUST keep
-  `mouse_filter = 2` and stays above gameplay readouts), `MapBack` (dark backdrop ColorRect under the map) + `MapPrism`
+  drives it), `HitFlash` (full-rect orange-red ColorRect at alpha 0 —
+  damage-taken vignette, declared BEFORE DeathFlash so death draws over it),
+  `DeathFlash` (full-rect red ColorRect at alpha 0, MUST keep
+  `mouse_filter = 2` and stays above gameplay readouts), `ThreatRing`
+  (full-rect Control with `threat_ring.gd` — charge wedges + damage arcs),
+  `HpPips` (60×12 Control above the crosshair; hud.gd builds the pips),
+  `SwordWarnLabel` (red, below the hitmarker area, hidden by default),
+  `KillBanner` (orange, upper-center, hidden by default), `KillFeed`
+  (VBoxContainer below the minimap area — hud.gd adds fading lines),
+  `MapBack` (dark backdrop ColorRect under the map) + `MapPrism`
   (Control with `minimap.gd`, top-right, hidden offline — draws the
   rotating prism + player dots itself).
 

@@ -4,7 +4,7 @@
 
 The practice dummy's geometry: a capsule with a distinct head sphere,
 scaled 3× humanoid (body r 1.2 × 4.5 tall, head r 0.66) — oversized on
-purpose for early range practice while aim crush is being tuned.
+purpose for early range practice.
 
 ## Interface
 

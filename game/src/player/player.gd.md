@@ -2,10 +2,11 @@
 
 ## Function
 
-The Steps 1+2 player (plus prototype LAN netplay): kinematic movement controller (DESIGN.md §4, §5) plus
-the dual railgun arm system (§7, §8.1) — charge freeze/trajectory-lock, aim
-crush, staggered dual-rail firing, hitscan damage, canister ejection. No
-networking — that's Step 4.
+The Steps 1+2 player (plus prototype LAN netplay): kinematic movement
+controller (DESIGN.md §4, §5) plus the dual railgun arm system (§7, §8.1) —
+charge freeze/trajectory-lock, staggered dual-rail firing, hitscan damage,
+canister ejection. (Aim crush was cut 2026-09-09, Appendix A — charging
+never degrades turn rate.)
 
 ## Interface
 
@@ -23,8 +24,9 @@ networking — that's Step 4.
   controller (with `process_physics_priority < 0`) for ghosts/bots. New
   input reads in physics code MUST go through cmds, never Input directly.
 - Signals: `shot_fired(side, result)` (side "L"/"R", result "miss"/"body"/
-  "head"/"kill" — HUD hitmarkers), `died` (HUD death flash), `respawned`
-  (ghost restart sync).
+  "head"/"kill" — HUD hitmarkers), `damaged(amount, from_id)` (emitted on the
+  victim's authority — HUD hit flash + directional damage arc), `died` (HUD
+  death flash), `respawned` (ghost restart sync).
 - **Loadouts (8.3)**: Tab (`swap_loadout`) cycles rail+rail → rail+sword →
   sword+sword; `arm_types` holds "rail"/"sword" per side, `loadout_name()`
   feeds the HUD. Swapping resets both rail arms, pending shots, and sword
@@ -44,11 +46,15 @@ networking — that's Step 4.
   while charge-locked or wallrunning. For `sword_active_time` after, `_sword_hit_check`
   kills the first player/dummy within `sword_hit_range` (99 dmg, one hit
   per lunge). No freeze, no ranged component, ever.
-- Read by the HUD (poll, no signals yet): `fuel`, `ramp_grace_timer`, `config`,
-  `horizontal_speed() -> float`, `state_name() -> String`.
+- Read by the HUD (polled): `fuel`, `ramp_grace_timer`, `config`,
+  `horizontal_speed() -> float`, `state_name() -> String`; event-driven via
+  the `shot_fired`/`damaged`/`died` signals.
 - Expected children: `Head` (Node3D, pitch) → `Head/Camera3D` (roll + FOV
   feel); `ArmLeft`/`ArmRight` (`RailArm` nodes). Yaw goes on the body itself.
-- HUD-facing reads: `move_locked`, `arm_progress_left/right()`.
+- HUD-facing reads: `move_locked`, `arm_progress_left/right()`, `hp`,
+  `combat`, `arm_types`; on puppets `remote_arm_progress(index)` (the synced
+  `_send_state` progress — the HUD's enemy-charge-warning source) and
+  `arm_types`/position for the sword proximity warning.
 - Consumes input actions: `move_forward/back/left/right`, `strafe_down`
   (Q — up was removed; double jump covers it), `jump`, `dash` (Shift),
   `fire_left` (LMB), `fire_right` (RMB), `respawn`, `ui_cancel`.
@@ -71,10 +77,8 @@ dashes) gated off. Wallrunning → the run *continues* (Lily's call: the wall
 is your trajectory) but the dismount jump is ignored; running off the wall
 end drops into the airborne lock. While locked, total speed is clamped to `combat.charge_speed_cap`
 (charging at high speed instantly bleeds you to 40 — the freeze makes you
-slower and more readable, not just steerless). **Aim crush**: mouse
-sensitivity ×
-`_aim_crush_mult()` = `lerp(1, aim_crush_floor, progress^exponent)` over the
-max progress of both arms.
+slower and more readable, not just steerless). Aim stays free while charging
+(aim crush cut 2026-09-09, Appendix A).
 
 **Firing (§7.1, §8.1)**: `_handle_arms` starts charges on trigger press;
 completed charges queue in `pending_arms` (FIFO = press order) and fire no
@@ -185,8 +189,10 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   physics + input + camera + viewmodels, show the red dummy-sized
   `BodyMesh`, and lerp toward the last state in `_process`. Hits on remote players rpc
   `take_damage` to the victim's authority (shooter-decided, LAN-trust);
-  victim at 0 hp emits `died`, broadcasts `Net.report_kill(killer)` (all
-  peers tally the scoreboard; the killer's peer `round_reset(true)`s its
+  the victim emits `damaged(amount, from_id)` on every hit, and at 0 hp
+  emits `died`, broadcasts `Net.report_kill(killer, victim)` (all
+  peers tally the scoreboard and re-emit `Net.kill_reported` for the HUD
+  feed/banner; the killer's peer `round_reset(true)`s its
   own player) and `_respawn`s — **a kill resets both duelists** to their
   spawns with full hp/fuel. Kill rpcs must route through `Net` (same node
   path on every peer); an rpc on the victim's own node lands on the
