@@ -1,0 +1,9 @@
+# From the repo root:  docker compose -f docker/compose.yaml up -d --build
+services:
+  airfuel-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "27555:27555/udp"
+    restart: unless-stopped

@@ -184,16 +184,21 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
 - Respawn on `respawn` action (solo only — disabled when `Net.active`, a
   free escape would break duels) or falling below `config.kill_y`.
 - **Networking (LAN-trust, gated on `Net.active`)**: the authority peer
-  simulates everything above and broadcasts `_send_state` (pos/vel/yaw/
-  pitch, unreliable_ordered) each tick; non-authority instances disable
+  simulates everything above and sends `_send_state` (pos/vel/yaw/
+  pitch, unreliable_ordered) each tick via `_send_my_state()` — broadcast
+  in LAN mode, but `rpc_id(Net.match_opponent)` in a lobby match (same for
+  `_remote_shot_fx`), so concurrent dedicated-server 1v1s never see each
+  other's traffic; non-authority instances disable
   physics + input + camera + viewmodels, show the red dummy-sized
   `BodyMesh`, and lerp toward the last state in `_process`. Hits on remote players rpc
   `take_damage` to the victim's authority (shooter-decided, LAN-trust);
   the victim emits `damaged(amount, from_id)` on every hit, and at 0 hp
-  emits `died`, broadcasts `Net.report_kill(killer, victim)` (all
-  peers tally the scoreboard and re-emit `Net.kill_reported` for the HUD
-  feed/banner; the killer's peer `round_reset(true)`s its
-  own player) and `_respawn`s — **a kill resets both duelists** to their
+  emits `died`, reports the kill — LAN: broadcast `Net.report_kill(killer,
+  victim)` (all peers tally the scoreboard and re-emit `Net.kill_reported`
+  for the HUD feed/banner; the killer's peer `round_reset(true)`s its own
+  player); lobby match: `Net.report_match_kill.rpc_id(1, killer)` so the
+  server keeps the first-to-5 score — and `_respawn`s — **a kill resets
+  both duelists** to their
   spawns with full hp/fuel. Kill rpcs must route through `Net` (same node
   path on every peer); an rpc on the victim's own node lands on the
   victim's *puppet* at the killer's end — that bug shipped once. `_remote_shot_fx` mirrors beams.

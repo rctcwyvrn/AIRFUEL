@@ -52,6 +52,33 @@ Host spawns at the −z end, joiners at +z. 2 HP, every rail hit = 1 damage
 No args = offline solo, unchanged. WSL2 note: for a real two-machine LAN
 test, run the Windows build or forward udp/27555 out of WSL.
 
+## Hosted lobby server (Docker)
+
+A dedicated server that is a **matchmaker + relay only** — it never loads
+the arena; each matched pair runs its own local arena and exchanges
+targeted state, so concurrent 1v1s never see each other.
+
+```sh
+docker build -f docker/Dockerfile -t airfuel-server .   # from repo root
+docker run --rm -p 27555:27555/udp airfuel-server
+# or: docker compose -f docker/compose.yaml up -d --build
+```
+
+In-game: enter a username + the server IP in the menu's **JOIN SERVER**
+row. The lobby lists everyone with session W–L; click **CHALLENGE** on an
+idle player, they accept, and you're both dropped into a private
+first-to-5-kills corridor duel (DESIGN.md §12.2), then returned to the
+lobby. Disconnecting mid-match forfeits. Tuning (win kills, peer cap,
+challenge timeout): `src/net/default_server.tres`.
+
+CLI equivalents:
+
+```sh
+godot4 --headless --path game -- --dedicated          # serve (no Docker)
+godot4 --path game -- --lobby <ip> --name <username>  # join a server
+# --autoduel: dev flag — auto-challenge/accept (headless smoke tests)
+```
+
 ## What to test (Step 1–3 questions from the design doc)
 
 - Does chained-short-runs feel emerge from the dismount reward?

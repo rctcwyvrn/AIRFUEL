@@ -10,8 +10,9 @@ Read this first, then the sidecar doc of any file you touch.
   re-propose them. Appendix B lists every tuning variable.
 - `game/` — the Godot project. Implements **prototype roadmap Steps 1–3**
   (movement, railgun combat, duel feedback HUD, DESIGN.md §24) plus
-  prototype-tier LAN multiplayer and the sword. Step 3's answer comes from
-  LAN 1v1 playtesting (the bot was cut — Appendix A). Everything else waits —
+  prototype-tier LAN multiplayer, the sword, and a Dockerized lobby server
+  (`docker/`, first-to-5 1v1s). Step 3's answer comes from LAN 1v1
+  playtesting (the bot was cut — Appendix A). Everything else waits —
   do not build ahead of the roadmap.
 - `game/README.md` — how to run, controls, what Steps 1–3 are trying to answer.
 - `shell.nix` — dev environment. All Godot work goes through it.

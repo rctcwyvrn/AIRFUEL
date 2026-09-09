@@ -535,6 +535,10 @@ opposite direction was abandoned.
 railgun rhythm. Nearly free to build -- same systems, smaller map, no objective
 logic.
 
+**Win condition: first to 5 kills** (decided 2026-09-09 at prototype tier —
+the hosted lobby server's 1v1s use it; revisit against rounds after
+playtests).
+
 Note this means shipping two modes with genuinely different rules, not one mode
 at two scales. 6v6 is the priority; 1v1 exists because the combat is good enough
 to stand alone.
@@ -1033,7 +1037,8 @@ pit where six telegraphs happen at once. Tuning for one can break the other.
 
 **Modes**
 
-- 1v1 duel win condition -- first to N kills, or rounds?
+- ~~1v1 duel win condition~~ — answered 12.2: first to 5 kills (prototype
+  decision, 2026-09-09).
 
 ## 24. Prototype Roadmap
 
@@ -1059,7 +1064,10 @@ confirmation.
 The real test. Polish the HUD information layer — enemy charge warning,
 damage-taken feedback, sword proximity warning, kill/round presentation — so
 LAN duels carry the full information game, then answer the question in real
-1v1s. Charge → tell → dodge, in both directions.
+1v1s. Charge → tell → dodge, in both directions. The playtesting instrument
+is the Dockerized lobby server (`docker/` — join, pick a username, challenge,
+first-to-5): it makes remote 1v1s cheap, but it is still the LAN-trust
+throwaway netcode, NOT §20.2.
 (This step was originally "one bot that shoots back" — replaced, see
 Appendix A: LAN multiplayer arrived early and a real human is the better
 instrument.)

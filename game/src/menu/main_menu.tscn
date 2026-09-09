@@ -129,6 +129,33 @@ placeholder_text = "host IP (blank = 127.0.0.1)"
 layout_mode = 2
 text = "JOIN"
 
+[node name="ServerRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NameEdit" type="LineEdit" parent="VBox/ServerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "username"
+
+[node name="ServerIpEdit" type="LineEdit" parent="VBox/ServerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "server IP"
+
+[node name="JoinServerButton" type="Button" parent="VBox/ServerRow"]
+layout_mode = 2
+text = "JOIN SERVER"
+
+[node name="ErrorLabel" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+autowrap_mode = 2
+visible = false
+text = ""
+
 [node name="Hint" type="Label" parent="VBox" unique_id=344003108]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.58, 0.63, 1)

@@ -179,8 +179,7 @@ func _physics_process(delta: float) -> void:
 		countdown -= delta
 		velocity = Vector3.ZERO
 		if Net.active:
-			_send_state.rpc(global_position, velocity, rotation.y, head.rotation.x,
-					arm_progress_left(), arm_progress_right(), loadout_index)
+			_send_my_state()
 		return
 	if not run_finished:
 		run_time += delta
@@ -242,6 +241,17 @@ func _physics_process(delta: float) -> void:
 				rotation.y, head.rotation.x, cmd_move.x, cmd_move.y, cmd_vert, flags])
 
 	if Net.active:
+		_send_my_state()
+
+
+## LAN broadcasts to every peer; a lobby match targets only the opponent, so
+## concurrent 1v1s never see each other's traffic.
+func _send_my_state() -> void:
+	if Net.match_opponent != 0:
+		_send_state.rpc_id(Net.match_opponent, global_position, velocity,
+				rotation.y, head.rotation.x,
+				arm_progress_left(), arm_progress_right(), loadout_index)
+	else:
 		_send_state.rpc(global_position, velocity, rotation.y, head.rotation.x,
 				arm_progress_left(), arm_progress_right(), loadout_index)
 
@@ -593,7 +603,10 @@ func _fire_rail(arm: RailArm) -> void:
 	_spawn_beam(muzzle, end)
 	_spawn_canister(side_sign, cam)
 	if Net.active:
-		_remote_shot_fx.rpc(muzzle, end)
+		if Net.match_opponent != 0:
+			_remote_shot_fx.rpc_id(Net.match_opponent, muzzle, end)
+		else:
+			_remote_shot_fx.rpc(muzzle, end)
 	shot_fired.emit(side, result)
 
 
@@ -809,7 +822,11 @@ func take_damage(amount: int, from_id: int) -> void:
 	damaged.emit(amount, from_id)
 	if hp <= 0:
 		died.emit()
-		Net.report_kill.rpc(from_id, multiplayer.get_unique_id())
+		if Net.match_opponent != 0:
+			# Lobby match: the server keeps score (first-to-N) and relays
+			Net.report_match_kill.rpc_id(1, from_id)
+		else:
+			Net.report_kill.rpc(from_id, multiplayer.get_unique_id())
 		_respawn()
 
 

@@ -2,14 +2,19 @@
 
 ## Function
 
-The game's main scene: title + three ways in (solo / host / join-by-IP).
+The game's main scene: title + four ways in (solo / parkour / host or
+join-by-IP LAN / join a lobby server with a username).
 
 ## Interface
 
 - Root `MainMenu` (full-rect Control, `main_menu.gd`).
 - Children the script requires: `VBox/SoloButton`, `VBox/ParkourButton`,
   `VBox/HostButton`,
-  `VBox/JoinRow/IpEdit` (LineEdit), `VBox/JoinRow/JoinButton`.
+  `VBox/JoinRow/IpEdit` (LineEdit), `VBox/JoinRow/JoinButton`,
+  `VBox/ServerRow/NameEdit` + `ServerIpEdit` (LineEdits) +
+  `JoinServerButton` (the dedicated-lobby entry), `VBox/ErrorLabel`
+  (hidden; the script drives it — grey connecting status / red failures,
+  autowrapped).
 
 ## Implementation
 

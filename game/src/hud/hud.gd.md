@@ -72,6 +72,8 @@ range drives the warning label, side text from the yaw-relative bearing
 (`_bearing_to`: 0 = ahead, +PI/2 = right; ±45° AHEAD, ±135°+ BEHIND).
 `damaged` freezes the attacker's bearing at hit time into a fading arc.
 Kill feed labels self-fade over 4 s then free; the banner shows 1.8 s.
+Peer tags (`_peer_tag`) resolve through `Net.display_name(id)` — real
+usernames in dedicated-server matches, "P%d" fallback in LAN.
 
 ## Assertions
 

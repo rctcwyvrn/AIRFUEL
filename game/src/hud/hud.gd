@@ -160,8 +160,7 @@ func _process(_delta: float) -> void:
 		var ids: Array = Net.players.keys()
 		ids.sort_custom(func(a: int, b: int) -> bool: return a == my_id)
 		for id: int in ids:
-			var tag := "YOU" if id == my_id else "P%d" % (id % 1000)
-			lines.append("%s  %d" % [tag, int(Net.scores.get(id, 0))])
+			lines.append("%s  %d" % [_peer_tag(id, my_id), int(Net.scores.get(id, 0))])
 		score_label.text = "\n".join(lines)
 
 
@@ -236,7 +235,8 @@ func _on_kill_reported(killer_id: int, victim_id: int) -> void:
 
 
 func _peer_tag(id: int, my_id: int) -> String:
-	return "YOU" if id == my_id else "P%d" % (id % 1000)
+	# Lobby matches know usernames; LAN falls back to peer-number tags.
+	return "YOU" if id == my_id else Net.display_name(id)
 
 
 func _build_hp_pips(hp_max: int) -> void:
