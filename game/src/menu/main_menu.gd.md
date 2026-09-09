@@ -13,7 +13,8 @@ all networking lives in the `Net` autoload.
   `PARKOUR` (parkour track), `Net.host()`,
   `Net.join(ip)` (blank IP field defaults to 127.0.0.1; Enter in the field
   submits), `Net.join_lobby(ip, username)` (JOIN SERVER row; blank name →
-  "player", blank IP → 127.0.0.1, Enter in the server-IP field submits).
+  "player", blank IP → `Net.DEFAULT_SERVER` (play.airfuel-game.com, also the
+  field's placeholder), Enter in the server-IP field submits).
 - Persists the last username + server IP to `user://settings.cfg`
   (`[lobby] name/ip`) and prefills them on launch.
 - Connection feedback via `VBox/ErrorLabel`: grey "connecting to <ip>..."

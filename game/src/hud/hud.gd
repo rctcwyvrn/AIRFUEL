@@ -198,7 +198,7 @@ func _scan_threats() -> void:
 		side = "BEHIND"
 	elif absf(ang) > PI / 4.0:
 		side = "RIGHT" if ang > 0.0 else "LEFT"
-	sword_warn_label.text = "SWORD NEARBY — %s" % side
+	sword_warn_label.text = "🗡WARNING️🗡 — %s" % side
 	sword_warn_label.visible = true
 	sword_warn_label.modulate.a = 0.6 + 0.4 * sin(Time.get_ticks_msec() / 90.0)
 

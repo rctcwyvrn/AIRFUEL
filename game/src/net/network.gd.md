@@ -26,6 +26,9 @@ is server-authoritative with rewind; this is NOT that):
   CLI (after `--`): `--server`, `--client <ip>`, `--dedicated`,
   `--lobby <ip> --name <n>`, `--autoduel` (dev: auto challenge/accept for
   headless smoke tests — highest-id idle peer challenges lowest, once).
+  Bare `--lobby` and the menu's blank server field both default to
+  `DEFAULT_SERVER` (play.airfuel-game.com — must stay a DNS-only record,
+  Cloudflare's proxy can't carry UDP); `--client` stays 127.0.0.1 (LAN).
 - Read by player.gd: `active`, `match_opponent` (nonzero exactly while in a
   lobby match — switches its state/fx sends to `rpc_id` and kill reports to
   `report_match_kill`). Read by the HUD: `players`, `scores`,
@@ -67,7 +70,12 @@ player.
 **Failure paths** (all flavors): every connection failure — create_server/
 create_client error, `connection_failed`, `server_disconnected` (the LAN
 client used to quit(); now it errors back to the menu like the lobby) —
-goes through `_fail` (cache + push_error + `net_error`) and
+goes through `_fail` (cache + push_error + `net_error`) and error codes are
+rendered with `error_string()`, never raw ints. Both join paths run
+`_resolve_or_fail` first — a blocking DNS pre-check, because an
+unresolvable hostname otherwise surfaces as create_client's generic
+ERR_CANT_CREATE ("error 20", the shipped-once bug) instead of naming the
+DNS problem — then
 `_teardown_to_menu` (free bodies, reset all session state,
 `OfflineMultiplayerPeer`, land on the menu without reloading it if it's
 already current — preserving typed fields and the just-shown error).

@@ -64,8 +64,14 @@ docker run --rm -p 27555:27555/udp airfuel-server
 # or: docker compose -f docker/compose.yaml up -d --build
 ```
 
-In-game: enter a username + the server IP in the menu's **JOIN SERVER**
-row. The lobby lists everyone with session W–L; click **CHALLENGE** on an
+In-game: enter a username + the server address in the menu's **JOIN
+SERVER** row (blank = the official server, `play.airfuel-game.com`).
+
+DNS layout (Cloudflare): `airfuel-game.com` + `www` are **Proxied** dummy
+records whose only job is an edge Redirect Rule →
+<https://rctcwyvrn.itch.io/airfuel>; `play.airfuel-game.com` is a
+**DNS-only** A record straight to the game host — it must stay grey-cloud,
+the proxy can't carry UDP. The lobby lists everyone with session W–L; click **CHALLENGE** on an
 idle player, they accept, and you're both dropped into a private
 first-to-5-kills corridor duel (DESIGN.md §12.2), then returned to the
 lobby. Disconnecting mid-match forfeits. Tuning (win kills, peer cap,

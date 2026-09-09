@@ -60,6 +60,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme = SubResource("theme_menu")
 script = ExtResource("1_menu")
 
@@ -127,34 +129,33 @@ placeholder_text = "host IP (blank = 127.0.0.1)"
 
 [node name="JoinButton" type="Button" parent="VBox/JoinRow" unique_id=1338784309]
 layout_mode = 2
-text = "JOIN"
+text = "JOIN LAN"
 
-[node name="ServerRow" type="HBoxContainer" parent="VBox"]
+[node name="ServerRow" type="HBoxContainer" parent="VBox" unique_id=1195895264]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="NameEdit" type="LineEdit" parent="VBox/ServerRow"]
+[node name="NameEdit" type="LineEdit" parent="VBox/ServerRow" unique_id=828874984]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "username"
 
-[node name="ServerIpEdit" type="LineEdit" parent="VBox/ServerRow"]
+[node name="ServerIpEdit" type="LineEdit" parent="VBox/ServerRow" unique_id=1770420025]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "server IP"
+placeholder_text = "play.airfuel-game.com"
 
-[node name="JoinServerButton" type="Button" parent="VBox/ServerRow"]
+[node name="JoinServerButton" type="Button" parent="VBox/ServerRow" unique_id=366974921]
 layout_mode = 2
 text = "JOIN SERVER"
 
-[node name="ErrorLabel" type="Label" parent="VBox"]
+[node name="ErrorLabel" type="Label" parent="VBox" unique_id=914297074]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.3, 0.25, 1)
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 autowrap_mode = 2
-visible = false
-text = ""
 
 [node name="Hint" type="Label" parent="VBox" unique_id=344003108]
 layout_mode = 2

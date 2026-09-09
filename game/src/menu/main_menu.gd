@@ -53,7 +53,7 @@ func _join_server() -> void:
 		username = "player"
 	var ip := server_ip_edit.text.strip_edges()
 	if ip.is_empty():
-		ip = "127.0.0.1"
+		ip = Net.DEFAULT_SERVER
 	var cf := ConfigFile.new()
 	cf.set_value("lobby", "name", username)
 	cf.set_value("lobby", "ip", ip)

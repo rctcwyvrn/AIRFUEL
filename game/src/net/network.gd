@@ -27,6 +27,9 @@ enum Mode { OFFLINE, LAN, LOBBY, DEDICATED }
 const ARENA := "res://maps/graybox_corridor.tscn"
 const LOBBY_SCENE := "res://src/lobby/lobby.tscn"
 const MENU_SCENE := "res://src/menu/main_menu.tscn"
+const DEFAULT_SERVER := "play.airfuel-game.com"  # blank JOIN SERVER field / bare --lobby
+# NOTE: must stay a DNS-only (grey-cloud) record — Cloudflare's proxy can't
+# carry the game's UDP. The bare domain is Proxied and serves the homepage.
 const PORT := 27555
 const MAX_PEERS := 8  # legacy LAN listen-server cap; the lobby cap is config
 const PLAYER_SCENE := preload("res://src/player/player.tscn")
@@ -68,7 +71,7 @@ func _ready() -> void:
 	elif args.find("--client") != -1:
 		join(_arg_value(args, "--client", "127.0.0.1"))
 	elif args.find("--lobby") != -1:
-		join_lobby(_arg_value(args, "--lobby", "127.0.0.1"),
+		join_lobby(_arg_value(args, "--lobby", DEFAULT_SERVER),
 				_arg_value(args, "--name", "player"))
 
 
@@ -86,7 +89,8 @@ func host() -> void:
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_server(PORT, MAX_PEERS)
 	if err != OK:
-		_fail("Couldn't host on udp/%d (error %d) — is a server already running?" % [PORT, err])
+		_fail("Couldn't host on udp/%d (%s) — is a server already running?" % [
+				PORT, error_string(err)])
 		_teardown_to_menu()
 		return
 	_clear_session_signals()
@@ -103,11 +107,13 @@ func host() -> void:
 func join(ip: String) -> void:
 	if active:
 		return
+	if not _resolve_or_fail(ip):
+		return
 	await _load_arena()
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_client(ip, PORT)
 	if err != OK:
-		_fail("Couldn't start a client for %s (error %d)." % [ip, err])
+		_fail("Couldn't start a client for %s (%s)." % [ip, error_string(err)])
 		_teardown_to_menu()
 		return
 	_clear_session_signals()
@@ -135,7 +141,7 @@ func host_dedicated() -> void:
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_server(PORT, cfg.max_peers)
 	if err != OK:
-		_fail("Couldn't host lobby on udp/%d (error %d) — port in use?" % [PORT, err])
+		_fail("Couldn't host lobby on udp/%d (%s) — port in use?" % [PORT, error_string(err)])
 		return
 	_clear_session_signals()
 	multiplayer.multiplayer_peer = peer
@@ -152,10 +158,12 @@ func host_dedicated() -> void:
 func join_lobby(ip: String, username: String) -> void:
 	if active:
 		return
+	if not _resolve_or_fail(ip):
+		return
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_client(ip, PORT)
 	if err != OK:
-		_fail("Couldn't start a client for %s (error %d)." % [ip, err])
+		_fail("Couldn't start a client for %s (%s)." % [ip, error_string(err)])
 		return
 	_clear_session_signals()
 	multiplayer.multiplayer_peer = peer
@@ -182,6 +190,20 @@ func join_lobby(ip: String, username: String) -> void:
 ## Full lobby-client teardown: close the peer, drop match state, back to menu.
 func leave_lobby() -> void:
 	_teardown_to_menu()
+
+
+## Blocking DNS pre-check: a hostname that doesn't resolve would otherwise
+## surface as create_client's generic ERR_CANT_CREATE ("error 20") — catch
+## it first and name the actual problem.
+func _resolve_or_fail(address: String) -> bool:
+	if address.is_valid_ip_address():
+		return true
+	var resolved := IP.resolve_hostname(address)
+	if resolved.is_valid_ip_address():
+		return true
+	_fail(("Couldn't find server '%s' — the name doesn't resolve. Check the "
+			+ "address (and that its DNS record exists).") % address)
+	return false
 
 
 ## User-facing connection failure: cache + print + signal. The menu shows
