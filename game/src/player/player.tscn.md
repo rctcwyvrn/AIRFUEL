@@ -2,7 +2,9 @@
 
 ## Function
 
-The playable character scene for Step 1. Instanced once by the active map.
+The playable character scene for Steps 1–3. Instanced by the active map for
+solo play, and by `Net` (network.gd, preloaded `PLAYER_SCENE`) once per peer
+in LAN play.
 
 ## Interface
 
@@ -12,7 +14,7 @@ The playable character scene for Step 1. Instanced once by the active map.
   — script `player.gd`, group `"player"`,
   `config` wired to `default_tuning.tres`, `combat` to
   `default_combat.tres`.
-- Node paths the script depends on: `CollisionShape3D`, `Head` (y = 0.65),
+- Node paths the script depends on: `CollisionShape3D`, `Head` (y = 1.7),
   `Head/Camera3D` (fov 100), `ArmLeft` and `ArmRight` (plain Nodes with
   `rail_arm.gd`, both sharing `default_combat.tres`),
   `Head/Camera3D/ViewmodelL` and `ViewmodelR` (graybox arm blocks).

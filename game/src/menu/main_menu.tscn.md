@@ -23,8 +23,9 @@ inline Theme: grey StyleBoxFlat buttons that flip orange (#FF8C1A) on hover
 with dark text, orange-underlined LineEdit, orange `>>>` + AIRFUEL title,
 grey secondary text. This is the color identity: **orange on dark grey**,
 shared with icon.svg/icon.ico, the HUD bars, and the in-world beam/cylinder
-orange. The hint label states the port so LAN debugging doesn't require
-reading code.
+orange. The hint label walks through LAN setup (host on one machine, find
+the local IP via ipconfig, enter it on the other) so joining doesn't
+require reading code.
 
 ## Assertions
 

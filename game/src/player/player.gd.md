@@ -50,14 +50,18 @@ never degrades turn rate.)
   `horizontal_speed() -> float`, `state_name() -> String`; event-driven via
   the `shot_fired`/`damaged`/`died` signals.
 - Expected children: `Head` (Node3D, pitch) → `Head/Camera3D` (roll + FOV
-  feel); `ArmLeft`/`ArmRight` (`RailArm` nodes). Yaw goes on the body itself.
+  feel); `ArmLeft`/`ArmRight` (`RailArm` nodes);
+  `Head/Camera3D/ViewmodelL`/`ViewmodelR` (first-person arm blocks);
+  `PuppetArmL`/`PuppetArmR` and `BodyMesh` (remote-puppet visuals). Yaw goes
+  on the body itself.
 - HUD-facing reads: `move_locked`, `arm_progress_left/right()`, `hp`,
   `combat`, `arm_types`; on puppets `remote_arm_progress(index)` (the synced
   `_send_state` progress — the HUD's enemy-charge-warning source) and
   `arm_types`/position for the sword proximity warning.
 - Consumes input actions: `move_forward/back/left/right`, `strafe_down`
   (Q — up was removed; double jump covers it), `jump`, `dash` (Shift),
-  `fire_left` (LMB), `fire_right` (RMB), `respawn`, `ui_cancel`.
+  `fire_left` (LMB), `fire_right` (RMB), `swap_loadout` (Tab), `record`
+  (F5), `respawn`, `ui_cancel`.
 - `MoveState { GROUNDED, AIRBORNE, WALLRUN }` in `state`.
 
 ## Implementation
@@ -72,7 +76,7 @@ wallrun banks the camera `wallrun_camera_roll_deg` at
 
 **Charge freeze (§7.2)**: `move_locked` is true while either arm
 `is_locking()`. Grounded → horizontal velocity zeroed (rooted). Airborne →
-ballistic: gravity/ramp decay continue, all steering (wish, Q/E, double jump,
+ballistic: gravity/ramp decay continue, all steering (wish, Q, double jump,
 dashes) gated off. Wallrunning → the run *continues* (Lily's call: the wall
 is your trajectory) but the dismount jump is ignored; running off the wall
 end drops into the airborne lock. While locked, total speed is clamped to `combat.charge_speed_cap`
@@ -118,7 +122,7 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   only up to a cap along the wish direction). Free control caps at
   `base_run_speed`; the fueled strafe tier caps at `air_strafe_speed_cap` and
   drains `air_strafe_cost_per_sec` only when it can actually add speed.
-  Vertical strafe (`_vertical_input`) is Q-down only, fueled, capped at
+  Vertical strafe (inline in `_air_move`) is Q-down only, fueled, capped at
   `air_strafe_vertical_cap`, airborne only; upward mobility is the double
   jump.
 - **Wallrun exits**: jump and dash leave the wall; Shift+Q does NOT — on a

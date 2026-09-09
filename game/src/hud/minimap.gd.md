@@ -2,13 +2,16 @@
 
 ## Function
 
-The LAN minimap: the corridor volume as a slowly rotating wireframe prism
-with live player dots, drawn entirely in 2D via manual 3D projection.
+The LAN minimap: the corridor volume as a compass-locked wireframe prism
+(it turns with your facing) with live player dots, drawn entirely in 2D
+via manual 3D projection.
 
 ## Interface
 
 - Script of `MapPrism` (Control) in `hud.tscn`; `hud.gd` toggles its
   `visible` with `Net.active` (alongside the `MapBack` backdrop).
+- `track: Node3D` — the local player, assigned by `hud.gd` at adoption;
+  drives the compass-lock yaw.
 - Reads `Net.players` directly each draw; you = orange dot, others = red.
 - No exports, no signals.
 

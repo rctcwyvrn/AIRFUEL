@@ -16,7 +16,7 @@ to the menu.
   `Net.challenge_ended`, plus the caches `Net.last_roster` /
   `Net.last_match_result` on entry (so a scene entered after the signals
   fired still renders).
-- Sends exactly three rpcs, all to peer 1: `Net.request_challenge`,
+- Sends exactly two rpcs, both to peer 1: `Net.request_challenge`,
   `Net.challenge_reply` — nothing else touches the network.
 - Expected children: `VBox/RosterBox` (rows built at runtime),
   `VBox/ResultLabel`, `VBox/ChallengeBox/{ChallengeLabel,AcceptButton,
@@ -34,7 +34,7 @@ mouse-captured match).
 
 ## Assertions
 
-- View-only: never mutate Net state directly; only the three rpcs above.
+- View-only: never mutate Net state directly; only the two rpcs above.
 - Must render correctly from the caches alone (entering the lobby between
   roster broadcasts is the common case, straight after a match).
 - Rows are rebuilt, never patched — stale-row bugs aren't worth the

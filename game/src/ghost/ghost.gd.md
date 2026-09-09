@@ -12,7 +12,8 @@ parkour track; resets with the player.
 ## Interface
 
 - `class_name TasGhostController extends Node`, child of the ghost player.
-- Exports: `waypoints` (baked by the track generator), `turn_rate`
+- Exports: `waypoints` (baked by the track generator), `tape_path`
+  (a `.tas` recording; empty = waypoint autopilot), `turn_rate`
   (rad/s steering cap — human-plausible), `arrive_dist`.
 - Connects to the real player's `respawned` signal → both restart.
 
@@ -37,7 +38,9 @@ head pitch (dashes are camera-aimed; steep pitch balloons the flight),
 hold-W, jump on floor when the line rises or speed drops, double-jump on
 fading climbs, dash only below 26 m/s with fuel to spare. A waypoint
 counts as reached when close OR passed (behind while near) — orbiting was
-the classic failure. 8 s without progress restarts from the track start.
+the classic failure. 8 s without progress snaps the body back onto the
+line at the previous waypoint (velocity zeroed, tank refilled) — a splice,
+not a full-track restart.
 Fuel is honest: the controller never refuels, so it runs dry and slows —
 a wallrun behavior would fix that (Step 3 bot territory).
 

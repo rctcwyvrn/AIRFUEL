@@ -26,8 +26,10 @@ PENDING: DESIGN.md 7.2 locks you "from first trigger press to second shot."
 
 ## Assertions
 
-- No cancel path: nothing may transition CHARGING back to IDLE except
-  completing (then firing). A mistimed charge fires into nothing — intended.
+- No player-facing cancel path: no input may transition CHARGING back to
+  IDLE except completing (then firing) — `reset()` (loadout-swap/respawn
+  housekeeping, never bound to a cancel input) is the sole exception. A
+  mistimed charge fires into nothing — intended.
 - `try_charge` while non-IDLE must stay a silent no-op.
 - `is_locking()` true exactly during CHARGING and PENDING, never COOLDOWN.
 - All timing numbers come from `config`; no literals.

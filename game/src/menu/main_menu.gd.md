@@ -31,9 +31,9 @@ Buttons wired in `_ready` with lambdas; `ARENA` duplicates the path in
 
 ## Assertions
 
-- Node paths `VBox/SoloButton`, `VBox/HostButton`, `VBox/JoinRow/IpEdit`,
-  `VBox/JoinRow/JoinButton`, `VBox/ServerRow/NameEdit`,
-  `VBox/ServerRow/ServerIpEdit`, `VBox/ServerRow/JoinServerButton` are the
-  contract with the scene.
+- Node paths `VBox/SoloButton`, `VBox/ParkourButton`, `VBox/HostButton`,
+  `VBox/JoinRow/IpEdit`, `VBox/JoinRow/JoinButton`, `VBox/ServerRow/NameEdit`,
+  `VBox/ServerRow/ServerIpEdit`, `VBox/ServerRow/JoinServerButton`, and
+  `VBox/ErrorLabel` are the contract with the scene.
 - Solo must stay a pure scene change — no Net involvement, so offline play
   never depends on networking code.

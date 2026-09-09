@@ -4,13 +4,14 @@
 
 The Step 1 test corridor — built to answer DESIGN.md §24's questions: does
 chaining emerge from dismount rewards, is curved wallrun viable, how far can
-gaps stretch before flow breaks, how long should the corridor be. It is the
-main scene.
+gaps stretch before flow breaks, how long should the corridor be. Loaded from
+the main menu (PLAY SOLO) and by `network.gd` as the LAN arena — the
+project's main scene is the menu, not this map.
 
 ## Interface
 
 - Root `GrayboxCorridor` (Node3D); instances `player.tscn` (at z = −430,
-  y = 2.6, rotated 180° to face +Z), `hud.tscn`, and three `target.tscn`
+  y = 2.6, rotated 180° to face +Z), `hud.tscn`, and
   17 `target.tscn` dummies (`Target1-17`): Target1
   (0, 0, −405) down the spawn sightline, most scattered at ground level
   every ~60–80 m across varied x, two on elevated platforms (Target16-17).
@@ -29,8 +30,8 @@ closed box; falling out is impossible (kill_y remains as a safety net). The node
 bands (see git history for the generator) but checked in as plain tscn.
 Color code:
 
-- **Gray floor** — one continuous 80×880 slab, no holes (falling below
-  `kill_y` only happens off the corridor ends/edges).
+- **Gray floor** — one continuous 80×880 slab, no holes; with the sealed
+  box, `kill_y` is unreachable in practice.
 - **Blue-gray walls** (x = ±40) — continuous, floor to roof; you cannot
   fall out the sides. Infinite parallel wallrun surfaces, so interior
   features are what force crossings now.
@@ -52,8 +53,8 @@ Color code:
   corridor); `OuterPanel1-6` at x = ±28 add a wider second line.
 - **Purple platforms** — three elevated 12×12 pads at y 24–28 (down-dash /
   vantage).
-- **Interior lane** (the 2×-widening fill): `Tower1-6` — 4×14×4 square
-  pillars (4×28×4), wallrunnable on all four faces; `DiagPanel1-8` — 14 m-tall
+- **Interior lane** (the 2×-widening fill): `Tower1-6` — 4×28×4 square
+  pillars, wallrunnable on all four faces; `DiagPanel1-8` — 14 m-tall
   panels yawed ±35° so chains can cut diagonally across the lane; `Rib1-4` —
   low 10×8×2 floor blocks to hop or wrap around (tan); `SpinePanel1-3` —
   mid-height panels on the center line.

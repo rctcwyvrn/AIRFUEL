@@ -20,8 +20,8 @@ the crosshair (enemy rail charges as escalating wedges — warn on EVERY
 charge, no filtering — and incoming-damage arcs toward the attacker, drawn
 by `threat_ring.gd`), **HP pips** above the crosshair with a persistent
 low-HP vignette at 1 hp, an orange **hit flash** on `damaged`, the
-"SWORD NEARBY — LEFT/RIGHT/AHEAD/BEHIND" proximity warning
-(within `combat.sword_warning_range`, pulsing), and — via
+sword proximity warning ("🗡WARNING️🗡 — AHEAD/BEHIND/LEFT/RIGHT",
+within `combat.sword_warning_range`, pulsing), and — via
 `Net.kill_reported` — a fading kill feed (under the minimap) plus a
 "YOU KILLED Px" / "KILLED BY Px" center banner.
 
@@ -37,23 +37,28 @@ low-HP vignette at 1 hp, an orange **hit flash** on `damaged`, the
   `ramp_grace_timer`, `horizontal_speed()`, `state_name()`,
   `arm_progress_left/right()` (rail charge, or sword cooldown-readiness),
   `move_locked`, `loadout_name()`, `hp`, `combat.hp_max`,
-  `combat.sword_warning_range`; on enemy puppets: `arm_types`,
+  `combat.sword_warning_range`, `run_time`, `run_finished`, `countdown`,
+  `recording`; on enemy puppets: `arm_types`,
   `remote_arm_progress(i)`, `global_position`. Connects to `shot_fired`
   (hitmarkers), `damaged` (hit flash + damage arc), `died` (death flash),
   and the autoload signal `Net.kill_reported` (feed/banner).
-- Expected children: `FuelBar`, `ChargeL`, `ChargeR` (ProgressBars),
-  `FuelLabel`, `SpeedLabel`, `StateLabel`, `HitLabel`, `LockLabel` (Labels),
-  `Crosshair` (ColorRect), `ControlsHint` (empty Control anchor —
-  `_ready` builds the key grid into it from `KEY_LAYOUT`), `HitFlash`
-  (ColorRect), `ThreatRing` (`threat_ring.gd`), `HpPips` (empty Control —
+- Expected children (`@onready` paths): `FuelBar`, `ChargeL`, `ChargeR`
+  (ProgressBars), `FuelLabel`, `SpeedLabel`, `StateLabel`, `HitLabel`,
+  `LockLabel`, `ScoreLabel`, `LoadoutLabel`, `TimerLabel`, `CountdownLabel`
+  (Labels), `ControlsHint` (empty Control anchor — `_ready` builds the key
+  grid into it from `KEY_LAYOUT`), `HitFlash`, `DeathFlash`, `MapBack`
+  (ColorRects), `ThreatRing` (`threat_ring.gd`), `HpPips` (empty Control —
   pips are built at adoption from `hp_max`), `SwordWarnLabel`, `KillBanner`
-  (Labels), `KillFeed` (VBoxContainer — feed labels are runtime-built).
+  (Labels), `KillFeed` (VBoxContainer — feed labels are runtime-built),
+  `MapPrism` (`minimap.gd`). The scene's `Crosshair` is layout-only —
+  the script never touches it.
 
 ## Implementation
 
-Mostly polling in `_process` (charge bars, lock label, fuel); the one
-signal is `shot_fired`, connected lazily when the player is first found,
-because hitmarkers are events, not state. Hit results map to distinct
+Mostly polling in `_process` (charge bars, lock label, fuel); the player
+signals (`shot_fired`, `damaged`, `died`) are connected lazily when the
+player is first found (`Net.kill_reported` in `_ready`), because
+hitmarkers, flashes, and feed lines are events, not state. Hit results map to distinct
 text+color (HIT white / HEADSHOT orange / KILL red — §17's "distinct for
 body vs head"), shown for 0.45s. Misses show nothing. `fuel_bar.max_value`
 is re-set from config every frame so live tuning reflects immediately.

@@ -14,7 +14,8 @@ editor; the nix devshell verify binary is 4.6.1, which warns but runs).
   background is the identity dark grey (#16181C).
 - Autoload: `Net` (`src/net/network.gd`) — LAN multiplayer; inert without
   `--server`/`--client` user args.
-- Input actions defined here and consumed by `player.gd`:
+- Input actions defined here and consumed by `player.gd` (`hud.gd`'s
+  controls-hint widget polls the same action names to light up keys):
   `move_forward/back/left/right` (WASD), `strafe_down` (Q),
   `jump` (Space), `dash` (Shift, combines with held direction keys),
   `fire_left` (mouse left), `fire_right` (mouse right), `swap_loadout`

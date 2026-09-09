@@ -25,8 +25,9 @@ Damage values are per-hit against uniform 2 HP (DESIGN.md 9.2): body 1
 
 ## Assertions
 
-- Values that actually ship live in `default_combat.tres`; keep fields and
-  lines in sync when adding.
+- Shipped values are the schema defaults here except where
+  `default_combat.tres` overrides them (overrides-only, same rule as
+  `default_tuning.tres`).
 - No partial charge / hold / early-release fields should ever appear here —
   explicitly cut (DESIGN.md Appendix A). Same for aim-crush fields (cut
   2026-09-09: crushing the shooter's turn rate felt like fighting the mouse).

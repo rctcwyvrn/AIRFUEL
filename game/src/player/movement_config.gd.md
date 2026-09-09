@@ -11,8 +11,9 @@ the game runs.
 
 - `class_name MovementConfig extends Resource` — plain data, no methods, no
   signals.
-- Consumed by `player.gd` via its `config` export. Nothing else reads it yet
-  (the HUD reaches it through `player.config`).
+- Consumed by `player.gd` via its `config` export. Nothing else references
+  the resource directly (the HUD and the parkour ghost reach it through the
+  player's `config`).
 - Fields are grouped with `@export_group`: Fuel, Ground, Air, Dash, Wallrun,
   Dismount, Assists (glide retention/angle, coyote windows, jump buffer),
   Ramp Persistence, Misc. Units: meters/seconds/degrees; costs and
@@ -21,15 +22,17 @@ the game runs.
 
 ## Implementation
 
-Defaults in this script are the fallback; the values that actually ship are in
-`default_tuning.tres`. Keep both in sync when adding fields (a missing `.tres`
-entry silently uses the script default — easy to miss).
+Defaults in this script ship unless `default_tuning.tres` overrides them —
+the `.tres` is overrides-only (Lily's call, 2026-09-09): a line appears there
+iff the value differs from the schema default, so changing a default here
+changes live tuning.
 
 ## Assertions
 
-- Adding a gameplay number to any script? It goes here + `default_tuning.tres`
-  instead. Field names appear verbatim in the `.tres`, so renames must touch
-  both files (and `player.gd`).
+- Adding a gameplay number to any script? It goes here instead (plus a
+  `default_tuning.tres` line only if the shipped value differs from the
+  default — overrides-only). Field names appear verbatim in the `.tres` when
+  overridden, so renames must touch both files (and `player.gd`).
 - Stays a pure `Resource` with no logic — it must remain safe to duplicate,
   serialize, and eventually ship per-server (DESIGN.md §19: tunable private
   servers).

@@ -13,9 +13,13 @@ No targets — pure traversal.
   facing +Z, y ≈ 42.6), `hud.tscn`, and a `GhostRunner`
   (`player.tscn` with `ghost_controlled = true`) driven by
   `TasController` (`ghost.gd`) replaying `res://tas/parkour.tas` (Lily's
-  recorded run, 4522 ticks ≈ 37.7 s; baked `waypoints` are only the
+  recorded run, 4194 ticks ≈ 35 s; baked `waypoints` are only the
   no-tape fallback). The ghost spawns at the PLAYER's exact spawn — a
   tape replayed from an offset start desyncs in an enclosed hallway.
+- `FinishZone` — Area3D in group `finish` (`finish_zone.gd`, mask 4,
+  24×30×3 box) just inside the green emissive `EndCapWall` that seals
+  the last straight; touching it stops the run timer for the local
+  human player (ghosts don't finish).
 - Selected from the main menu (`PARKOUR TRACK`).
 
 ## Implementation
@@ -27,16 +31,16 @@ whole track is a wallrun chain — `KillZone` volumes 6 m under every
 section make falling through an instant reset (countdown included); the
 global `kill_y` is only a backstop. Elevation changes subdivide each straight into five parts —
 level → half-pitch blend → full pitch (±8–12°) → half-pitch blend →
-level — so no joint bends more than ~6°, and floors/roofs are 2 m-thick
-slabs overlapping 5 m into joints, burying the elbow wedges that used to
-open sky slivers. Corners are flat square pads with
+level — so no joint bends more than ~6°, and roofs are 2 m-thick slabs,
+burying the elbow wedges that used to open sky slivers. Corners are flat
+square junctions (floorless like the rest, own KillZone) with
 far+side walls, a glow strip + OmniLight (navigation beacon), an orange
 swing cylinder on the inside of the turn, and an emissive orange chevron
 arrow on the far wall pointing the turn direction. 17 bright-red emissive
 obstacles (cycling wall-left block / center pillar / wall-right block /
 horizontal bar) sit on the level parts of straights — dash-dodge tests;
-the bar is jumped or slid under. Floors/walls overlap
-+3 m into joints so seams are watertight.
+the bar is jumped or slid under. Walls overlap +8 m and roofs +5 m into
+joints so seams are watertight.
 
 ## Assertions
 
