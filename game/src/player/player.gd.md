@@ -147,9 +147,10 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   available briefly. **Jump buffer**: any jump press is buffered
   `jump_buffer_time`; landing consumes it. Air jump priority: wall coyote →
   ground coyote → fueled double jump.
-- **Speed trail**: the `Trail` particles emit above 1.2× base run speed —
-  authority sets it per physics tick, puppets from synced velocity in
-  `_process` (puppets have no physics, so it must live on both paths).
+- **Flight trail** (`_update_trail_line`, `_process`, all bodies): one
+  long thin orange world-space line — 2 m position samples, 150-point /
+  4 s rolling window, alpha ramp to the tail, rebuilt into an
+  ImmediateMesh LINE_STRIP each frame; cleared on respawn.
 - **TAS recording (F5, `record` action)**: toggling on respawns you (clean
   tape from spawn state) and logs one line per physics tick — absolute
   yaw/pitch + cmd fields + button bitmask — with a header naming the map

@@ -1,21 +1,10 @@
-[gd_resource type="Resource" script_class="CombatConfig" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="CombatConfig" format=3 uid="uid://cx1jeqn1xqwmu"]
 
-[ext_resource type="Script" path="res://src/weapons/combat_config.gd" id="1_cfg"]
+[ext_resource type="Script" uid="uid://c55hmxxc6rxgm" path="res://src/weapons/combat_config.gd" id="1_cfg"]
 
 [resource]
 script = ExtResource("1_cfg")
-charge_time = 1.0
-cooldown = 1.2
-damage_body = 1
-damage_head = 2
-range_max = 2000.0
-charge_speed_cap = 40.0
-hp_max = 2
 aim_crush_floor = 1.0
 aim_crush_exponent = 0.7
-min_shot_gap = 0.35
-sword_lunge_cost = 15.0
-sword_lunge_speed = 120.0
 sword_lunge_cooldown = 3
-sword_hit_range = 4.0
 sword_active_time = 0.2

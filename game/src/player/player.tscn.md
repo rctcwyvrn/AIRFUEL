@@ -37,11 +37,11 @@ ships the rail default. `ShadowMesh` is a matching capsule with `cast_shadow = 3
 each with its OWN emissive material (orange emission, energy 0 at rest) —
 `player.gd` drives emission with charge progress and kicks position on fire.
 
-`Trail` is a world-space (`local_coords = false`) GPUParticles3D behind the
-back: small orange puffs fading over 0.7 s — the speed trail. `player.gd`
-toggles `emitting` above 1.2× base run speed (authority: physics tick;
-puppets: from synced velocity in `_process`), so trails read on both your
-own player and remotes.
+The speed trail is code-built (no scene node): `player.gd` creates a
+top-level MeshInstance3D and redraws a world-space LINE_STRIP each frame
+from a rolling position history — one long thin orange line tracing the
+recent flight path, alpha-fading toward the tail, cleared on respawn.
+Drawn for every body (you, remotes, the ghost).
 
 ## Assertions
 

@@ -1,48 +1,48 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://c20v04yj8rfpk"]
 
-[ext_resource type="Script" path="res://src/menu/main_menu.gd" id="1_menu"]
+[ext_resource type="Script" uid="uid://bbur7d6jmqhyx" path="res://src/menu/main_menu.gd" id="1_menu"]
 
-[sub_resource type="StyleBoxFlat" id="sb_btn"]
-bg_color = Color(0.16, 0.18, 0.21, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="StyleBoxFlat" id="sb_btn_hover"]
 content_margin_left = 18.0
 content_margin_top = 10.0
 content_margin_right = 18.0
 content_margin_bottom = 10.0
-
-[sub_resource type="StyleBoxFlat" id="sb_btn_hover"]
 bg_color = Color(1, 0.55, 0.1, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="sb_btn"]
 content_margin_left = 18.0
 content_margin_top = 10.0
 content_margin_right = 18.0
 content_margin_bottom = 10.0
+bg_color = Color(0.16, 0.18, 0.21, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="sb_btn_pressed"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
 bg_color = Color(0.8, 0.42, 0.06, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-content_margin_left = 18.0
-content_margin_top = 10.0
-content_margin_right = 18.0
-content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="sb_line"]
-bg_color = Color(0.1, 0.11, 0.13, 1)
-border_width_bottom = 2
-border_color = Color(1, 0.55, 0.1, 1)
 content_margin_left = 12.0
 content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
+bg_color = Color(0.1, 0.11, 0.13, 1)
+border_width_bottom = 2
+border_color = Color(1, 0.55, 0.1, 1)
 
 [sub_resource type="Theme" id="theme_menu"]
 Button/colors/font_color = Color(0.78, 0.8, 0.83, 1)
@@ -55,18 +55,22 @@ Button/styles/pressed = SubResource("sb_btn_pressed")
 LineEdit/colors/font_color = Color(0.85, 0.87, 0.9, 1)
 LineEdit/styles/normal = SubResource("sb_line")
 
-[node name="MainMenu" type="Control"]
-theme = SubResource("theme_menu")
+[node name="MainMenu" type="Control" unique_id=1507526257]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme = SubResource("theme_menu")
 script = ExtResource("1_menu")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1578216571]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.086, 0.094, 0.11, 1)
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="VBox" type="VBoxContainer" parent="." unique_id=271789740]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -77,45 +81,60 @@ offset_right = 160.0
 offset_bottom = 170.0
 theme_override_constants/separation = 18
 
-[node name="Chevrons" type="Label" parent="VBox"]
+[node name="Chevrons" type="Label" parent="VBox" unique_id=892023127]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.55, 0.1, 1)
 theme_override_font_sizes/font_size = 30
 text = ">>>"
 horizontal_alignment = 1
 
-[node name="Title" type="Label" parent="VBox"]
+[node name="Title" type="Label" parent="VBox" unique_id=166578019]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.55, 0.1, 1)
 theme_override_font_sizes/font_size = 52
 text = "AIRFUEL"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="VBox"]
+[node name="Subtitle" type="Label" parent="VBox" unique_id=709193337]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.58, 0.63, 1)
 theme_override_font_sizes/font_size = 13
-text = "prototype — movement + railgun"
+text = ">> !! PRE ALPHA PROTOTYPE !! <<
+
+Have fun! Expect nothing to stay as it is"
 horizontal_alignment = 1
 
-[node name="SoloButton" type="Button" parent="VBox"]
+[node name="SoloButton" type="Button" parent="VBox" unique_id=1004618395]
+layout_mode = 2
 text = "PLAY SOLO"
 
-[node name="ParkourButton" type="Button" parent="VBox"]
+[node name="ParkourButton" type="Button" parent="VBox" unique_id=1729817477]
+layout_mode = 2
 text = "PARKOUR TRACK"
 
-[node name="HostButton" type="Button" parent="VBox"]
+[node name="HostButton" type="Button" parent="VBox" unique_id=196640325]
+layout_mode = 2
 text = "HOST LAN GAME"
 
-[node name="JoinRow" type="HBoxContainer" parent="VBox"]
+[node name="JoinRow" type="HBoxContainer" parent="VBox" unique_id=2124262873]
+layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="IpEdit" type="LineEdit" parent="VBox/JoinRow"]
+[node name="IpEdit" type="LineEdit" parent="VBox/JoinRow" unique_id=1387714088]
+layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "host IP (blank = 127.0.0.1)"
 
-[node name="JoinButton" type="Button" parent="VBox/JoinRow"]
+[node name="JoinButton" type="Button" parent="VBox/JoinRow" unique_id=1338784309]
+layout_mode = 2
 text = "JOIN"
 
-[node name="Hint" type="Label" parent="VBox"]
+[node name="Hint" type="Label" parent="VBox" unique_id=344003108]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.58, 0.63, 1)
 theme_override_font_sizes/font_size = 12
-text = "LAN uses udp 27555 — same machine: host, then join 127.0.0.1"
+text = "To play over LAN
+- Host the game on one computer
+- Open cmd, run [ipconfig], get your local IP address
+- Input that on the other player's game"
 horizontal_alignment = 1

@@ -1,54 +1,20 @@
-[gd_resource type="Resource" script_class="MovementConfig" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="MovementConfig" format=3 uid="uid://bvwihgso7f508"]
 
-[ext_resource type="Script" path="res://src/player/movement_config.gd" id="1_cfg"]
+[ext_resource type="Script" uid="uid://ys22g7hjt1m5" path="res://src/player/movement_config.gd" id="1_cfg"]
 
 [resource]
 script = ExtResource("1_cfg")
 fuel_max = 200.0
-base_run_speed = 12.0
-ground_accel = 60.0
-ground_friction = 45.0
-jump_velocity = 9.0
-gravity = 14.0
 terminal_velocity = 80.0
-overspeed_decay = 60.0
-terminal_fall_speed = 40.0
 air_control_accel = 15.0
 air_strafe_accel = 20.0
 air_strafe_speed_cap = 28.0
 air_strafe_vertical_cap = 16.0
-air_strafe_cost_per_sec = 6.0
-double_jump_cost = 8.0
 double_jump_strength = 35.0
-double_jump_cooldown = 0.35
-air_dash_cost = 25.0
 air_dash_impulse = 50.0
 air_dash_cooldown = 0.3
-down_dash_cost = 12.0
 down_dash_speed = 65.0
 wall_probe_distance = 2.8
-min_wallrun_speed = 6.0
-wallrun_max_duration = 2.5
 wallrun_accel = 60.0
 wallrun_max_speed = 80.0
-wallrun_gravity = 2.0
-wall_stick_speed = 3.0
-wallrun_camera_roll_deg = 18.0
-wallrun_camera_roll_speed = 14.0
-wallrun_fov_bonus = 7.0
-dismount_fuel_per_speed = 1.4
-dismount_fuel_max = 60.0
-dismount_boost_factor = 0.18
-dismount_up_velocity = 6.0
 dismount_push_off = 14.0
-wall_rearm_time = 0.18
-dash_wall_rearm_time = 0.7
-glide_speed_retention = 0.9
-glide_max_impact_angle_deg = 75.0
-wall_coyote_time = 0.15
-ground_coyote_time = 0.12
-jump_buffer_time = 0.12
-ramp_grace_window = 1.2
-ramp_decay_rate = 10.0
-kill_y = -40.0
-reset_countdown = 3.0

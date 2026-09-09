@@ -1,9 +1,10 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=34 format=3]
 
 [ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
 [ext_resource type="Script" path="res://src/ghost/ghost.gd" id="3_ghost"]
 [ext_resource type="Script" path="res://src/race/finish_zone.gd" id="4_finish"]
+[ext_resource type="Script" path="res://src/race/kill_zone.gd" id="5_kill"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
 sky_top_color = Color(0.25, 0.32, 0.45, 1)
@@ -60,6 +61,57 @@ size = Vector3(24, 30, 3)
 [sub_resource type="StandardMaterial3D" id="mat_cyl"]
 albedo_color = Color(0.85, 0.5, 0.2, 1)
 
+[sub_resource type="BoxShape3D" id="kshape0"]
+size = Vector3(68.0, 2, 126.0)
+
+[sub_resource type="BoxShape3D" id="kshape1"]
+size = Vector3(68.0, 2, 68.0)
+
+[sub_resource type="BoxShape3D" id="kshape2"]
+size = Vector3(68.0, 2, 34.0)
+
+[sub_resource type="BoxShape3D" id="kshape3"]
+size = Vector3(68.0, 2, 17.2)
+
+[sub_resource type="BoxShape3D" id="kshape4"]
+size = Vector3(68.0, 2, 67.6)
+
+[sub_resource type="BoxShape3D" id="kshape5"]
+size = Vector3(68.0, 2, 106.0)
+
+[sub_resource type="BoxShape3D" id="kshape6"]
+size = Vector3(68.0, 2, 36.0)
+
+[sub_resource type="BoxShape3D" id="kshape7"]
+size = Vector3(68.0, 2, 18.0)
+
+[sub_resource type="BoxShape3D" id="kshape8"]
+size = Vector3(68.0, 2, 72.0)
+
+[sub_resource type="BoxShape3D" id="kshape9"]
+size = Vector3(68.0, 2, 32.0)
+
+[sub_resource type="BoxShape3D" id="kshape10"]
+size = Vector3(68.0, 2, 16.4)
+
+[sub_resource type="BoxShape3D" id="kshape11"]
+size = Vector3(68.0, 2, 63.2)
+
+[sub_resource type="BoxShape3D" id="kshape12"]
+size = Vector3(68.0, 2, 146.0)
+
+[sub_resource type="BoxShape3D" id="kshape13"]
+size = Vector3(68.0, 2, 30.0)
+
+[sub_resource type="BoxShape3D" id="kshape14"]
+size = Vector3(68.0, 2, 15.6)
+
+[sub_resource type="BoxShape3D" id="kshape15"]
+size = Vector3(68.0, 2, 58.8)
+
+[sub_resource type="BoxShape3D" id="kshape16"]
+size = Vector3(68.0, 2, 136.0)
+
 [node name="ParkourTrack" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -101,6 +153,14 @@ size = Vector3(26.0, 1, 26)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
+[node name="KillZone1" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.000, 34.000, 60.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape1" type="CollisionShape3D" parent="KillZone1"]
+shape = SubResource("kshape0")
+
 [node name="H1p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 12.500, 54.000, 60.000)
 use_collision = true
@@ -119,6 +179,14 @@ use_collision = true
 size = Vector3(26.0, 2, 125.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone2" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 34.000, 132.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape2" type="CollisionShape3D" parent="KillZone2"]
+shape = SubResource("kshape1")
 
 [node name="C1Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 70.000, 132.000)
@@ -196,6 +264,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone3" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 34.000, 132.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape3" type="CollisionShape3D" parent="KillZone3"]
+shape = SubResource("kshape2")
+
 [node name="H2p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 54.000, 144.500)
 use_collision = true
@@ -221,6 +297,14 @@ use_collision = true
 size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
+[node name="KillZone4" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -46.102, 34.511, 132.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape4" type="CollisionShape3D" parent="KillZone4"]
+shape = SubResource("kshape3")
+
 [node name="H2p2WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -44.359, 54.435, 144.500)
 use_collision = true
@@ -239,6 +323,14 @@ use_collision = true
 size = Vector3(26.0, 2, 16.200000000000003)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone5" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, -0.98481, 0.00000, 0.98481, 0.17365, 1.00000, -0.00000, 0.00000, -82.531, 40.416, 132.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape5" type="CollisionShape3D" parent="KillZone5"]
+shape = SubResource("kshape4")
 
 [node name="H2p3WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.17365, -0.98481, 0.00000, 0.98481, 0.17365, 1.00000, -0.00000, 0.00000, -79.058, 60.112, 144.500)
@@ -259,6 +351,14 @@ size = Vector3(26.0, 2, 66.6)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
+[node name="KillZone6" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -117.923, 46.184, 132.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape6" type="CollisionShape3D" parent="KillZone6"]
+shape = SubResource("kshape3")
+
 [node name="H2p4WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -116.180, 66.108, 144.500)
 use_collision = true
@@ -277,6 +377,14 @@ use_collision = true
 size = Vector3(26.0, 2, 16.200000000000003)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone7" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 46.649, 132.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape7" type="CollisionShape3D" parent="KillZone7"]
+shape = SubResource("kshape2")
 
 [node name="H2p5WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 66.649, 144.500)
@@ -302,6 +410,14 @@ transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1
 use_collision = true
 size = Vector3(5, 29, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone8" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -162.979, 46.649, 132.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape8" type="CollisionShape3D" parent="KillZone8"]
+shape = SubResource("kshape1")
 
 [node name="C2Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -162.979, 82.649, 132.000)
@@ -379,6 +495,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone9" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -162.979, 46.649, 194.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape9" type="CollisionShape3D" parent="KillZone9"]
+shape = SubResource("kshape5")
+
 [node name="H3p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -150.479, 66.649, 194.000)
 use_collision = true
@@ -403,6 +527,14 @@ transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.
 use_collision = true
 size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone10" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -162.979, 46.649, 256.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape10" type="CollisionShape3D" parent="KillZone10"]
+shape = SubResource("kshape1")
 
 [node name="C3Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -162.979, 82.649, 256.000)
@@ -480,6 +612,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone11" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 46.649, 256.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape11" type="CollisionShape3D" parent="KillZone11"]
+shape = SubResource("kshape6")
+
 [node name="H4p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 66.649, 243.500)
 use_collision = true
@@ -505,6 +645,14 @@ use_collision = true
 size = Vector3(24.0, 8, 1.5)
 material = SubResource("mat_obstacle")
 
+[node name="KillZone12" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -115.525, 46.149, 256.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape12" type="CollisionShape3D" parent="KillZone12"]
+shape = SubResource("kshape7")
+
 [node name="H4p2WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -113.782, 66.073, 243.500)
 use_collision = true
@@ -523,6 +671,14 @@ use_collision = true
 size = Vector3(26.0, 2, 17.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone13" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.17365, 0.98481, 0.00000, 0.98481, -0.17365, -1.00000, 0.00000, 0.00000, -77.568, 39.964, 256.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape13" type="CollisionShape3D" parent="KillZone13"]
+shape = SubResource("kshape8")
 
 [node name="H4p3WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.17365, 0.98481, 0.00000, 0.98481, -0.17365, -1.00000, 0.00000, 0.00000, -74.095, 59.660, 243.500)
@@ -543,6 +699,14 @@ size = Vector3(26.0, 2, 71.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
+[node name="KillZone14" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -38.573, 33.642, 256.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape14" type="CollisionShape3D" parent="KillZone14"]
+shape = SubResource("kshape7")
+
 [node name="H4p4WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -36.830, 53.566, 243.500)
 use_collision = true
@@ -561,6 +725,14 @@ use_collision = true
 size = Vector3(26.0, 2, 17.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone15" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 33.096, 256.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape15" type="CollisionShape3D" parent="KillZone15"]
+shape = SubResource("kshape6")
 
 [node name="H4p5WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 53.096, 243.500)
@@ -586,6 +758,14 @@ transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1
 use_collision = true
 size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone16" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 9.927, 33.096, 256.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape16" type="CollisionShape3D" parent="KillZone16"]
+shape = SubResource("kshape1")
 
 [node name="C4Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 9.927, 69.096, 256.000)
@@ -663,6 +843,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone17" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 33.096, 281.000)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape17" type="CollisionShape3D" parent="KillZone17"]
+shape = SubResource("kshape9")
+
 [node name="H5p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 22.427, 53.096, 281.000)
 use_collision = true
@@ -688,6 +876,14 @@ use_collision = true
 size = Vector3(5, 29, 1.5)
 material = SubResource("mat_obstacle")
 
+[node name="KillZone18" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 33.673, 299.799)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape18" type="CollisionShape3D" parent="KillZone18"]
+shape = SubResource("kshape10")
+
 [node name="H5p2WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 22.427, 53.563, 297.708)
 use_collision = true
@@ -706,6 +902,14 @@ use_collision = true
 size = Vector3(26.0, 2, 15.4)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone19" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, 0.20791, 0.00000, -0.20791, 0.97815, 9.927, 40.261, 333.566)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape19" type="CollisionShape3D" parent="KillZone19"]
+shape = SubResource("kshape11")
 
 [node name="H5p3WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, 0.20791, 0.00000, -0.20791, 0.97815, 22.427, 59.824, 329.407)
@@ -726,6 +930,14 @@ size = Vector3(26.0, 2, 62.2)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
+[node name="KillZone20" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 46.653, 366.092)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape20" type="CollisionShape3D" parent="KillZone20"]
+shape = SubResource("kshape10")
+
 [node name="H5p4WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 22.427, 66.543, 364.001)
 use_collision = true
@@ -744,6 +956,14 @@ use_collision = true
 size = Vector3(26.0, 2, 15.4)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone21" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 47.163, 383.636)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape21" type="CollisionShape3D" parent="KillZone21"]
+shape = SubResource("kshape9")
 
 [node name="H5p5WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 22.427, 67.163, 383.636)
@@ -769,6 +989,14 @@ transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.
 use_collision = true
 size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone22" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 9.927, 47.163, 408.636)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape22" type="CollisionShape3D" parent="KillZone22"]
+shape = SubResource("kshape1")
 
 [node name="C5Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 9.927, 83.163, 408.636)
@@ -846,6 +1074,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone23" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 47.163, 408.636)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape23" type="CollisionShape3D" parent="KillZone23"]
+shape = SubResource("kshape12")
+
 [node name="H6p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 67.163, 421.136)
 use_collision = true
@@ -870,6 +1106,14 @@ transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1
 use_collision = true
 size = Vector3(24.0, 8, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone24" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -154.073, 47.163, 408.636)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape24" type="CollisionShape3D" parent="KillZone24"]
+shape = SubResource("kshape1")
 
 [node name="C6Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -154.073, 83.163, 408.636)
@@ -947,6 +1191,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone25" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 47.163, 432.636)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape25" type="CollisionShape3D" parent="KillZone25"]
+shape = SubResource("kshape13")
+
 [node name="H7p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -141.573, 67.163, 432.636)
 use_collision = true
@@ -972,6 +1224,14 @@ use_collision = true
 size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
+[node name="KillZone26" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 46.694, 448.783)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape26" type="CollisionShape3D" parent="KillZone26"]
+shape = SubResource("kshape14")
+
 [node name="H7p2WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -141.573, 66.585, 450.873)
 use_collision = true
@@ -990,6 +1250,14 @@ use_collision = true
 size = Vector3(26.0, 2, 14.6)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone27" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, -0.20791, 0.00000, 0.20791, 0.97815, -154.073, 40.802, 478.759)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape27" type="CollisionShape3D" parent="KillZone27"]
+shape = SubResource("kshape15")
 
 [node name="H7p3WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, -0.20791, 0.00000, 0.20791, 0.97815, -141.573, 60.365, 482.917)
@@ -1010,6 +1278,14 @@ size = Vector3(26.0, 2, 57.8)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
+[node name="KillZone28" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 34.713, 509.976)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape28" type="CollisionShape3D" parent="KillZone28"]
+shape = SubResource("kshape14")
+
 [node name="H7p4WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -141.573, 54.604, 512.067)
 use_collision = true
@@ -1028,6 +1304,14 @@ use_collision = true
 size = Vector3(26.0, 2, 14.6)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone29" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 34.179, 527.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape29" type="CollisionShape3D" parent="KillZone29"]
+shape = SubResource("kshape13")
 
 [node name="H7p5WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -141.573, 54.179, 527.377)
@@ -1053,6 +1337,14 @@ transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.
 use_collision = true
 size = Vector3(5, 29, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone30" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -154.073, 34.179, 551.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape30" type="CollisionShape3D" parent="KillZone30"]
+shape = SubResource("kshape1")
 
 [node name="C7Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -154.073, 70.179, 551.377)
@@ -1130,6 +1422,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone31" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 34.179, 551.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape31" type="CollisionShape3D" parent="KillZone31"]
+shape = SubResource("kshape6")
+
 [node name="H8p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 54.179, 538.877)
 use_collision = true
@@ -1155,6 +1455,14 @@ use_collision = true
 size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
+[node name="KillZone32" type="Area3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -105.573, 34.724, 551.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape32" type="CollisionShape3D" parent="KillZone32"]
+shape = SubResource("kshape7")
+
 [node name="H8p2WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -107.316, 54.648, 538.877)
 use_collision = true
@@ -1173,6 +1481,14 @@ use_collision = true
 size = Vector3(26.0, 2, 17.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone33" type="Area3D" parent="."]
+transform = Transform3D(0.00000, -0.17365, 0.98481, 0.00000, 0.98481, 0.17365, -1.00000, -0.00000, 0.00000, -66.578, 41.046, 551.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape33" type="CollisionShape3D" parent="KillZone33"]
+shape = SubResource("kshape8")
 
 [node name="H8p3WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, -0.17365, 0.98481, 0.00000, 0.98481, 0.17365, -1.00000, -0.00000, 0.00000, -70.051, 60.742, 538.877)
@@ -1193,6 +1509,14 @@ size = Vector3(26.0, 2, 71.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
+[node name="KillZone34" type="Area3D" parent="."]
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -28.621, 47.231, 551.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape34" type="CollisionShape3D" parent="KillZone34"]
+shape = SubResource("kshape7")
+
 [node name="H8p4WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -30.364, 67.155, 538.877)
 use_collision = true
@@ -1211,6 +1535,14 @@ use_collision = true
 size = Vector3(26.0, 2, 17.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone35" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 47.731, 551.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape35" type="CollisionShape3D" parent="KillZone35"]
+shape = SubResource("kshape6")
 
 [node name="H8p5WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 67.731, 538.877)
@@ -1236,6 +1568,14 @@ transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1
 use_collision = true
 size = Vector3(24.0, 8, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone36" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 18.833, 47.731, 551.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape36" type="CollisionShape3D" parent="KillZone36"]
+shape = SubResource("kshape1")
 
 [node name="C8Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 18.833, 83.731, 551.377)
@@ -1313,6 +1653,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone37" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 18.833, 47.731, 628.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape37" type="CollisionShape3D" parent="KillZone37"]
+shape = SubResource("kshape16")
+
 [node name="H9p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 31.333, 67.731, 628.377)
 use_collision = true
@@ -1337,6 +1685,14 @@ transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.
 use_collision = true
 size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone38" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 18.833, 47.731, 705.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape38" type="CollisionShape3D" parent="KillZone38"]
+shape = SubResource("kshape1")
 
 [node name="C9Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 18.833, 83.731, 705.377)
@@ -1414,6 +1770,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone39" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 47.731, 705.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape39" type="CollisionShape3D" parent="KillZone39"]
+shape = SubResource("kshape13")
+
 [node name="H10p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 67.731, 692.877)
 use_collision = true
@@ -1439,6 +1803,14 @@ use_collision = true
 size = Vector3(5, 29, 1.5)
 material = SubResource("mat_obstacle")
 
+[node name="KillZone40" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 59.203, 47.411, 705.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape40" type="CollisionShape3D" parent="KillZone40"]
+shape = SubResource("kshape14")
+
 [node name="H10p2WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 60.598, 67.362, 692.877)
 use_collision = true
@@ -1457,6 +1829,14 @@ use_collision = true
 size = Vector3(26.0, 2, 14.6)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone41" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.13917, 0.99027, 0.00000, 0.99027, -0.13917, -1.00000, 0.00000, 0.00000, 89.718, 43.446, 705.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape41" type="CollisionShape3D" parent="KillZone41"]
+shape = SubResource("kshape15")
 
 [node name="H10p3WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.13917, 0.99027, 0.00000, 0.99027, -0.13917, -1.00000, 0.00000, 0.00000, 92.501, 63.251, 692.877)
@@ -1477,6 +1857,14 @@ size = Vector3(26.0, 2, 57.8)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
+[node name="KillZone42" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 121.066, 39.393, 705.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape42" type="CollisionShape3D" parent="KillZone42"]
+shape = SubResource("kshape14")
+
 [node name="H10p4WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 122.461, 59.344, 692.877)
 use_collision = true
@@ -1495,6 +1883,14 @@ use_collision = true
 size = Vector3(26.0, 2, 14.6)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone43" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 39.043, 705.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape43" type="CollisionShape3D" parent="KillZone43"]
+shape = SubResource("kshape13")
 
 [node name="H10p5WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 59.043, 692.877)
@@ -1520,6 +1916,14 @@ transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1
 use_collision = true
 size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
+
+[node name="KillZone44" type="Area3D" parent="."]
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 162.272, 39.043, 705.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape44" type="CollisionShape3D" parent="KillZone44"]
+shape = SubResource("kshape1")
 
 [node name="C10Roof" type="CSGBox3D" parent="."]
 transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 162.272, 75.043, 705.377)
@@ -1597,6 +2001,14 @@ size = Vector3(6, 1.4, 0.6)
 cast_shadow = 0
 material = SubResource("mat_arrow")
 
+[node name="KillZone45" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 39.043, 732.377)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape45" type="CollisionShape3D" parent="KillZone45"]
+shape = SubResource("kshape6")
+
 [node name="H11p1WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 174.772, 59.043, 732.377)
 use_collision = true
@@ -1622,6 +2034,14 @@ use_collision = true
 size = Vector3(24.0, 8, 1.5)
 material = SubResource("mat_obstacle")
 
+[node name="KillZone46" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 39.477, 753.781)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape46" type="CollisionShape3D" parent="KillZone46"]
+shape = SubResource("kshape7")
+
 [node name="H11p2WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 174.772, 59.428, 752.386)
 use_collision = true
@@ -1640,6 +2060,14 @@ use_collision = true
 size = Vector3(26.0, 2, 17.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone47" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99027, 0.13917, 0.00000, -0.13917, 0.99027, 162.272, 44.532, 792.862)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape47" type="CollisionShape3D" parent="KillZone47"]
+shape = SubResource("kshape8")
 
 [node name="H11p3WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99027, 0.13917, 0.00000, -0.13917, 0.99027, 174.772, 64.337, 790.078)
@@ -1660,6 +2088,14 @@ size = Vector3(26.0, 2, 71.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
+[node name="KillZone48" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 49.499, 831.109)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape48" type="CollisionShape3D" parent="KillZone48"]
+shape = SubResource("kshape7")
+
 [node name="H11p4WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 174.772, 69.450, 829.714)
 use_collision = true
@@ -1678,6 +2114,14 @@ use_collision = true
 size = Vector3(26.0, 2, 17.0)
 cast_shadow = 0
 material = SubResource("mat_floor")
+
+[node name="KillZone49" type="Area3D" parent="."]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 49.903, 851.676)
+script = ExtResource("5_kill")
+collision_mask = 4
+
+[node name="KShape49" type="CollisionShape3D" parent="KillZone49"]
+shape = SubResource("kshape6")
 
 [node name="H11p5WallL" type="CSGBox3D" parent="."]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 174.772, 69.903, 851.676)

@@ -28,7 +28,7 @@ const CANISTER := preload("res://src/weapons/canister.tscn")
 @onready var vm_right: MeshInstance3D = $Head/Camera3D/ViewmodelR
 @onready var puppet_arm_l: MeshInstance3D = $PuppetArmL
 @onready var puppet_arm_r: MeshInstance3D = $PuppetArmR
-@onready var trail: GPUParticles3D = $Trail
+
 
 var state := MoveState.AIRBORNE
 var fuel := 0.0
@@ -87,6 +87,10 @@ var sword_side := "L"
 var _net_prog := Vector2.ZERO
 var _rail_vm_mesh: BoxMesh
 var _sword_vm_mesh: BoxMesh
+var _trail_node: MeshInstance3D
+var _trail_mesh: ImmediateMesh
+var _trail_pts: Array[Vector3] = []
+var _trail_times: Array[float] = []
 
 
 func _ready() -> void:
@@ -105,6 +109,16 @@ func _ready() -> void:
 	_sword_vm_mesh = BoxMesh.new()
 	_sword_vm_mesh.size = Vector3(0.05, 0.2, 1.05)
 	_apply_loadout_visuals()
+	_trail_mesh = ImmediateMesh.new()
+	_trail_node = MeshInstance3D.new()
+	_trail_node.mesh = _trail_mesh
+	_trail_node.top_level = true
+	var tmat := StandardMaterial3D.new()
+	tmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	tmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	tmat.vertex_color_use_as_albedo = true
+	_trail_node.material_override = tmat
+	add_child(_trail_node)
 	base_fov = camera.fov
 	if ghost_controlled:
 		# TAS/bot body: real physics, no human input, translucent orange.
@@ -216,7 +230,6 @@ func _physics_process(delta: float) -> void:
 	_update_state()
 	_camera_feel(delta)
 	_update_viewmodels(delta)
-	trail.emitting = horizontal_speed() > config.base_run_speed * 1.2
 
 	var manual_respawn := cmd_respawn and not Net.active
 	if manual_respawn or global_position.y < config.kill_y:
@@ -234,10 +247,10 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	_update_trail_line()
 	if is_multiplayer_authority():
 		return
 	global_position = global_position.lerp(_net_target_pos, 1.0 - exp(-20.0 * delta))
-	trail.emitting = velocity.length() > config.base_run_speed * 1.2
 	# Rail arms glow with charge (the audible-tell stand-in); swords idle warm
 	for i in 2:
 		var mat := (puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
@@ -612,6 +625,32 @@ func _spawn_beam(from: Vector3, to: Vector3) -> void:
 	tw.tween_callback(mi.queue_free)
 
 
+## One long thin orange line tracing the recent flight path: world-space
+## line strip over a rolling position history (2 m samples, ~4 s / 150 pt
+## cap), alpha fading toward the tail. Replaces the old particle puffs.
+func _update_trail_line() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if _trail_pts.is_empty() \
+			or _trail_pts[-1].distance_to(global_position) > 2.0:
+		_trail_pts.append(global_position + Vector3.UP * 0.4)
+		_trail_times.append(now)
+	while not _trail_times.is_empty() \
+			and (now - _trail_times[0] > 4.0 or _trail_pts.size() > 150):
+		_trail_pts.pop_front()
+		_trail_times.pop_front()
+	_trail_node.global_transform = Transform3D.IDENTITY
+	_trail_mesh.clear_surfaces()
+	if _trail_pts.size() < 2:
+		return
+	_trail_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	var n := _trail_pts.size()
+	for i in n:
+		var a := float(i) / float(n - 1)
+		_trail_mesh.surface_set_color(Color(1.0, 0.55, 0.1, a * 0.8))
+		_trail_mesh.surface_add_vertex(_trail_pts[i])
+	_trail_mesh.surface_end()
+
+
 func _update_viewmodels(delta: float) -> void:
 	for i in 2:
 		var vm := vm_left if i == 0 else vm_right
@@ -853,6 +892,8 @@ func _respawn() -> void:
 	run_time = 0.0
 	run_finished = false
 	countdown = config.reset_countdown
+	_trail_pts.clear()
+	_trail_times.clear()
 	# Deterministic reset: recordings and replays must start from identical
 	# state, so no timer or arm state survives a respawn
 	dash_cooldown_timer = 0.0

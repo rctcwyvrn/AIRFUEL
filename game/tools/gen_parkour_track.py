@@ -31,12 +31,28 @@ def cylnode(name, pos, r, h, mat):
             f"use_collision = true\nradius = {r}\nheight = {h}\n"
             f'material = SubResource("{mat}")\n')
 
-HEADER = '''[gd_scene load_steps=16 format=3]
+_kill_n = 0
+KILL_SHAPES = {}  # size tuple -> sub_resource id (all emitted in the header)
+def kill_zone(M, pos, size):
+    global _kill_n
+    _kill_n += 1
+    key = tuple(round(v, 2) for v in size)
+    if key not in KILL_SHAPES:
+        KILL_SHAPES[key] = "kshape%d" % len(KILL_SHAPES)
+    sid = KILL_SHAPES[key]
+    return (f'\n[node name="KillZone{_kill_n}" type="Area3D" parent="."]\n'
+            f"transform = Transform3D({basis_str(M)}, %.3f, %.3f, %.3f)\n" % tuple(pos) +
+            f'script = ExtResource("5_kill")\ncollision_mask = 4\n'
+            f'\n[node name="KShape{_kill_n}" type="CollisionShape3D" parent="KillZone{_kill_n}"]\n'
+            f'shape = SubResource("{sid}")\n')
+
+HEADER = '''[gd_scene load_steps=17 format=3]
 
 [ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
 [ext_resource type="Script" path="res://src/ghost/ghost.gd" id="3_ghost"]
 [ext_resource type="Script" path="res://src/race/finish_zone.gd" id="4_finish"]
+[ext_resource type="Script" path="res://src/race/kill_zone.gd" id="5_kill"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
 sky_top_color = Color(0.25, 0.32, 0.45, 1)
@@ -92,7 +108,7 @@ size = Vector3(24, 30, 3)
 
 [sub_resource type="StandardMaterial3D" id="mat_cyl"]
 albedo_color = Color(0.85, 0.5, 0.2, 1)
-
+<<KILL_SHAPES>>
 [node name="ParkourTrack" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -119,9 +135,10 @@ def hall_part(tag, start, hdg, pitch, L, with_obstacle):
     M = mat_mul(ry(hdg), rx(-a))
     side, lup, fwd3 = col(M, 0), col(M, 1), col(M, 2)
     mid = tuple(start[k] + fwd3[k] * L / 2 for k in range(3))
-    # FLOORLESS variant: no hallway floors — the track is wallrun-only;
-    # falling exits through kill_y and resets the run
-    out = ""
+    # FLOORLESS variant: no hallway floors — the track is wallrun-only.
+    # A KillZone under each part makes falling through an instant reset.
+    kz = tuple(mid[k] - lup[k] * 6.0 for k in range(3))
+    out = kill_zone(M, kz, (W + 44, 2, L + 6))
     for sn, ss in (("L", 1.0), ("R", -1.0)):
         wc = tuple(mid[k] + side[k] * ss * (W/2 + 0.5) + lup[k] * (WH/2 - 1) for k in range(3))
         out += box(f"{tag}Wall{sn}", M, wc, (1, WH + 2, L + 8), "mat_wall")
@@ -187,6 +204,7 @@ for i, (L, pitch, turn) in enumerate(SEGS):
     pc = tuple(pos[k] + d[k] * W / 2 for k in range(3))
     RY = ry(heading)
     sflat = (math.cos(heading), 0.0, -math.sin(heading))
+    body += kill_zone(RY, (pc[0], pc[1] - 6.0, pc[2]), (W + 44, 2, W + 44))
 
     body += box(f"C{i+1}Roof", RY, (pc[0], pc[1] + WH, pc[2]), (W + 6, 2, W + 6), "mat_floor", "cast_shadow = 0\n")
     body += box(f"C{i+1}Far", RY, [pc[0] + d[0]*(W/2 + 0.5), pc[1] + 14, pc[2] + d[2]*(W/2 + 0.5)], (W + 6, WH + 2, 1), "mat_wall")
@@ -230,6 +248,12 @@ script = ExtResource("3_ghost")
 tape_path = "res://tas/parkour.tas"
 waypoints = PackedVector3Array({flat})
 '''
+shape_defs = "".join(
+    '\n[sub_resource type="BoxShape3D" id="%s"]\nsize = Vector3(%s, %s, %s)\n' % (sid, k[0], k[1], k[2])
+    for k, sid in KILL_SHAPES.items())
+body = body.replace("<<KILL_SHAPES>>", shape_defs)
+body = body.replace("[gd_scene load_steps=17 format=3]",
+                    "[gd_scene load_steps=%d format=3]" % (17 + len(KILL_SHAPES)))
 open("game/maps/parkour_track.tscn", "w").write(body)
 print("hallway v3: %d obstacles, arrows at %d corners, %d waypoints, min y %.0f"
       % (obst_n, sum(1 for s in SEGS if s[2] != 0), len(wps), min_y))
