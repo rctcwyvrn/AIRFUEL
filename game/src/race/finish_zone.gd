@@ -11,6 +11,5 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node3D) -> void:
-	if body is AirfuelPlayer and body.is_multiplayer_authority() \
-			and not body.ghost_controlled:
+	if body is AirfuelPlayer and body.is_multiplayer_authority() and not body.ghost_controlled:
 		body.finish_run()

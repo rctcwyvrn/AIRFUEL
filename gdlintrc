@@ -1,0 +1,11 @@
+# gdlint config (gdtoolkit). Run from the repo root: gdlint game/src
+#
+# class-definitions-order is disabled deliberately: scripts group vars
+# thematically (see player.gd's state blocks and its sidecar) instead of
+# by const/export/var kind. Everything else is gdlint defaults.
+disable:
+  - class-definitions-order
+
+# player.gd (the whole kinematic controller + arms + netsync) sits just over
+# the default 1000 after gdformat. Raised, not split — revisit if it grows.
+max-file-lines: 1200

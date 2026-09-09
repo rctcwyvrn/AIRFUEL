@@ -50,8 +50,16 @@ func _load_tape() -> void:
 			continue
 		var c := line.split(" ")
 		if c.size() >= 6:
-			tape.append([c[0].to_float(), c[1].to_float(), c[2].to_float(),
-					c[3].to_float(), c[4].to_float(), c[5].to_int()])
+			tape.append(
+				[
+					c[0].to_float(),
+					c[1].to_float(),
+					c[2].to_float(),
+					c[3].to_float(),
+					c[4].to_float(),
+					c[5].to_int()
+				]
+			)
 	print("Airfuel ghost: tape loaded, %d ticks" % tape.size())
 
 
@@ -135,6 +143,5 @@ func _physics_process(delta: float) -> void:
 		body.cmd_jump = true  # climb: double jump whenever rise is fading
 	# dashes are the fuel hogs: spend only with a deep tank so climbs
 	# always have double-jump budget left
-	if hspeed < 26.0 and to.y > -3.0 and body.fuel > 80.0 \
-			and body.dash_cooldown_timer == 0.0:
+	if hspeed < 26.0 and to.y > -3.0 and body.fuel > 80.0 and body.dash_cooldown_timer == 0.0:
 		body.cmd_dash = true

@@ -102,8 +102,7 @@ func _process(_delta: float) -> void:
 		timer_label.visible = true
 		var t := player.run_time
 		timer_label.text = "%d:%06.3f" % [int(t) / 60, fmod(t, 60.0)]
-		timer_label.modulate = Color(0.3, 1.0, 0.4) if player.run_finished \
-				else Color(1, 1, 1)
+		timer_label.modulate = Color(0.3, 1.0, 0.4) if player.run_finished else Color(1, 1, 1)
 	else:
 		timer_label.visible = false
 	if player.countdown > 0.0:
@@ -174,8 +173,12 @@ func _scan_threats() -> void:
 	var nearest_dist := INF
 	for p: Node in get_tree().get_nodes_in_group("player"):
 		var enemy := p as AirfuelPlayer
-		if enemy == null or enemy == player or enemy.ghost_controlled \
-				or enemy.is_multiplayer_authority():
+		if (
+			enemy == null
+			or enemy == player
+			or enemy.ghost_controlled
+			or enemy.is_multiplayer_authority()
+		):
 			continue
 		var bearing := _bearing_to(enemy.global_position)
 		for i in 2:
@@ -205,8 +208,7 @@ func _scan_threats() -> void:
 
 ## Yaw-relative bearing to a world position: 0 = ahead, +PI/2 = right.
 func _bearing_to(world_pos: Vector3) -> float:
-	var local := player.global_transform.basis.inverse() \
-			* (world_pos - player.global_position)
+	var local := player.global_transform.basis.inverse() * (world_pos - player.global_position)
 	return atan2(local.x, -local.z)
 
 

@@ -23,8 +23,13 @@ func _ready() -> void:
 	$VBox/ChallengeBox/DeclineButton.pressed.connect(func() -> void: _reply(false))
 	$VBox/LeaveButton.pressed.connect(Net.leave_lobby)
 	if not Net.last_match_result.is_empty():
-		result_label.text = "%s%s" % [Net.last_match_result.text,
-				"  (opponent left)" if Net.last_match_result.forfeit else ""]
+		result_label.text = (
+			"%s%s"
+			% [
+				Net.last_match_result.text,
+				"  (opponent left)" if Net.last_match_result.forfeit else ""
+			]
+		)
 		result_label.visible = true
 	_rebuild(Net.last_roster)
 

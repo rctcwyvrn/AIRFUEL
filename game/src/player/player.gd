@@ -30,7 +30,6 @@ const CANISTER := preload("res://src/weapons/canister.tscn")
 @onready var puppet_arm_l: MeshInstance3D = $PuppetArmL
 @onready var puppet_arm_r: MeshInstance3D = $PuppetArmR
 
-
 var state := MoveState.AIRBORNE
 var fuel := 0.0
 
@@ -215,8 +214,9 @@ func _physics_process(delta: float) -> void:
 	var speed := velocity.length()
 	if speed > config.terminal_velocity:
 		# Soft ceiling: overspeed (sword lunge) decays fast instead of clamping
-		velocity *= move_toward(speed, config.terminal_velocity,
-				config.overspeed_decay * delta) / speed
+		velocity *= (
+			move_toward(speed, config.terminal_velocity, config.overspeed_decay * delta) / speed
+		)
 	if move_locked:
 		# Charging bleeds you down to a slower, more readable trajectory
 		velocity = velocity.limit_length(combat.charge_speed_cap)
@@ -235,10 +235,20 @@ func _physics_process(delta: float) -> void:
 		_respawn()
 
 	if recording:
-		var flags := (int(cmd_jump) | int(cmd_dash) << 1 | int(cmd_fire_l) << 2
-				| int(cmd_fire_r) << 3 | int(cmd_swap) << 4 | int(cmd_respawn) << 5)
-		_tape_lines.append("%.5f %.5f %.3f %.3f %.1f %d" % [
-				rotation.y, head.rotation.x, cmd_move.x, cmd_move.y, cmd_vert, flags])
+		var flags := (
+			int(cmd_jump)
+			| int(cmd_dash) << 1
+			| int(cmd_fire_l) << 2
+			| int(cmd_fire_r) << 3
+			| int(cmd_swap) << 4
+			| int(cmd_respawn) << 5
+		)
+		_tape_lines.append(
+			(
+				"%.5f %.5f %.3f %.3f %.1f %d"
+				% [rotation.y, head.rotation.x, cmd_move.x, cmd_move.y, cmd_vert, flags]
+			)
+		)
 
 	if Net.active:
 		_send_my_state()
@@ -248,12 +258,26 @@ func _physics_process(delta: float) -> void:
 ## concurrent 1v1s never see each other's traffic.
 func _send_my_state() -> void:
 	if Net.match_opponent != 0:
-		_send_state.rpc_id(Net.match_opponent, global_position, velocity,
-				rotation.y, head.rotation.x,
-				arm_progress_left(), arm_progress_right(), loadout_index)
+		_send_state.rpc_id(
+			Net.match_opponent,
+			global_position,
+			velocity,
+			rotation.y,
+			head.rotation.x,
+			arm_progress_left(),
+			arm_progress_right(),
+			loadout_index
+		)
 	else:
-		_send_state.rpc(global_position, velocity, rotation.y, head.rotation.x,
-				arm_progress_left(), arm_progress_right(), loadout_index)
+		_send_state.rpc(
+			global_position,
+			velocity,
+			rotation.y,
+			head.rotation.x,
+			arm_progress_left(),
+			arm_progress_right(),
+			loadout_index
+		)
 
 
 func _process(delta: float) -> void:
@@ -263,7 +287,9 @@ func _process(delta: float) -> void:
 	global_position = global_position.lerp(_net_target_pos, 1.0 - exp(-20.0 * delta))
 	# Rail arms glow with charge (the audible-tell stand-in); swords idle warm
 	for i in 2:
-		var mat := (puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
+		var mat := (
+			(puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
+		)
 		mat.emission_energy_multiplier = (_net_prog[i] * 3.0) if arm_types[i] == "rail" else 0.4
 
 
@@ -280,8 +306,10 @@ func _ground_move(wish: Vector3, delta: float) -> void:
 	else:
 		# Excess speed above base run bleeds off on the ground; the air (ramp
 		# grace) and walls are where speed lives.
-		var speed := maxf(config.base_run_speed,
-				move_toward(h.length(), config.base_run_speed, config.ground_friction * delta))
+		var speed := maxf(
+			config.base_run_speed,
+			move_toward(h.length(), config.base_run_speed, config.ground_friction * delta)
+		)
 		h = h.move_toward(wish * speed, config.ground_accel * delta)
 	velocity.x = h.x
 	velocity.z = h.z
@@ -297,16 +325,20 @@ func _air_move(wish: Vector3, delta: float) -> void:
 
 	if wish != Vector3.ZERO:
 		_air_accelerate(wish, config.air_control_accel, config.base_run_speed, delta)
-		if velocity.dot(wish) < config.air_strafe_speed_cap \
-				and _spend(config.air_strafe_cost_per_sec * delta):
+		if (
+			velocity.dot(wish) < config.air_strafe_speed_cap
+			and _spend(config.air_strafe_cost_per_sec * delta)
+		):
 			_air_accelerate(wish, config.air_strafe_accel, config.air_strafe_speed_cap, delta)
 
 	# Q vertical strafe: fueled downward thrust only
 	var vert := 0.0 if move_locked else cmd_vert
 	if vert != 0.0:
 		var vdir := Vector3.UP * vert
-		if velocity.dot(vdir) < config.air_strafe_vertical_cap \
-				and _spend(config.air_strafe_cost_per_sec * delta):
+		if (
+			velocity.dot(vdir) < config.air_strafe_vertical_cap
+			and _spend(config.air_strafe_cost_per_sec * delta)
+		):
 			_air_accelerate(vdir, config.air_strafe_accel, config.air_strafe_vertical_cap, delta)
 
 	if ramp_grace_timer > 0.0:
@@ -369,15 +401,19 @@ func _wallrun_move(delta: float) -> void:
 ## near-nothing). A jump dismount also gets the speed boost; falling off or
 ## timing out grants fuel only.
 func _dismount(jumped: bool) -> void:
-	var grant := clampf((wall_speed - config.min_wallrun_speed) * config.dismount_fuel_per_speed,
-			0.0, config.dismount_fuel_max)
+	var grant := clampf(
+		(wall_speed - config.min_wallrun_speed) * config.dismount_fuel_per_speed,
+		0.0,
+		config.dismount_fuel_max
+	)
 	fuel = minf(config.fuel_max, fuel + grant)
 
 	if jumped:
 		var flat := Vector3(velocity.x, 0.0, velocity.z)
 		var dir := flat.normalized() if flat.length() > 0.1 else -global_transform.basis.z
-		var boosted := minf(wall_speed * (1.0 + config.dismount_boost_factor),
-				config.terminal_velocity)
+		var boosted := minf(
+			wall_speed * (1.0 + config.dismount_boost_factor), config.terminal_velocity
+		)
 		velocity.x = dir.x * boosted + wall_normal.x * config.dismount_push_off
 		velocity.z = dir.z * boosted + wall_normal.z * config.dismount_push_off
 		velocity.y = maxf(velocity.y, config.dismount_up_velocity)
@@ -410,8 +446,10 @@ func _try_attach_wall() -> void:
 		var hit := _probe_wall_at(Vector3(cos(ang), 0.0, sin(ang)))
 		if hit.is_empty():
 			continue
-		if wall_rearm_timer > 0.0 \
-				and (hit.normal as Vector3).angle_to(last_wall_normal) < deg_to_rad(25.0):
+		if (
+			wall_rearm_timer > 0.0
+			and (hit.normal as Vector3).angle_to(last_wall_normal) < deg_to_rad(25.0)
+		):
 			continue
 		if velocity.dot(hit.normal) > 2.0:
 			continue
@@ -432,9 +470,11 @@ func _try_attach_wall() -> void:
 func _probe_wall_at(dir: Vector3, dist_scale := 1.0) -> Dictionary:
 	var space := get_world_3d().direct_space_state
 	var params := PhysicsRayQueryParameters3D.create(
-			global_position,
-			global_position + dir.normalized() * config.wall_probe_distance * dist_scale,
-			collision_mask, [get_rid()])
+		global_position,
+		global_position + dir.normalized() * config.wall_probe_distance * dist_scale,
+		collision_mask,
+		[get_rid()]
+	)
 	var hit := space.intersect_ray(params)
 	if hit.is_empty() or absf(hit.normal.y) > 0.4:
 		return {}
@@ -528,8 +568,9 @@ func _sword_hit_check() -> void:
 			node.take_hit(99)
 			shot_fired.emit(sword_side, "kill")
 		elif node is AirfuelPlayer:
-			node.take_damage.rpc_id(node.get_multiplayer_authority(), 99,
-					multiplayer.get_unique_id())
+			node.take_damage.rpc_id(
+				node.get_multiplayer_authority(), 99, multiplayer.get_unique_id()
+			)
 		return
 
 
@@ -593,8 +634,10 @@ func _fire_rail(arm: RailArm) -> void:
 		elif collider is AirfuelPlayer and not collider.ghost_controlled:
 			result = "body"
 			collider.take_damage.rpc_id(
-					collider.get_multiplayer_authority(), combat.damage_body,
-					multiplayer.get_unique_id())
+				collider.get_multiplayer_authority(),
+				combat.damage_body,
+				multiplayer.get_unique_id()
+			)
 	arm.on_fired()
 	var side_sign := 1.0 if side == "R" else -1.0
 	var vm := vm_right if side == "R" else vm_left
@@ -643,12 +686,10 @@ func _spawn_beam(from: Vector3, to: Vector3) -> void:
 ## cap), alpha fading toward the tail. Replaces the old particle puffs.
 func _update_trail_line() -> void:
 	var now := Time.get_ticks_msec() / 1000.0
-	if _trail_pts.is_empty() \
-			or _trail_pts[-1].distance_to(global_position) > 2.0:
+	if _trail_pts.is_empty() or _trail_pts[-1].distance_to(global_position) > 2.0:
 		_trail_pts.append(global_position + Vector3.UP * 0.4)
 		_trail_times.append(now)
-	while not _trail_times.is_empty() \
-			and (now - _trail_times[0] > 4.0 or _trail_pts.size() > 150):
+	while not _trail_times.is_empty() and (now - _trail_times[0] > 4.0 or _trail_pts.size() > 150):
 		_trail_pts.pop_front()
 		_trail_times.pop_front()
 	_trail_node.global_transform = Transform3D.IDENTITY
@@ -683,7 +724,9 @@ func _spawn_canister(side_sign: float, cam: Transform3D) -> void:
 	var c := CANISTER.instantiate() as RigidBody3D
 	get_parent().add_child(c)
 	c.global_position = cam.origin + cam.basis.x * 0.35 * side_sign - cam.basis.y * 0.1
-	c.linear_velocity = velocity + cam.basis.x * side_sign * 2.5 + cam.basis.y * 2.0 + cam.basis.z * 1.5
+	c.linear_velocity = (
+		velocity + cam.basis.x * side_sign * 2.5 + cam.basis.y * 2.0 + cam.basis.z * 1.5
+	)
 	c.angular_velocity = Vector3(randf_range(-12, 12), randf_range(-12, 12), randf_range(-12, 12))
 
 
@@ -755,8 +798,9 @@ func _apply_glide(pre_vel: Vector3) -> void:
 func _coyote_walljump() -> void:
 	var flat := Vector3(velocity.x, 0.0, velocity.z)
 	var dir := flat.normalized() if flat.length() > 0.1 else -global_transform.basis.z
-	var boosted := minf(coyote_wall_speed * (1.0 + config.dismount_boost_factor),
-			config.terminal_velocity)
+	var boosted := minf(
+		coyote_wall_speed * (1.0 + config.dismount_boost_factor), config.terminal_velocity
+	)
 	velocity.x = dir.x * boosted + coyote_wall_normal.x * config.dismount_push_off
 	velocity.z = dir.z * boosted + coyote_wall_normal.z * config.dismount_push_off
 	velocity.y = maxf(velocity.y, config.dismount_up_velocity)
@@ -793,16 +837,14 @@ func _wish_dir() -> Vector3:
 	return (b.x * cmd_move.x + -b.z * -cmd_move.y).normalized()
 
 
-
-
-
 func _camera_feel(delta: float) -> void:
 	var target_roll := 0.0
 	if state == MoveState.WALLRUN:
 		var side := signf((-wall_normal).dot(global_transform.basis.x))
 		target_roll = side * deg_to_rad(config.wallrun_camera_roll_deg)
-	camera.rotation.z = lerpf(camera.rotation.z, target_roll,
-			1.0 - exp(-config.wallrun_camera_roll_speed * delta))
+	camera.rotation.z = lerpf(
+		camera.rotation.z, target_roll, 1.0 - exp(-config.wallrun_camera_roll_speed * delta)
+	)
 
 	var hs := Vector3(velocity.x, 0.0, velocity.z).length()
 	var target_fov := base_fov + clampf(hs - config.base_run_speed, 0.0, 25.0) * 0.6
@@ -844,8 +886,9 @@ func _remote_shot_fx(from: Vector3, to: Vector3) -> void:
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")
-func _send_state(pos: Vector3, vel: Vector3, yaw: float, pitch: float,
-		prog_l: float, prog_r: float, l_idx: int) -> void:
+func _send_state(
+	pos: Vector3, vel: Vector3, yaw: float, pitch: float, prog_l: float, prog_r: float, l_idx: int
+) -> void:
 	_net_target_pos = pos
 	velocity = vel
 	rotation.y = yaw
@@ -855,7 +898,9 @@ func _send_state(pos: Vector3, vel: Vector3, yaw: float, pitch: float,
 		loadout_index = l_idx
 		arm_types = LOADOUTS[l_idx]
 		for i in 2:
-			var mat := (puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
+			var mat := (
+				(puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
+			)
 			mat.albedo_color = SWORD_VM_COLOR if arm_types[i] == "sword" else RAIL_VM_COLOR
 
 
@@ -866,9 +911,16 @@ func _toggle_recording() -> void:
 	if not recording:
 		_respawn()
 		_tape_lines.clear()
-		_tape_lines.append("# airfuel-tas v1 map=%s tick_hz=%d loadout=%d" % [
-				get_tree().current_scene.scene_file_path,
-				Engine.physics_ticks_per_second, loadout_index])
+		_tape_lines.append(
+			(
+				"# airfuel-tas v1 map=%s tick_hz=%d loadout=%d"
+				% [
+					get_tree().current_scene.scene_file_path,
+					Engine.physics_ticks_per_second,
+					loadout_index
+				]
+			)
+		)
 		recording = true
 		return
 	recording = false
@@ -880,9 +932,12 @@ func _toggle_recording() -> void:
 		return
 	f.store_string("\n".join(_tape_lines))
 	f.close()
-	print("Airfuel: TAS tape saved: %s (%d ticks) — real path: %s" % [
-			fname, _tape_lines.size() - 1,
-			ProjectSettings.globalize_path(fname)])
+	print(
+		(
+			"Airfuel: TAS tape saved: %s (%d ticks) — real path: %s"
+			% [fname, _tape_lines.size() - 1, ProjectSettings.globalize_path(fname)]
+		)
+	)
 
 
 ## Crossing a FinishZone: freeze the run clock; a live recording stops and
@@ -923,9 +978,16 @@ func _respawn() -> void:
 		# any reset (T, fall, F5) restarts the tape: a recording is always
 		# one clean spawn-to-finish attempt, never a spliced teleport
 		_tape_lines.clear()
-		_tape_lines.append("# airfuel-tas v1 map=%s tick_hz=%d loadout=%d" % [
-				get_tree().current_scene.scene_file_path,
-				Engine.physics_ticks_per_second, loadout_index])
+		_tape_lines.append(
+			(
+				"# airfuel-tas v1 map=%s tick_hz=%d loadout=%d"
+				% [
+					get_tree().current_scene.scene_file_path,
+					Engine.physics_ticks_per_second,
+					loadout_index
+				]
+			)
+		)
 	respawned.emit()
 	state = MoveState.AIRBORNE
 	ramp_grace_timer = 0.0

@@ -24,10 +24,8 @@ func _ready() -> void:
 		# A failure that landed while another scene was current (server
 		# dropped mid-lobby/mid-match) surfaces here on return.
 		_show_error(Net.last_error)
-	$VBox/SoloButton.pressed.connect(
-			func() -> void: get_tree().change_scene_to_file(ARENA))
-	$VBox/ParkourButton.pressed.connect(
-			func() -> void: get_tree().change_scene_to_file(PARKOUR))
+	$VBox/SoloButton.pressed.connect(func() -> void: get_tree().change_scene_to_file(ARENA))
+	$VBox/ParkourButton.pressed.connect(func() -> void: get_tree().change_scene_to_file(PARKOUR))
 	$VBox/HostButton.pressed.connect(func() -> void: Net.host())
 	$VBox/JoinRow/JoinButton.pressed.connect(_join)
 	ip_edit.text_submitted.connect(func(_text: String) -> void: _join())

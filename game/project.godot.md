@@ -3,8 +3,8 @@
 ## Function
 
 Godot project configuration for the Steps 1+2 prototype. The `features` tag
-tracks whichever editor last saved the project (currently 4.7 — Lily's
-editor; the nix devshell verify binary is 4.6.1, which warns but runs).
+is 4.7, matching the pinned toolchain (shell.nix: godot 4.7.2-stable;
+docker/Dockerfile: `GODOT_VERSION=4.7.2` — keep all three in step).
 
 ## Interface
 

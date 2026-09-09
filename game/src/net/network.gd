@@ -39,7 +39,7 @@ var mode := Mode.OFFLINE
 var active := false
 var is_host := false
 var players: Dictionary = {}  # peer id -> AirfuelPlayer (lobby match: just the pair)
-var scores: Dictionary = {}   # peer id -> kills (LAN: all peers tally; lobby: server-fed)
+var scores: Dictionary = {}  # peer id -> kills (LAN: all peers tally; lobby: server-fed)
 
 # Lobby client state
 var my_name := ""
@@ -71,8 +71,9 @@ func _ready() -> void:
 	elif args.find("--client") != -1:
 		join(_arg_value(args, "--client", "127.0.0.1"))
 	elif args.find("--lobby") != -1:
-		join_lobby(_arg_value(args, "--lobby", DEFAULT_SERVER),
-				_arg_value(args, "--name", "player"))
+		join_lobby(
+			_arg_value(args, "--lobby", DEFAULT_SERVER), _arg_value(args, "--name", "player")
+		)
 
 
 func _arg_value(args: PackedStringArray, flag: String, fallback: String) -> String:
@@ -89,8 +90,12 @@ func host() -> void:
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_server(PORT, MAX_PEERS)
 	if err != OK:
-		_fail("Couldn't host on udp/%d (%s) — is a server already running?" % [
-				PORT, error_string(err)])
+		_fail(
+			(
+				"Couldn't host on udp/%d (%s) — is a server already running?"
+				% [PORT, error_string(err)]
+			)
+		)
 		_teardown_to_menu()
 		return
 	_clear_session_signals()
@@ -121,15 +126,19 @@ func join(ip: String) -> void:
 	active = true
 	mode = Mode.LAN
 	multiplayer.connected_to_server.connect(
-			func() -> void: print("Airfuel net: joined %s as peer %d" % [ip, multiplayer.get_unique_id()]))
+		func() -> void:
+			print("Airfuel net: joined %s as peer %d" % [ip, multiplayer.get_unique_id()])
+	)
 	multiplayer.connection_failed.connect(
-			func() -> void:
-				_fail("Couldn't reach %s on udp/%d — no host answered." % [ip, PORT])
-				_teardown_to_menu.call_deferred())
+		func() -> void:
+			_fail("Couldn't reach %s on udp/%d — no host answered." % [ip, PORT])
+			_teardown_to_menu.call_deferred()
+	)
 	multiplayer.server_disconnected.connect(
-			func() -> void:
-				_fail("Host disconnected.")
-				_teardown_to_menu.call_deferred())
+		func() -> void:
+			_fail("Host disconnected.")
+			_teardown_to_menu.call_deferred()
+	)
 	print("Airfuel net: connecting to %s:%d..." % [ip, PORT])
 
 
@@ -149,10 +158,15 @@ func host_dedicated() -> void:
 	is_host = true
 	mode = Mode.DEDICATED
 	multiplayer.peer_connected.connect(
-			func(id: int) -> void: print("Airfuel lobby: peer %d connected" % id))
+		func(id: int) -> void: print("Airfuel lobby: peer %d connected" % id)
+	)
 	multiplayer.peer_disconnected.connect(_on_lobby_peer_disconnected)
-	print("Airfuel lobby: dedicated server on udp/%d (%d peers max, first to %d)" % [
-			PORT, cfg.max_peers, cfg.duel_win_kills])
+	print(
+		(
+			"Airfuel lobby: dedicated server on udp/%d (%d peers max, first to %d)"
+			% [PORT, cfg.max_peers, cfg.duel_win_kills]
+		)
+	)
 
 
 func join_lobby(ip: String, username: String) -> void:
@@ -171,19 +185,29 @@ func join_lobby(ip: String, username: String) -> void:
 	mode = Mode.LOBBY
 	my_name = username
 	multiplayer.connected_to_server.connect(
-			func() -> void:
-				print("Airfuel lobby: joined %s as peer %d" % [ip, multiplayer.get_unique_id()])
-				register.rpc_id(1, my_name)
-				get_tree().change_scene_to_file(LOBBY_SCENE))
+		func() -> void:
+			print("Airfuel lobby: joined %s as peer %d" % [ip, multiplayer.get_unique_id()])
+			register.rpc_id(1, my_name)
+			get_tree().change_scene_to_file(LOBBY_SCENE)
+	)
 	multiplayer.connection_failed.connect(
-			func() -> void:
-				_fail(("Couldn't reach %s on udp/%d — server down, wrong IP, "
-						+ "or the port isn't forwarded.") % [ip, PORT])
-				_teardown_to_menu.call_deferred())
+		func() -> void:
+			_fail(
+				(
+					(
+						"Couldn't reach %s on udp/%d — server down, wrong IP, "
+						+ "or the port isn't forwarded."
+					)
+					% [ip, PORT]
+				)
+			)
+			_teardown_to_menu.call_deferred()
+	)
 	multiplayer.server_disconnected.connect(
-			func() -> void:
-				_fail("Server disconnected.")
-				_teardown_to_menu.call_deferred())
+		func() -> void:
+			_fail("Server disconnected.")
+			_teardown_to_menu.call_deferred()
+	)
 	print("Airfuel lobby: connecting to %s:%d..." % [ip, PORT])
 
 
@@ -201,8 +225,15 @@ func _resolve_or_fail(address: String) -> bool:
 	var resolved := IP.resolve_hostname(address)
 	if resolved.is_valid_ip_address():
 		return true
-	_fail(("Couldn't find server '%s' — the name doesn't resolve. Check the "
-			+ "address (and that its DNS record exists).") % address)
+	_fail(
+		(
+			(
+				"Couldn't find server '%s' — the name doesn't resolve. Check the "
+				+ "address (and that its DNS record exists)."
+			)
+			% address
+		)
+	)
 	return false
 
 
@@ -220,9 +251,13 @@ func _fail(message: String) -> void:
 ## stack a second set of lambdas and double-fire (stale captured ip, double
 ## scene change). Net is the only subscriber to these signals.
 func _clear_session_signals() -> void:
-	for sig: Signal in [multiplayer.connected_to_server,
-			multiplayer.connection_failed, multiplayer.server_disconnected,
-			multiplayer.peer_connected, multiplayer.peer_disconnected]:
+	for sig: Signal in [
+		multiplayer.connected_to_server,
+		multiplayer.connection_failed,
+		multiplayer.server_disconnected,
+		multiplayer.peer_connected,
+		multiplayer.peer_disconnected
+	]:
 		for c: Dictionary in sig.get_connections():
 			sig.disconnect(c.callable)
 
@@ -254,7 +289,6 @@ func _teardown_to_menu() -> void:
 
 ## ---- Lobby protocol (server = peer 1; all reliable) ----
 
-
 @rpc("any_peer", "call_remote", "reliable")
 func register(username: String) -> void:
 	if mode != Mode.DEDICATED:
@@ -281,8 +315,9 @@ func _broadcast_roster() -> void:
 	var arr: Array = []
 	for id: int in roster:
 		var r: Dictionary = roster[id]
-		arr.append({id = id, name = r.name, wins = r.wins, losses = r.losses,
-				in_match = r.match_id != 0})
+		arr.append(
+			{id = id, name = r.name, wins = r.wins, losses = r.losses, in_match = r.match_id != 0}
+		)
 	roster_sync.rpc(arr)
 
 
@@ -306,10 +341,16 @@ func request_challenge(target_id: int) -> void:
 	if mode != Mode.DEDICATED:
 		return
 	var from := multiplayer.get_remote_sender_id()
-	if from == target_id or not roster.has(from) or not roster.has(target_id) \
-			or roster[from].match_id != 0 or roster[target_id].match_id != 0 \
-			or pending_challenges.has(from) \
-			or _is_challenge_target(target_id) or _is_challenge_target(from):
+	if (
+		from == target_id
+		or not roster.has(from)
+		or not roster.has(target_id)
+		or roster[from].match_id != 0
+		or roster[target_id].match_id != 0
+		or pending_challenges.has(from)
+		or _is_challenge_target(target_id)
+		or _is_challenge_target(from)
+	):
 		challenge_result.rpc_id(from, false, "unavailable")
 		return
 	pending_challenges[from] = {target = target_id, time_left = cfg.challenge_timeout}
@@ -317,8 +358,7 @@ func request_challenge(target_id: int) -> void:
 
 
 func _is_challenge_target(id: int) -> bool:
-	return pending_challenges.values().any(
-			func(c: Dictionary) -> bool: return c.target == id)
+	return pending_challenges.values().any(func(c: Dictionary) -> bool: return c.target == id)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -440,9 +480,16 @@ func _end_match(mid: int, winner_id: int, forfeit: bool) -> void:
 	for id: int in [m.a, m.b]:
 		if roster.has(id):
 			match_over.rpc_id(id, winner_id, forfeit, final)
-	print("Airfuel lobby: match %d over, winner %s%s" % [
-			mid, roster.get(winner_id, {}).get("name", str(winner_id)),
-			" (forfeit)" if forfeit else ""])
+	print(
+		(
+			"Airfuel lobby: match %d over, winner %s%s"
+			% [
+				mid,
+				roster.get(winner_id, {}).get("name", str(winner_id)),
+				" (forfeit)" if forfeit else ""
+			]
+		)
+	)
 	_broadcast_roster()
 
 
@@ -454,10 +501,16 @@ func match_over(winner_id: int, forfeit: bool, kills: Dictionary) -> void:
 	last_match_result = {
 		won = winner_id == my_id,
 		forfeit = forfeit,
-		text = "%s %d — %d vs %s" % [
-			"WON" if winner_id == my_id else "LOST",
-			int(kills.get(my_id, 0)), int(kills.get(opp, 0)),
-			match_names.get(opp, "?")],
+		text =
+		(
+			"%s %d — %d vs %s"
+			% [
+				"WON" if winner_id == my_id else "LOST",
+				int(kills.get(my_id, 0)),
+				int(kills.get(opp, 0)),
+				match_names.get(opp, "?")
+			]
+		),
 	}
 	for p: Node in players.values():
 		if is_instance_valid(p):
@@ -496,11 +549,9 @@ func display_name(id: int) -> String:
 ## so no spawn rpc can arrive while the menu is still the current scene.
 func _load_arena() -> void:
 	await get_tree().process_frame
-	if get_tree().current_scene == null \
-			or get_tree().current_scene.scene_file_path != ARENA:
+	if get_tree().current_scene == null or get_tree().current_scene.scene_file_path != ARENA:
 		get_tree().change_scene_to_file(ARENA)
-		while get_tree().current_scene == null \
-				or get_tree().current_scene.scene_file_path != ARENA:
+		while get_tree().current_scene == null or get_tree().current_scene.scene_file_path != ARENA:
 			await get_tree().process_frame
 	var offline := get_tree().current_scene.get_node_or_null("Player")
 	if offline != null:
@@ -535,9 +586,17 @@ func _spawn_player(id: int, index: int = -1) -> void:
 	p.transform = _spawn_transform_for_index(index if index >= 0 else players.size())
 	get_tree().current_scene.add_child(p)
 	players[id] = p
-	print("Airfuel net: spawned player %d at %s (mine: %s, cam: %s)" % [
-			id, p.global_position, p.is_multiplayer_authority(),
-			(p.get_node("Head/Camera3D") as Camera3D).current])
+	print(
+		(
+			"Airfuel net: spawned player %d at %s (mine: %s, cam: %s)"
+			% [
+				id,
+				p.global_position,
+				p.is_multiplayer_authority(),
+				(p.get_node("Head/Camera3D") as Camera3D).current
+			]
+		)
+	)
 
 
 ## Spawns alternate ends (even index: -z facing +z, odd: +z facing -z) and

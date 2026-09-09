@@ -8,7 +8,7 @@
 
 FROM debian:bookworm-slim
 
-ARG GODOT_VERSION=4.6.1
+ARG GODOT_VERSION=4.7.2
 
 ADD https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip /tmp/godot.zip
 

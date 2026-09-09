@@ -1,6 +1,8 @@
 # CLAUDE.md — Airfuel
 
-Airfuel is a solo-dev 6v6 movement shooter prototype in Godot 4.6 (GDScript).
+Airfuel is a solo-dev 6v6 movement shooter prototype in Godot 4.7 (GDScript).
+The toolchain is pinned: `shell.nix` (godot 4.7.2-stable) and
+`docker/Dockerfile` (`GODOT_VERSION=4.7.2`) must name the same version.
 Read this first, then the sidecar doc of any file you touch.
 
 ## Where things are
@@ -73,7 +75,9 @@ pairs).
   emitting axis vectors (columns) transposes the rotation. Symmetric for
   yaw-only boxes, silently wrong for compound rotations (this shipped once
   as "giant holes in the parkour track").
-- Format/lint via `gdformat` / `gdlint` (in the devshell) if in doubt.
+- **Formatting/lint are enforced**: after editing any `.gd` file, run
+  `gdformat <files>` and `gdlint game/src` (both in the devshell; config in
+  `gdlintrc` at the repo root) — gdlint must exit clean.
 
 ### Process
 
