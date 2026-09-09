@@ -119,8 +119,9 @@ def hall_part(tag, start, hdg, pitch, L, with_obstacle):
     M = mat_mul(ry(hdg), rx(-a))
     side, lup, fwd3 = col(M, 0), col(M, 1), col(M, 2)
     mid = tuple(start[k] + fwd3[k] * L / 2 for k in range(3))
-    fl = tuple(mid[k] - lup[k] * 1.0 for k in range(3))
-    out = box(f"{tag}Floor", M, fl, (W, 2, L + 5), "mat_floor")
+    # FLOORLESS variant: no hallway floors — the track is wallrun-only;
+    # falling exits through kill_y and resets the run
+    out = ""
     for sn, ss in (("L", 1.0), ("R", -1.0)):
         wc = tuple(mid[k] + side[k] * ss * (W/2 + 0.5) + lup[k] * (WH/2 - 1) for k in range(3))
         out += box(f"{tag}Wall{sn}", M, wc, (1, WH + 2, L + 8), "mat_wall")
@@ -169,7 +170,6 @@ for i, (L, pitch, turn) in enumerate(SEGS):
     min_y = min(min_y, pos[1])
     d = (math.sin(heading), 0.0, math.cos(heading))
     if turn == 0:
-        body += box("EndCapFloor", ry(heading), (pos[0] + d[0]*12, pos[1] - 0.5, pos[2] + d[2]*12), (W, 1, 26), "mat_floor")
         body += box("EndCapWall", ry(heading), (pos[0] + d[0]*24.5, pos[1] + 14, pos[2] + d[2]*24.5), (W + 2, WH, 1), "mat_finish")
         fz = (pos[0] + d[0]*22.5, pos[1] + 14, pos[2] + d[2]*22.5)
         body += (f'\n[node name="FinishZone" type="Area3D" parent="." groups=["finish"]]\n'
@@ -187,7 +187,7 @@ for i, (L, pitch, turn) in enumerate(SEGS):
     pc = tuple(pos[k] + d[k] * W / 2 for k in range(3))
     RY = ry(heading)
     sflat = (math.cos(heading), 0.0, -math.sin(heading))
-    body += box(f"C{i+1}Pad", RY, (pc[0], pc[1] - 1.0, pc[2]), (W + 6, 2, W + 6), "mat_floor")
+
     body += box(f"C{i+1}Roof", RY, (pc[0], pc[1] + WH, pc[2]), (W + 6, 2, W + 6), "mat_floor", "cast_shadow = 0\n")
     body += box(f"C{i+1}Far", RY, [pc[0] + d[0]*(W/2 + 0.5), pc[1] + 14, pc[2] + d[2]*(W/2 + 0.5)], (W + 6, WH + 2, 1), "mat_wall")
     body += box(f"C{i+1}Side", RY, [pc[0] - sflat[0]*turn*(W/2 + 0.5), pc[1] + 14, pc[2] - sflat[2]*turn*(W/2 + 0.5)], (1, WH + 2, W + 6), "mat_wall")
