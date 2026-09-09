@@ -24,7 +24,7 @@ godot4 --path game             # just play
 | Shift + WASD/Q | Dash in that direction (fuel); Shift+Q alone = down dash |
 | LMB / RMB | Fire left / right arm — rail: 1s charge, auto-fire, locks movement; sword: fueled lunge-kill |
 | Tab | Cycle loadout: rail+rail / rail+sword / sword+sword |
-| T | Reset the run (solo only; restarts timer, ghost, and any recording) |
+| T | Reset the run (solo only; 3-2-1 countdown, then timer/ghost/recording go) |
 | F5 | Dev: record a TAS ghost tape (toggle; finish line auto-saves) |
 | Esc | Release mouse |
 

@@ -22,12 +22,17 @@ Two modes. **Tape replay** (when `tape_path` is set): loads a `.tas`
 recording (made in-game with F5) and executes it verbatim — absolute
 yaw/pitch plus the recorded command fields each tick, looping from spawn
 at tape end. This is the true fixed-input TAS; a tape silently assumes
-the movement tuning and map it was recorded under. **Waypoint autopilot**
+the movement tuning and map it was recorded under. The header's
+`loadout=` is applied to the body at start and on every loop/restart —
+replays must begin from the recorded loadout, not whatever the ghost
+last had. **Waypoint autopilot**
 (no tape): the reactive fallback described below — deterministic, but
 closed-loop.
 
 `process_physics_priority = -1` so commands are written BEFORE the body's
-physics tick consumes them. Waypoint chase: rate-limited yaw, near-level
+physics tick consumes them. Playback (tape ticks AND autopilot) holds
+while the body's reset countdown runs — replays start at GO like the
+recording did. Waypoint chase: rate-limited yaw, near-level
 head pitch (dashes are camera-aimed; steep pitch balloons the flight),
 hold-W, jump on floor when the line rises or speed drops, double-jump on
 fading climbs, dash only below 26 m/s with fuel to spare. A waypoint

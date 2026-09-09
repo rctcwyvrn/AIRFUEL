@@ -74,6 +74,7 @@ var _tape_lines: PackedStringArray = []
 
 var run_time := 0.0
 var run_finished := false
+var countdown := 0.0
 
 const LOADOUTS: Array = [["rail", "rail"], ["rail", "sword"], ["sword", "sword"]]
 const RAIL_VM_COLOR := Color(0.45, 0.47, 0.5)
@@ -107,9 +108,12 @@ func _ready() -> void:
 	base_fov = camera.fov
 	if ghost_controlled:
 		# TAS/bot body: real physics, no human input, translucent orange.
-		# Layer 0: nothing collides INTO the ghost (players/rays phase
-		# through); mask 1 keeps ITS OWN physics against the world.
+		# Layer 0: nothing collides INTO the ghost; mask 1 = world ONLY.
+		# The mask must exclude the player layer (4): a replay that can bump
+		# a nearby player desyncs nondeterministically (shipped once as
+		# "sometimes the ghost gets stuck").
 		collision_layer = 0
+		collision_mask = 1
 		camera.current = false
 		set_process_unhandled_input(false)
 		vm_left.visible = false
@@ -155,6 +159,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	_gather_input()
+	if countdown > 0.0:
+		# 3-2-1 after any reset: frozen in place (look around freely); the
+		# run clock, tape recording, and ghost playback all wait for GO
+		countdown -= delta
+		velocity = Vector3.ZERO
+		if Net.active:
+			_send_state.rpc(global_position, velocity, rotation.y, head.rotation.x,
+					arm_progress_left(), arm_progress_right(), loadout_index)
+		return
 	if not run_finished:
 		run_time += delta
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
@@ -498,7 +511,11 @@ func _sword_hit_check() -> void:
 
 
 func _cycle_loadout() -> void:
-	loadout_index = (loadout_index + 1) % LOADOUTS.size()
+	set_loadout((loadout_index + 1) % LOADOUTS.size())
+
+
+func set_loadout(index: int) -> void:
+	loadout_index = index
 	arm_types = LOADOUTS[loadout_index]
 	arm_left.reset()
 	arm_right.reset()
@@ -799,9 +816,9 @@ func _toggle_recording() -> void:
 	if not recording:
 		_respawn()
 		_tape_lines.clear()
-		_tape_lines.append("# airfuel-tas v1 map=%s tick_hz=%d" % [
+		_tape_lines.append("# airfuel-tas v1 map=%s tick_hz=%d loadout=%d" % [
 				get_tree().current_scene.scene_file_path,
-				Engine.physics_ticks_per_second])
+				Engine.physics_ticks_per_second, loadout_index])
 		recording = true
 		return
 	recording = false
@@ -835,13 +852,28 @@ func _respawn() -> void:
 	hp = combat.hp_max
 	run_time = 0.0
 	run_finished = false
+	countdown = config.reset_countdown
+	# Deterministic reset: recordings and replays must start from identical
+	# state, so no timer or arm state survives a respawn
+	dash_cooldown_timer = 0.0
+	double_jump_timer = 0.0
+	wall_coyote_timer = 0.0
+	ground_coyote_timer = 0.0
+	jump_buffer_timer = 0.0
+	wall_rearm_timer = 0.0
+	ramp_grace_timer = 0.0
+	sword_cd = [0.0, 0.0]
+	sword_active = 0.0
+	arm_left.reset()
+	arm_right.reset()
+	pending_arms.clear()
 	if recording:
 		# any reset (T, fall, F5) restarts the tape: a recording is always
 		# one clean spawn-to-finish attempt, never a spliced teleport
 		_tape_lines.clear()
-		_tape_lines.append("# airfuel-tas v1 map=%s tick_hz=%d" % [
+		_tape_lines.append("# airfuel-tas v1 map=%s tick_hz=%d loadout=%d" % [
 				get_tree().current_scene.scene_file_path,
-				Engine.physics_ticks_per_second])
+				Engine.physics_ticks_per_second, loadout_index])
 	respawned.emit()
 	state = MoveState.AIRBORNE
 	ramp_grace_timer = 0.0

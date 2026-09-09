@@ -68,3 +68,4 @@ extends Resource
 
 @export_group("Misc")
 @export var kill_y := -40.0
+@export var reset_countdown := 3.0

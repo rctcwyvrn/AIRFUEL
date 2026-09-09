@@ -2013,6 +2013,7 @@ material = SubResource("mat_finish")
 [node name="FinishZone" type="Area3D" parent="." groups=["finish"]]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 162.272, 69.903, 889.176)
 script = ExtResource("4_finish")
+collision_mask = 4
 
 [node name="FinishShape" type="CollisionShape3D" parent="FinishZone"]
 shape = SubResource("finish_shape")

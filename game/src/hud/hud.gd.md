@@ -7,7 +7,8 @@ instruments the prototype questions need): Airfuel meter, horizontal speed,
 movement state, ramp-grace countdown, per-arm charge bars, crosshair,
 hitmarker, a LOCKED indicator during the charge freeze, a controls
 highlighter (bottom-left key cluster that lights up pressed inputs), the
-current loadout (bottom-right), a red death flash on the `died` signal, a run timer (top-center,
+current loadout (bottom-right), a red death flash on the `died` signal, a 3-2-1 countdown + GO flash (center, orange, after every reset),
+a run timer (top-center,
 mm:ss.mmm — visible only when a `"finish"`-group zone exists in the
 scene, green once finished),
 and — LAN only — a kill scoreboard (top-right, YOU first, from

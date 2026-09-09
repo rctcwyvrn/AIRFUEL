@@ -6,7 +6,10 @@ The playable character scene for Step 1. Instanced once by the active map.
 
 ## Interface
 
-- Root: `Player` (CharacterBody3D) — script `player.gd`, group `"player"`,
+- Root: `Player` (CharacterBody3D, **collision layer 4 / mask 5**; the
+  layer scheme is 1 = world, 2 = targets, 4 = players — the TAS ghost's
+  mask must be able to exclude players, so players cannot share layer 1)
+  — script `player.gd`, group `"player"`,
   `config` wired to `default_tuning.tres`, `combat` to
   `default_combat.tres`.
 - Node paths the script depends on: `CollisionShape3D`, `Head` (y = 0.65),

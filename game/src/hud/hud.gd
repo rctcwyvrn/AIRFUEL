@@ -15,6 +15,7 @@ extends CanvasLayer
 @onready var map_prism: Control = $MapPrism
 @onready var map_back: ColorRect = $MapBack
 @onready var timer_label: Label = $TimerLabel
+@onready var countdown_label: Label = $CountdownLabel
 
 const KEY_DIM := Color(0.5, 0.5, 0.55, 0.25)
 const KEY_LIT := Color(1.0, 0.75, 0.3, 0.9)
@@ -34,6 +35,7 @@ const KEY_LAYOUT: Array = [
 var player: AirfuelPlayer
 var hit_timer := 0.0
 var flash_alpha := 0.0
+var go_timer := 0.0
 var key_rects: Dictionary = {}
 
 
@@ -85,6 +87,16 @@ func _process(_delta: float) -> void:
 				else Color(1, 1, 1)
 	else:
 		timer_label.visible = false
+	if player.countdown > 0.0:
+		countdown_label.visible = true
+		countdown_label.text = str(ceili(player.countdown))
+		go_timer = 0.7
+	elif go_timer > 0.0:
+		go_timer -= _delta
+		countdown_label.text = "GO"
+		countdown_label.visible = go_timer > 0.0
+	else:
+		countdown_label.visible = false
 	var rec := "● REC   " if player.recording else ""
 	state_label.text = "%sHP %d   %s%s" % [rec, player.hp, player.state_name(), extra]
 	charge_l.value = player.arm_progress_left()

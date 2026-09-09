@@ -14,7 +14,7 @@ The race finish line: an Area3D that stops the local player's run timer
 
 ## Implementation
 
-Default Area3D monitoring against layer 1 (players). Placed by the track
+Area3D with `collision_mask = 4` (the player layer). Placed by the track
 generator just inside the green end wall, spanning the hallway
 cross-section.
 

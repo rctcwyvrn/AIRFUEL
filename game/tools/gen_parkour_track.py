@@ -174,7 +174,8 @@ for i, (L, pitch, turn) in enumerate(SEGS):
         fz = (pos[0] + d[0]*22.5, pos[1] + 14, pos[2] + d[2]*22.5)
         body += (f'\n[node name="FinishZone" type="Area3D" parent="." groups=["finish"]]\n'
                  f"transform = Transform3D({basis_str(ry(heading))}, %.3f, %.3f, %.3f)\n" % fz +
-                 f'script = ExtResource("4_finish")\n')
+                 f'script = ExtResource("4_finish")\n'
+                 f"collision_mask = 4\n")
         body += ('\n[node name="FinishShape" type="CollisionShape3D" parent="FinishZone"]\n'
                  'shape = SubResource("finish_shape")\n')
         body += box("EndCapRoof", ry(heading), (pos[0] + d[0]*12, pos[1] + WH - 0.5, pos[2] + d[2]*12), (W + 2, 1, 26), "mat_floor", "cast_shadow = 0\n")

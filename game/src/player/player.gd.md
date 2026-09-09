@@ -160,8 +160,18 @@ lerps the viewmodel back to its `rest_pos` meta after the fire kick.
   attempt (a teleport mid-tape would desync replay). Feed a tape to the parkour ghost via
   `TasController.tape_path`. Tapes assume the tuning they were recorded
   under — retune movement, re-record the tape.
-- Also the ghost body sets `collision_layer = 0` — players and rays phase
-  through it; its own physics (mask 1) still collides with the world.
+- The ghost body sets `collision_layer = 0` AND `collision_mask = 1`
+  (world only): nothing collides into it, and it cannot bump players —
+  a replay that can touch a nearby player desyncs nondeterministically.
+- `_respawn` zeroes EVERY transient (cooldowns, coyote/buffer/rearm/grace
+  timers, sword state, pending arms) — recordings replay from spawn, so
+  spawn state must be bit-identical between a run and its ghost (leftover
+  ramp-grace at record start shipped once as ghost desync). Tape headers
+  carry `loadout=` (recorded via `set_loadout`; Tab cycles through it).
+- **Reset countdown** (`reset_countdown`, default 3 s): every `_respawn`
+  freezes the body in place (look is free) while `countdown` runs; the run
+  clock, tape recording, AND ghost playback all gate on it, so a run and
+  its replay stay tick-aligned from GO. Applies in LAN round-resets too.
 - **Run timer**: `run_time` accumulates per tick until `run_finished`;
   every `_respawn` zeroes and restarts it. `finish_run()` (called by a
   `FinishZone`) freezes the clock and auto-saves an active TAS recording —

@@ -17,6 +17,7 @@ var idx := 0
 var stall := 0.0
 var tape: Array = []
 var tick := 0
+var tape_loadout := 0
 
 
 func _ready() -> void:
@@ -24,7 +25,13 @@ func _ready() -> void:
 	body = get_parent() as AirfuelPlayer
 	if tape_path != "":
 		_load_tape()
+	_apply_tape_loadout.call_deferred()
 	_link_player.call_deferred()
+
+
+func _apply_tape_loadout() -> void:
+	if not tape.is_empty():
+		body.set_loadout(tape_loadout)
 
 
 func _load_tape() -> void:
@@ -34,7 +41,12 @@ func _load_tape() -> void:
 		return
 	while not f.eof_reached():
 		var line := f.get_line().strip_edges()
-		if line.is_empty() or line.begins_with("#"):
+		if line.begins_with("#"):
+			for token in line.split(" "):
+				if token.begins_with("loadout="):
+					tape_loadout = token.trim_prefix("loadout=").to_int()
+			continue
+		if line.is_empty():
 			continue
 		var c := line.split(" ")
 		if c.size() >= 6:
@@ -55,10 +67,13 @@ func _restart() -> void:
 	tick = 0
 	stall = 0.0
 	body._respawn()
+	# the tape assumes the loadout it was recorded with — every loop too
+	if not tape.is_empty():
+		body.set_loadout(tape_loadout)
 
 
 func _physics_process(delta: float) -> void:
-	if body == null:
+	if body == null or body.countdown > 0.0:
 		return
 	if not tape.is_empty():
 		# fixed-input TAS replay: absolute look + recorded commands per tick

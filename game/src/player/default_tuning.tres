@@ -51,3 +51,4 @@ jump_buffer_time = 0.12
 ramp_grace_window = 1.2
 ramp_decay_rate = 10.0
 kill_y = -40.0
+reset_countdown = 3.0
