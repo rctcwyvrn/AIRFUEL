@@ -37,9 +37,12 @@ jobs:
         id: parse
         run: |
           subject="$(git log -1 --pretty=%s)"
-          if [[ "$subject" =~ ^v([0-9]+\.[0-9]+\.[0-9]+(-\w*)?)($|[[:space:]:]) ]]; then
-            echo "version=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
-            echo "Release commit: v${BASH_REMATCH[2]}"
+          # Bash [[ =~ ]] is POSIX ERE: \w is NOT supported (silently never
+          # matches on the runner) — suffix uses an explicit class instead.
+          # The version is capture group 1; group 2 is only the suffix.
+          if [[ "$subject" =~ ^v([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?)($|[[:space:]:]) ]]; then
+            echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "Release commit: v${BASH_REMATCH[1]}"
           else
             echo "version=" >> "$GITHUB_OUTPUT"
             echo "Not a release commit ('$subject') — skipping build."

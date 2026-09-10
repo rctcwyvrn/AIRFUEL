@@ -2,7 +2,9 @@
 # Release commit (CI builds + publishes):     v0.4.0 one-line summary
 # Normal commit (no build):                   one-line summary
 #
-# A subject starting with vMAJOR.MINOR.PATCH triggers
+# A subject starting with vMAJOR.MINOR.PATCH (optionally with a
+# pre-release suffix: v0.0.1-prototype, v0.1.0-rc.1 — the hyphen is
+# required, "v0.0.1prototype" will NOT trigger) triggers
 # .github/workflows/release.yml on push to main:
 #   export Windows + Linux (Godot 4.7.2) → tag vX.Y.Z → GitHub release
 #   with both zips → butler push to rctcwyvrn.itch.io/airfuel
