@@ -11,5 +11,7 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node3D) -> void:
-	if body is AirfuelPlayer and body.is_multiplayer_authority():
+	# Every simulating body resets here (offline, predicted, server-side);
+	# render-only replicas are position-written and must never trigger it.
+	if body is AirfuelPlayer and body.sim_active():
 		body._respawn()

@@ -35,28 +35,44 @@ down it without detaching. WASD dashes
 follow the camera (W+Shift = wherever you're looking, pitch included);
 Q dashes straight down. Up is the double jump's job.
 
-## LAN multiplayer (prototype tier)
+## Multiplayer (server-authoritative — §20.2 stage N1)
 
-Use the main menu: **HOST LAN GAME** on one machine, **JOIN** with the
-host's IP on the other (blank = 127.0.0.1 for two instances locally).
-CLI equivalents for scripted/headless runs:
+All netplay runs one netcode: an authoritative process simulates every
+player from per-tick input commands; your own client *predicts* its body
+locally and reconciles against server snapshots, opponents render as
+snapshot-fed puppets. Damage and kills only ever happen on the server.
+
+**LAN listen server** — menu: **HOST LAN GAME** / **JOIN** (blank =
+127.0.0.1 for two instances locally). The host simulates everyone and plays
+as a zero-latency local body. CLI equivalents:
 
 ```sh
 godot4 --path game -- --server
 godot4 --path game -- --client <ip>
 ```
 
-Client-authoritative movement (LAN-trust — not the shipping §20.2 netcode).
 Host spawns at the −z end, joiners at +z. 2 HP, every rail hit = 1 damage
-(two shots to kill), death resets you to your spawn with full fuel.
-No args = offline solo, unchanged. WSL2 note: for a real two-machine LAN
-test, run the Windows build or forward udp/27555 out of WSL.
+(two shots to kill), a kill resets both duelists with full fuel.
+No args = offline solo, unchanged (offline never touches the netcode).
+WSL2 note: for a real two-machine LAN test, run the Windows build or
+forward udp/27555 out of WSL.
+
+Dev/test flags (either mode): `--fake-lag <ms>` adds artificial round-trip
+latency on a client (prediction stress-test); `--autoduel` makes lobby
+clients challenge/accept/fire automatically (headless soak tests);
+`--spawn-gap <m>` spawns duelists close together with line of sight so
+autofire duels actually connect (pass it to the lobby server — it forwards
+to match servers — or to a LAN host).
 
 ## Hosted lobby server (Docker)
 
-A dedicated server that is a **matchmaker + relay only** — it never loads
-the arena; each matched pair runs its own local arena and exchanges
-targeted state, so concurrent 1v1s never see each other.
+A dedicated **matchmaker**: it never simulates a game itself. When a
+challenge is accepted it spawns a private per-match **child server process**
+on a port from the range udp/27600–27619 (config: `ServerConfig`) and both
+duelists hop to it; the child runs the authoritative first-to-5 duel, then
+the players rejoin the lobby, report the result, and the name-keyed W–L
+records update. Concurrent 1v1s are isolated by construction — separate
+processes. Forward/publish the whole port range along with 27555.
 
 ```sh
 docker build -f docker/Dockerfile -t airfuel-server .   # from repo root
@@ -71,18 +87,21 @@ DNS layout (Cloudflare): `airfuel-game.com` + `www` are **Proxied** dummy
 records whose only job is an edge Redirect Rule →
 <https://rctcwyvrn.itch.io/airfuel>; `play.airfuel-game.com` is a
 **DNS-only** A record straight to the game host — it must stay grey-cloud,
-the proxy can't carry UDP. The lobby lists everyone with session W–L; click **CHALLENGE** on an
-idle player, they accept, and you're both dropped into a private
-first-to-5-kills corridor duel (DESIGN.md §12.2), then returned to the
-lobby. Disconnecting mid-match forfeits. Tuning (win kills, peer cap,
-challenge timeout): `src/net/default_server.tres`.
+the proxy can't carry UDP. The lobby lists everyone with W–L (kept by
+username for as long as the server runs); click **CHALLENGE** on an idle
+player, they accept, and you're both dropped onto a private per-match
+server for a first-to-5-kills corridor duel (DESIGN.md §12.2), then
+returned to the lobby. Disconnecting mid-match forfeits. Tuning (win
+kills, peer cap, challenge timeout, match-server port range/timeouts):
+`src/net/default_server.tres` (schema `src/net/server_config.gd`).
 
 CLI equivalents:
 
 ```sh
 godot4 --headless --path game -- --dedicated          # serve (no Docker)
 godot4 --path game -- --lobby <ip> --name <username>  # join a server
-# --autoduel: dev flag — auto-challenge/accept (headless smoke tests)
+# dev flags: --autoduel (auto challenge/accept/fire, loops matches),
+#            --fake-lag <ms>, --spawn-gap <m>  — see the LAN section
 ```
 
 ## What to test (Step 1–3 questions from the design doc)

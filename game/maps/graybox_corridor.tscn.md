@@ -5,8 +5,10 @@
 The Step 1 test corridor — built to answer DESIGN.md §24's questions: does
 chaining emerge from dismount rewards, is curved wallrun viable, how far can
 gaps stretch before flow breaks, how long should the corridor be. Loaded from
-the main menu (PLAY SOLO) and by `network.gd` as the LAN arena — the
-project's main scene is the menu, not this map.
+the main menu (PLAY SOLO) and by `network.gd` as the netplay arena — on
+LAN hosts/clients, on lobby-match clients, and headless on each per-match
+child server (which strips the offline Player and dummies, then spawns
+per-peer bodies) — the project's main scene is the menu, not this map.
 
 ## Interface
 

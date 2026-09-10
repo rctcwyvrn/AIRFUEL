@@ -12,8 +12,10 @@ docker/Dockerfile: `GODOT_VERSION=4.7.2` — keep all three in step).
 - Runtime/window icon: `res://icon.svg` (orange `>>>` chevrons — the brand
   mark, matching `icon.ico` used by the Windows export preset). Boot splash
   background is the identity dark grey (#16181C).
-- Autoload: `Net` (`src/net/network.gd`) — LAN multiplayer; inert without
-  `--server`/`--client` user args.
+- Autoload: `Net` (`src/net/network.gd`) — server-authoritative multiplayer
+  (§20.2 N1): LAN listen server, dedicated lobby, and per-match child
+  servers; inert without net user args
+  (`--server`/`--client`/`--lobby`/`--dedicated`/`--match-server`).
 - Input actions defined here and consumed by `player.gd` (`hud.gd`'s
   controls-hint widget polls the same action names to light up keys):
   `move_forward/back/left/right` (WASD), `strafe_down` (Q),

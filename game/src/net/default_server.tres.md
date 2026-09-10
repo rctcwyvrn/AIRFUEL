@@ -7,7 +7,9 @@ The shipping `ServerConfig` values for the dedicated lobby server.
 ## Interface
 
 Preloaded by `network.gd` as `Net.cfg`. Currently all schema defaults
-(first to 5 kills, 12 peers, 15 s challenge timeout, 16-char names).
+(first to 5 kills, 12 peers, 15 s challenge timeout, 16-char names, and the
+Match Servers group: ports 27600–27619, 60 s hello / 600 s max-duration /
+900 s result timeouts).
 
 ## Implementation
 

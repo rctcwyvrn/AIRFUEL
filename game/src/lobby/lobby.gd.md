@@ -3,15 +3,18 @@
 ## Function
 
 The dedicated-server lobby screen (DESIGN.md §24 Step 3 instrument): shows
-the roster with session W–L tallies, lets you challenge an idle player,
+the roster with W–L tallies (name-keyed records the server keeps across
+match hops and reconnects), lets you challenge an idle player,
 answers incoming challenges, shows the last match result, and leaves back
 to the menu.
 
 ## Interface
 
-- Script of `lobby.tscn` root (full-rect Control). Entered/exited only by
-  `Net` (`join_lobby` connect and `match_over` both change_scene here;
-  LEAVE calls `Net.leave_lobby()`).
+- Script of `lobby.tscn` root (full-rect Control). Entered only via
+  `Net.join_lobby`'s connect handler — both the first join and the fresh
+  reconnect `Net._return_to_lobby` performs after every match (match end
+  tears down the match peer and rejoins the lobby from scratch); LEAVE
+  calls `Net.leave_lobby()`.
 - Consumes `Net.roster_updated`, `Net.challenge_received`,
   `Net.challenge_ended`, plus the caches `Net.last_roster` /
   `Net.last_match_result` on entry (so a scene entered after the signals
@@ -30,7 +33,10 @@ button) on every `roster_updated`. `challenger_id` is the only local state
 — the pending incoming challenge; "withdrawn" (offer expired server-side)
 clears it silently, other `challenge_ended` reasons surface on
 StatusLabel. Mouse is made visible on entry (players arrive from a
-mouse-captured match).
+mouse-captured match). Roster updates arrive via `Net._roster_sync` →
+`roster_updated`; the server never sends them to in-match peers (their
+lobby connection is already gone) — a returning duelist re-registers on
+reconnect and gets a fresh sync then.
 
 ## Assertions
 

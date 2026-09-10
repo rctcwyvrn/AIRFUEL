@@ -4,7 +4,8 @@
 
 The playable character scene for Steps 1–3. Instanced by the active map for
 solo play, and by `Net` (network.gd, preloaded `PLAYER_SCENE`) once per peer
-in LAN play.
+in netplay — `Net` sets the instance's `role` (NetRole) before `add_child`;
+the scene default is LOCAL.
 
 ## Interface
 
@@ -27,11 +28,12 @@ Capsule **1.2 r × 4.5 h** (dummy-sized — both players are big red targets
 in PvP, per Lily) centered on the origin, so the body origin is at capsule
 center, not the feet — spawn transforms need y ≥ ~2.3. Head sits at +1.7
 (eye near the capsule top). `BodyMesh` is a matching red emissive capsule,
-hidden for the authority (your own camera is inside it) and shown on remote
-puppets, along with `PuppetArmL/R` — shoulder weapon blocks whose tint
-(grey rail / silver sword) and charge glow are driven from synced state;
-non-authority code duplicates their materials so multiple puppets tint
-independently. Viewmodel meshes are swapped in code per loadout (chunky
+hidden for first-person roles (LOCAL/PREDICTED — your own camera is inside
+it) and shown on puppet-rendered bodies (REPLICA, DRIVEN on a LAN host's
+screen, the TAS ghost), along with `PuppetArmL/R` — shoulder weapon blocks
+whose tint (grey rail / silver sword) and charge glow are driven from
+synced or real arm state; puppet-role code duplicates their materials so
+multiple puppets tint independently. Viewmodel meshes are swapped in code per loadout (chunky
 rail block vs long thin blade with rolled/tilted pose) — the tscn only
 ships the rail default. `ShadowMesh` is a matching capsule with `cast_shadow = 3`
 (shadows-only) so you still cast your own shadow first-person. Viewmodels are 0.12×0.12×0.5 boxes at
@@ -58,7 +60,8 @@ Drawn for every body (you, remotes, the ghost).
 - `mat_vm_l`/`mat_vm_r` must stay separate sub_resources — a shared material
   would make both arms glow when one charges.
 - `ShadowMesh` keeps `cast_shadow = 3` and `BodyMesh` stays `visible =
-  false` in-scene; only non-authority code flips BodyMesh on — visible
-  locally, either would fill your camera with red capsule interior.
+  false` in-scene; only puppet-role (REPLICA/DRIVEN) or ghost code flips
+  BodyMesh on — visible on a first-person body, either would fill your
+  camera with red capsule interior.
 - Collision capsule, ShadowMesh, and BodyMesh must stay the same size —
   the visual IS the hitbox; a mismatch makes shots feel wrong.

@@ -926,6 +926,13 @@ If revisited, the constraints established are:
   feel like the prototype did* → **N3** scale to 12 (unlocks the 6v6
   prototype and §22 risk 1 measurement).
 
+*N1 implemented 2026-09-10 (branch `netcode`): MatchHost + NetRole
+architecture, per-match child servers, LAN converted, client-auth path
+deleted. Verified headless: full lobby→duel→result loop at 0/80/120 ms
+artificial latency, multi-match soak on rotating ports, and the TAS-ghost
+trajectory fingerprint bit-identical to the pre-refactor baseline (offline
+untouched). N2 (rewind) not started.*
+
 ### 20.3 Character controller
 
 Godot's `CharacterBody3D` is a starting point, but a custom kinematic controller

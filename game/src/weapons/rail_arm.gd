@@ -17,7 +17,10 @@ var charge := 0.0
 var cooldown := 0.0
 
 
-func _physics_process(delta: float) -> void:
+## Advances the charge cycle by one tick. Called by the owning player from
+## inside its simulation step (NOT self-driven _physics_process) so the whole
+## player tick is one re-runnable unit for client prediction replay.
+func step(delta: float) -> void:
 	match state:
 		ArmState.CHARGING:
 			charge += delta

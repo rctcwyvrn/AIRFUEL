@@ -2,7 +2,8 @@
 
 ## Function
 
-The LAN minimap: the corridor volume as a compass-locked wireframe prism
+The netplay minimap (LAN and lobby matches — any `Net.active` session):
+the corridor volume as a compass-locked wireframe prism
 (it turns with your facing) with live player dots, drawn entirely in 2D
 via manual 3D projection.
 

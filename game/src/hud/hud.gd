@@ -183,7 +183,7 @@ func _scan_threats() -> void:
 		var bearing := _bearing_to(enemy.global_position)
 		for i in 2:
 			if enemy.arm_types[i] == "rail":
-				var prog := enemy.remote_arm_progress(i)
+				var prog := enemy.display_arm_progress(i)
 				if prog > 0.0:
 					threats.append({angle = bearing, progress = prog})
 		if "sword" in enemy.arm_types:

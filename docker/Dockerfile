@@ -32,5 +32,8 @@ RUN godot --headless --path /app/game --import; chown -R airfuel /app/game
 USER airfuel
 ENV HOME=/home/airfuel
 
-EXPOSE 27555/udp
+# 27555 = lobby/matchmaker; 27600-27619 = per-match child servers (the range
+# must match ServerConfig match_port_start/match_port_count and be published
+# alongside 27555 — see docker/compose.yaml).
+EXPOSE 27555/udp 27600-27619/udp
 CMD ["godot", "--headless", "--path", "/app/game", "--", "--dedicated"]

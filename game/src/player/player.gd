@@ -5,9 +5,21 @@ extends CharacterBody3D
 ## Wallrun (flat + curved via radial ray probes), dismount fuel/speed grants,
 ## ramp persistence across gaps, dashes, fueled strafes, terminal velocity;
 ## per-arm rail charge with freeze/trajectory-lock, hitscan, canister
-## ejection. Plus prototype LAN netplay (client-authoritative, see Net).
+## ejection. Netplay is server-authoritative (§20.2 N1): one body class plays
+## four roles (see NetRole) — the same _simulate() tick runs everywhere, and
+## client prediction replays it against server snapshots.
 
 enum MoveState { GROUNDED, AIRBORNE, WALLRUN }
+
+## Who simulates this body, and from what input:
+## LOCAL     — authoritative + local human input (offline solo, LAN host's own
+##             body, TAS ghosts via ghost_controlled).
+## DRIVEN    — authoritative + net cmds (a remote client's body on the server).
+## PREDICTED — the client's own body: simulates immediately from local input,
+##             sends cmds to the server, reconciles against snapshots.
+## REPLICA   — render-only puppet of another player on a client; never
+##             simulated here, fed by snapshots.
+enum NetRole { LOCAL, DRIVEN, PREDICTED, REPLICA }
 
 signal shot_fired(side: String, result: String)
 signal damaged(amount: int, from_id: int)
@@ -20,6 +32,9 @@ const CANISTER := preload("res://src/weapons/canister.tscn")
 @export var config: MovementConfig
 @export var combat: CombatConfig
 @export var mouse_sensitivity := 0.0022
+
+# Set by Net before add_child; scene default LOCAL keeps offline untouched.
+var role := NetRole.LOCAL
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
@@ -53,10 +68,22 @@ var spawn_transform: Transform3D
 
 var move_locked := false
 var pending_arms: Array[RailArm] = []
-var last_shot_time := -1000.0
+var shot_gap_timer := 0.0
+
+# True while re-simulating buffered ticks during prediction reconciliation:
+# gameplay math runs, one-shot effects (beams, canisters, hitmarker signals,
+# viewmodel kicks) are suppressed so replays don't double them.
+var replaying := false
 
 var hp := 2
 var _net_target_pos := Vector3.ZERO
+
+# PREDICTED-role machinery: cmd/state history for reconciliation replays.
+# The cmd/state wire formats live in PlayerState (player_state.gd).
+var net_tick := 0
+var _cmd_history: Dictionary = {}  # tick -> PackedFloat32Array cmd
+var _state_history: Dictionary = {}  # tick -> capture_state()
+var _pending_snapshot: Array = []  # [ack_tick, state]; applied at tick start
 
 # Per-tick command state: filled from Input for humans, written directly by
 # a controller (TAS ghost, future bots) when ghost_controlled.
@@ -139,13 +166,8 @@ func _ready() -> void:
 		gmat.albedo_color = Color(1.0, 0.55, 0.1, 0.4)
 		gmat.emission = Color(1.0, 0.55, 0.1, 1.0)
 		bm.material_override = gmat
-	elif is_multiplayer_authority():
-		# Explicit claim: auto-current fails when a remote puppet's camera
-		# entered the viewport first (client-side join order)
-		camera.current = true
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	else:
-		# Remote puppet: rendered + state-synced, never simulated here
+	elif role == NetRole.REPLICA:
+		# Render-only puppet: state-synced from snapshots, never simulated here
 		camera.current = false
 		set_physics_process(false)
 		vm_left.visible = false
@@ -156,10 +178,27 @@ func _ready() -> void:
 		for arm: MeshInstance3D in [puppet_arm_l, puppet_arm_r]:
 			arm.material_override = arm.material_override.duplicate()
 			arm.visible = true
+	elif role == NetRole.DRIVEN:
+		# Server-side body of a remote client: full simulation from net cmds.
+		# Rendered like a puppet on a LAN host's screen; headless elsewhere.
+		camera.current = false
+		set_process_unhandled_input(false)
+		vm_left.visible = false
+		vm_right.visible = false
+		$BodyMesh.visible = true
+		for arm: MeshInstance3D in [puppet_arm_l, puppet_arm_r]:
+			arm.material_override = arm.material_override.duplicate()
+			arm.visible = true
+	else:
+		# LOCAL or PREDICTED: this machine's own first-person body.
+		# Explicit claim: auto-current fails when a remote puppet's camera
+		# entered the viewport first (client-side join order)
+		camera.current = true
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_multiplayer_authority():
+	if role == NetRole.REPLICA or role == NetRole.DRIVEN:
 		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
@@ -171,17 +210,62 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	_gather_input()
+	if role == NetRole.PREDICTED:
+		# Prediction: reconcile any queued server snapshot first (inside the
+		# physics frame, so replay's move_and_slide uses the physics delta),
+		# then simulate this tick immediately from local input and ship the
+		# cmd to the server.
+		_maybe_reconcile()
+		_gather_input()
+		net_tick += 1
+		var cmd := PlayerState.encode_cmd(self)
+		_cmd_history[net_tick] = cmd
+		Net.send_cmd(cmd)
+		_simulate(delta)
+		_state_history[net_tick] = capture_state()
+		_camera_feel(delta)
+		_update_viewmodels(delta)
+		return
+	if role == NetRole.LOCAL:
+		_gather_input()
+	_simulate(delta)  # DRIVEN: cmds were written by MatchHost before this tick
+	if role == NetRole.DRIVEN:
+		return
+	_camera_feel(delta)
+	_update_viewmodels(delta)
+
+	if recording and countdown <= 0.0:
+		var flags := (
+			int(cmd_jump)
+			| int(cmd_dash) << 1
+			| int(cmd_fire_l) << 2
+			| int(cmd_fire_r) << 3
+			| int(cmd_swap) << 4
+			| int(cmd_respawn) << 5
+		)
+		_tape_lines.append(
+			(
+				"%.5f %.5f %.3f %.3f %.1f %d"
+				% [rotation.y, head.rotation.x, cmd_move.x, cmd_move.y, cmd_vert, flags]
+			)
+		)
+
+
+## One full gameplay tick from the current cmd_* fields: timers, arms, sword,
+## movement, collision, respawn checks, then the arm charge cycles. This is
+## the re-runnable unit client prediction replays — everything the outcome of
+## a tick depends on lives in here (and in capture_state()); everything
+## visual-only (camera feel, viewmodels, recording, net sends) stays out.
+func _simulate(delta: float) -> void:
 	if countdown > 0.0:
 		# 3-2-1 after any reset: frozen in place (look around freely); the
 		# run clock, tape recording, and ghost playback all wait for GO
 		countdown -= delta
 		velocity = Vector3.ZERO
-		if Net.active:
-			_send_my_state()
 		return
 	if not run_finished:
 		run_time += delta
+	shot_gap_timer = maxf(0.0, shot_gap_timer - delta)
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
 	double_jump_timer = maxf(0.0, double_jump_timer - delta)
 	wall_rearm_timer = maxf(0.0, wall_rearm_timer - delta)
@@ -227,62 +311,133 @@ func _physics_process(delta: float) -> void:
 	if state != MoveState.WALLRUN:
 		_apply_glide(pre_slide_velocity)
 	_update_state()
-	_camera_feel(delta)
-	_update_viewmodels(delta)
 
 	var manual_respawn := cmd_respawn and not Net.active
 	if manual_respawn or global_position.y < config.kill_y:
 		_respawn()
 
-	if recording:
-		var flags := (
-			int(cmd_jump)
-			| int(cmd_dash) << 1
-			| int(cmd_fire_l) << 2
-			| int(cmd_fire_r) << 3
-			| int(cmd_swap) << 4
-			| int(cmd_respawn) << 5
-		)
-		_tape_lines.append(
-			(
-				"%.5f %.5f %.3f %.3f %.1f %d"
-				% [rotation.y, head.rotation.x, cmd_move.x, cmd_move.y, cmd_vert, flags]
+	# Arms advance at tick end (they were self-processing child nodes, which
+	# ran after the parent) so a completed charge fires next tick, not this one
+	arm_left.step(delta)
+	arm_right.step(delta)
+
+
+## Queues a server snapshot; applied at the next tick's start so the replay
+## runs inside a physics frame (move_and_slide picks up the physics delta).
+func on_server_snapshot(ack_tick: int, server_state: PackedFloat32Array) -> void:
+	if role != NetRole.PREDICTED:
+		return
+	_pending_snapshot = [ack_tick, server_state]
+
+
+func _maybe_reconcile() -> void:
+	if _pending_snapshot.is_empty():
+		return
+	var ack: int = _pending_snapshot[0]
+	var server_state: PackedFloat32Array = _pending_snapshot[1]
+	_pending_snapshot = []
+	var predicted: PackedFloat32Array = _state_history.get(ack, PackedFloat32Array())
+	for t: int in _state_history.keys():
+		if t <= ack:
+			_state_history.erase(t)
+			_cmd_history.erase(t)
+	if PlayerState.agree(predicted, server_state):
+		return
+	# Misprediction: rewind to the server's truth and replay the cmds it
+	# hasn't seen yet. Live view angles are preserved across the replay —
+	# the mouse may have moved since the last recorded cmd.
+	var live_yaw := rotation.y
+	var live_pitch := head.rotation.x
+	var delta := 1.0 / float(Engine.physics_ticks_per_second)
+	replaying = true
+	restore_state(server_state)
+	for t: int in range(ack + 1, net_tick + 1):
+		var c: PackedFloat32Array = _cmd_history.get(t, PackedFloat32Array())
+		if not c.is_empty():
+			PlayerState.apply_cmd(self, c)
+		_simulate(delta)
+		_state_history[t] = capture_state()
+	replaying = false
+	rotation.y = live_yaw
+	head.rotation.x = live_pitch
+
+
+## Render-state row the server sends about this body for other clients'
+## replicas: [id, pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp].
+func render_state(id: int) -> PackedFloat32Array:
+	var r := PackedFloat32Array()
+	r.resize(13)
+	r[0] = float(id)
+	var p := global_position
+	r[1] = p.x
+	r[2] = p.y
+	r[3] = p.z
+	r[4] = velocity.x
+	r[5] = velocity.y
+	r[6] = velocity.z
+	r[7] = rotation.y
+	r[8] = head.rotation.x
+	r[9] = arm_progress_left()
+	r[10] = arm_progress_right()
+	r[11] = float(loadout_index)
+	r[12] = float(hp)
+	return r
+
+
+## Applies a render-state row to this REPLICA (position eased in _process).
+func apply_replica(r: PackedFloat32Array) -> void:
+	_net_target_pos = Vector3(r[1], r[2], r[3])
+	velocity = Vector3(r[4], r[5], r[6])
+	rotation.y = r[7]
+	head.rotation.x = r[8]
+	_net_prog = Vector2(r[9], r[10])
+	hp = int(r[12])
+	if int(r[11]) != loadout_index:
+		loadout_index = int(r[11])
+		arm_types = LOADOUTS[loadout_index]
+		for i in 2:
+			var mat := (
+				(puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
 			)
-		)
-
-	if Net.active:
-		_send_my_state()
+			mat.albedo_color = SWORD_VM_COLOR if arm_types[i] == "sword" else RAIL_VM_COLOR
 
 
-## LAN broadcasts to every peer; a lobby match targets only the opponent, so
-## concurrent 1v1s never see each other's traffic.
-func _send_my_state() -> void:
-	if Net.match_opponent != 0:
-		_send_state.rpc_id(
-			Net.match_opponent,
-			global_position,
-			velocity,
-			rotation.y,
-			head.rotation.x,
-			arm_progress_left(),
-			arm_progress_right(),
-			loadout_index
-		)
-	else:
-		_send_state.rpc(
-			global_position,
-			velocity,
-			rotation.y,
-			head.rotation.x,
-			arm_progress_left(),
-			arm_progress_right(),
-			loadout_index
-		)
+## Client-side arrival of an authoritative damage event (via Net._ev_damage):
+## syncs hp and emits the HUD-facing signals from inside the class.
+func on_net_damage(attacker_id: int, hp_left: int) -> void:
+	hp = hp_left
+	damaged.emit(1, attacker_id)
+	if hp_left <= 0:
+		died.emit()
+
+
+## Server-side authoritative damage (replaces the LAN-trust take_damage rpc:
+## only LOCAL/DRIVEN bodies on the simulating process ever run this).
+func apply_damage(amount: int, from_id: int) -> void:
+	hp -= amount
+	if Net.match_host != null:
+		Net.match_host.on_damage(self, from_id)
+
+
+## Does this body run real simulation on this machine? (KillZones etc. act on
+## simulating bodies and must ignore render-only replicas.)
+func sim_active() -> bool:
+	return role != NetRole.REPLICA
 
 
 func _process(delta: float) -> void:
 	_update_trail_line()
-	if is_multiplayer_authority():
+	if role == NetRole.DRIVEN:
+		# LAN host renders server bodies directly: real arm progress drives
+		# the shoulder-block charge tell.
+		for i in 2:
+			var mat := (
+				(puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
+			)
+			var prog := arm_progress_left() if i == 0 else arm_progress_right()
+			mat.emission_energy_multiplier = (prog * 3.0) if arm_types[i] == "rail" else 0.4
+		return
+	if role != NetRole.REPLICA:
 		return
 	global_position = global_position.lerp(_net_target_pos, 1.0 - exp(-20.0 * delta))
 	# Rail arms glow with charge (the audible-tell stand-in); swords idle warm
@@ -524,10 +679,10 @@ func _handle_arms() -> void:
 	if pending_arms.is_empty():
 		return
 	# 7.1: completed charges fire in press order, never closer than min_shot_gap
-	var now := Time.get_ticks_msec() / 1000.0
-	if now - last_shot_time >= combat.min_shot_gap:
+	# (tick-timer, not wall clock: prediction replays re-run this code)
+	if shot_gap_timer <= 0.0:
 		_fire_rail(pending_arms.pop_front())
-		last_shot_time = now
+		shot_gap_timer = combat.min_shot_gap
 
 
 func _trigger_arm(index: int) -> void:
@@ -545,13 +700,20 @@ func _trigger_arm(index: int) -> void:
 	sword_side = "L" if index == 0 else "R"
 	velocity = -camera.global_transform.basis.z * combat.sword_lunge_speed
 	ramp_grace_timer = config.ramp_grace_window
+	if replaying:
+		return
 	var vm := vm_left if index == 0 else vm_right
 	vm.position += Vector3(0.0, -0.06, -0.5)
 	vm.rotation.x += 0.4
 
 
 ## While the blade is live, anything in reach dies (one hit per lunge).
+## Kills only happen where the sim is authoritative: offline (dummies) and on
+## the server (players). A PREDICTED lunge is pure movement — the server's
+## copy of the same lunge lands the kill and the event comes back.
 func _sword_hit_check() -> void:
+	if role == NetRole.PREDICTED:
+		return
 	var candidates: Array[Node] = []
 	candidates.append_array(get_tree().get_nodes_in_group("player"))
 	candidates.append_array(get_tree().get_nodes_in_group("target"))
@@ -568,9 +730,9 @@ func _sword_hit_check() -> void:
 			node.take_hit(99)
 			shot_fired.emit(sword_side, "kill")
 		elif node is AirfuelPlayer:
-			node.take_damage.rpc_id(
-				node.get_multiplayer_authority(), 99, multiplayer.get_unique_id()
-			)
+			node.apply_damage(99, get_multiplayer_authority())
+			if Net.match_host != null:
+				Net.match_host.on_shot(self, sword_side, Vector3.ZERO, Vector3.ZERO, "kill")
 		return
 
 
@@ -612,6 +774,11 @@ func loadout_name() -> String:
 
 
 func _fire_rail(arm: RailArm) -> void:
+	arm.on_fired()
+	if replaying:
+		# Replayed ticks keep the arm state machine honest but never re-do
+		# damage or effects — those happened when the tick first ran.
+		return
 	var side := "L" if arm == arm_left else "R"
 	var cam := camera.global_transform
 	var from := cam.origin
@@ -632,25 +799,23 @@ func _fire_rail(arm: RailArm) -> void:
 			if target is TargetDummy:
 				result = "kill" if target.take_hit(damage) else zone
 		elif collider is AirfuelPlayer and not collider.ghost_controlled:
+			# Damage only where the sim is authoritative (server / offline).
+			# A PREDICTED shot is muzzle-flash only; the server's copy of the
+			# same shot decides the hit and ev_shot brings the result back.
 			result = "body"
-			collider.take_damage.rpc_id(
-				collider.get_multiplayer_authority(),
-				combat.damage_body,
-				multiplayer.get_unique_id()
-			)
-	arm.on_fired()
+			if role != NetRole.PREDICTED:
+				collider.apply_damage(combat.damage_body, get_multiplayer_authority())
 	var side_sign := 1.0 if side == "R" else -1.0
 	var vm := vm_right if side == "R" else vm_left
-	vm.position += Vector3(0.0, 0.02, 0.16)
 	var muzzle: Vector3 = vm.global_transform * Vector3(0, 0, -0.35)
-	_spawn_beam(muzzle, end)
-	_spawn_canister(side_sign, cam)
-	if Net.active:
-		if Net.match_opponent != 0:
-			_remote_shot_fx.rpc_id(Net.match_opponent, muzzle, end)
-		else:
-			_remote_shot_fx.rpc(muzzle, end)
-	shot_fired.emit(side, result)
+	if not Net.headless:
+		vm.position += Vector3(0.0, 0.02, 0.16)
+		_spawn_beam(muzzle, end)
+		_spawn_canister(side_sign, cam)
+	if Net.match_host != null:
+		Net.match_host.on_shot(self, side, muzzle, end, result)
+	if not Net.active:
+		shot_fired.emit(side, result)  # offline hitmarker; netplay uses ev_shot
 
 
 func _spawn_beam(from: Vector3, to: Vector3) -> void:
@@ -826,8 +991,13 @@ func _gather_input() -> void:
 	cmd_fire_r = Input.is_action_just_pressed("fire_right")
 	cmd_swap = Input.is_action_just_pressed("swap_loadout")
 	cmd_respawn = Input.is_action_just_pressed("respawn")
-	if Input.is_action_just_pressed("record"):
-		_toggle_recording()
+	if Input.is_action_just_pressed("record") and not Net.active:
+		_toggle_recording()  # TAS tapes are a solo instrument
+	if Net.autoduel and role == NetRole.PREDICTED:
+		# Headless smoke duels: stand still and fire the left rail on a fixed
+		# cadence — spawns face each other, so shots connect and a first-to-N
+		# match runs to completion without a human.
+		cmd_fire_l = Engine.get_physics_frames() % 300 == 0
 
 
 func _wish_dir() -> Vector3:
@@ -851,57 +1021,6 @@ func _camera_feel(delta: float) -> void:
 	if state == MoveState.WALLRUN:
 		target_fov += config.wallrun_fov_bonus
 	camera.fov = lerpf(camera.fov, target_fov, 1.0 - exp(-6.0 * delta))
-
-
-## LAN-trust damage: the shooter reports the hit, the victim's authority
-## applies it. 2 HP, every rail hit = 1 -> two shots to kill; a kill resets
-## BOTH duelists to spawn (design 9: no regen, no partial states).
-@rpc("any_peer", "call_remote", "reliable")
-func take_damage(amount: int, from_id: int) -> void:
-	if not is_multiplayer_authority():
-		return
-	hp -= amount
-	damaged.emit(amount, from_id)
-	if hp <= 0:
-		died.emit()
-		if Net.match_opponent != 0:
-			# Lobby match: the server keeps score (first-to-N) and relays
-			Net.report_match_kill.rpc_id(1, from_id)
-		else:
-			Net.report_kill.rpc(from_id, multiplayer.get_unique_id())
-		_respawn()
-
-
-## Round reset: both duelists return to spawn after a kill. Called locally
-## (victim) and via Net.kill_scored (killer, with the KILL hitmarker).
-func round_reset(scored_kill: bool) -> void:
-	if scored_kill:
-		shot_fired.emit("", "kill")
-	_respawn()
-
-
-@rpc("authority", "call_remote", "unreliable")
-func _remote_shot_fx(from: Vector3, to: Vector3) -> void:
-	_spawn_beam(from, to)
-
-
-@rpc("authority", "call_remote", "unreliable_ordered")
-func _send_state(
-	pos: Vector3, vel: Vector3, yaw: float, pitch: float, prog_l: float, prog_r: float, l_idx: int
-) -> void:
-	_net_target_pos = pos
-	velocity = vel
-	rotation.y = yaw
-	head.rotation.x = pitch
-	_net_prog = Vector2(prog_l, prog_r)
-	if l_idx != loadout_index:
-		loadout_index = l_idx
-		arm_types = LOADOUTS[l_idx]
-		for i in 2:
-			var mat := (
-				(puppet_arm_l if i == 0 else puppet_arm_r).material_override as StandardMaterial3D
-			)
-			mat.albedo_color = SWORD_VM_COLOR if arm_types[i] == "sword" else RAIL_VM_COLOR
 
 
 ## F5: record this run's inputs, one line per physics tick, for TAS ghost
@@ -996,6 +1115,16 @@ func _respawn() -> void:
 	head.rotation.x = 0.0
 
 
+## State codec lives in PlayerState (player_state.gd) — fixed-layout
+## PackedFloat32Array of everything _simulate()'s outcome depends on.
+func capture_state() -> PackedFloat32Array:
+	return PlayerState.capture(self)
+
+
+func restore_state(s: PackedFloat32Array) -> void:
+	PlayerState.restore(self, s)
+
+
 func horizontal_speed() -> float:
 	return Vector3(velocity.x, 0.0, velocity.z).length()
 
@@ -1012,10 +1141,13 @@ func arm_progress_right() -> float:
 	return arm_right.progress()
 
 
-## Synced arm progress of a remote puppet (from _send_state) — the HUD's
-## charge-warning source. Meaningless on locally simulated bodies.
-func remote_arm_progress(index: int) -> float:
-	return _net_prog.x if index == 0 else _net_prog.y
+## Arm progress for HUD display regardless of role: replicas answer from the
+## snapshot-fed values, simulated bodies (incl. DRIVEN on a LAN host's
+## screen) from the real arm state. The HUD's charge-warning source.
+func display_arm_progress(index: int) -> float:
+	if role == NetRole.REPLICA:
+		return _net_prog.x if index == 0 else _net_prog.y
+	return arm_progress_left() if index == 0 else arm_progress_right()
 
 
 func state_name() -> String:

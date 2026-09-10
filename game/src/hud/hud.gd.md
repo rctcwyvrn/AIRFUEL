@@ -11,8 +11,9 @@ current loadout (bottom-right), a red death flash on the `died` signal, a 3-2-1 
 a run timer (top-center,
 mm:ss.mmm — visible only when a `"finish"`-group zone exists in the
 scene, green once finished),
-and — LAN only — a kill scoreboard (top-right, YOU first, from
-`Net.players`/`Net.scores`) plus the rotating-prism minimap
+and — netplay only — a kill scoreboard (top-right, YOU first, from
+`Net.players`/`Net.scores` — scores are server-fed by the kill events)
+plus the rotating-prism minimap
 (see `minimap.gd` — hud.gd only toggles its visibility with `Net.active`).
 
 Step 3 duel feedback layer (§15.2, §8.2): directional **threat ring** around
@@ -38,10 +39,14 @@ within `combat.sword_warning_range`, pulsing), and — via
   `arm_progress_left/right()` (rail charge, or sword cooldown-readiness),
   `move_locked`, `loadout_name()`, `hp`, `combat.hp_max`,
   `combat.sword_warning_range`, `run_time`, `run_finished`, `countdown`,
-  `recording`; on enemy puppets: `arm_types`,
-  `remote_arm_progress(i)`, `global_position`. Connects to `shot_fired`
+  `recording`; on enemy bodies: `arm_types`,
+  `display_arm_progress(i)`, `global_position`. Connects to `shot_fired`
   (hitmarkers), `damaged` (hit flash + damage arc), `died` (death flash),
-  and the autoload signal `Net.kill_reported` (feed/banner).
+  and the autoload signal `Net.kill_reported` (feed/banner). In netplay
+  those three player signals are emitted by Net's server-event handlers
+  (`_ev_shot` / `_ev_damage` fan-out — authoritative results, §20.2 N1),
+  not by local simulation; offline the player emits them directly. The
+  HUD doesn't care which — same signals either way.
 - Expected children (`@onready` paths): `FuelBar`, `ChargeL`, `ChargeR`
   (ProgressBars), `FuelLabel`, `SpeedLabel`, `StateLabel`, `HitLabel`,
   `LockLabel`, `ScoreLabel`, `LoadoutLabel`, `TimerLabel`, `CountdownLabel`
@@ -67,12 +72,14 @@ The controls highlighter is data-driven: `KEY_LAYOUT` rows are
 (skipping the respawn key when `Net.active` — T is solo-only)
 and `_process` polls `Input.is_action_pressed` to swap KEY_DIM/KEY_LIT.
 
-`_scan_threats` (every frame) walks group `"player"` for enemy puppets —
+`_scan_threats` (every frame) walks group `"player"` for enemy bodies —
 skipping self, ghosts, and any `is_multiplayer_authority()` body, so offline
 it finds nothing and the whole layer is silently inert. Rail arms with
-synced progress > 0 become `{angle, progress}` wedges on the ThreatRing
-(progress > 0 is exactly CHARGING/PENDING — RailArm.progress() is 0 in
-cooldown, so no false warning after the shot); the nearest sword carrier in
+`display_arm_progress(i)` > 0 become `{angle, progress}` wedges on the
+ThreatRing — snapshot-fed on REPLICA puppets, real arm state on a LAN
+host's DRIVEN bodies (the host IS the sim there); progress > 0 is exactly
+CHARGING/PENDING — RailArm.progress() is 0 in
+cooldown, so no false warning after the shot. The nearest sword carrier in
 range drives the warning label, side text from the yaw-relative bearing
 (`_bearing_to`: 0 = ahead, +PI/2 = right; ±45° AHEAD, ±135°+ BEHIND).
 `damaged` freezes the attacker's bearing at hit time into a fading arc.
@@ -94,8 +101,10 @@ usernames in dedicated-server matches, "P%d" fallback in LAN.
   mouse-look-eating hazard as the hud.tscn assertion.
 - `KEY_LAYOUT` action names must exist in project.godot; renaming an input
   action must touch this table too.
-- The charge warning must key off synced puppet progress
-  (`remote_arm_progress`), never local arm state — an invisible enemy charge
+- The charge warning must key off `display_arm_progress` — the role-aware
+  source (snapshot-fed for replicas; a LAN host's DRIVEN bodies answer
+  from real arm state, which is authoritative there) — never a replica's
+  local `RailArm` nodes, which don't simulate. An invisible enemy charge
   would gut the dodge duel (§8.1's loud-tell rule).
 - Warn on EVERY enemy rail charge — no range gate, no aim filter (the
   aim-cone filter died with aim crush; §15.2 defers filtering to
