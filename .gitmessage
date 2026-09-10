@@ -1,0 +1,15 @@
+# ── Airfuel commit ─────────────────────────────────────────────────────
+# Release commit (CI builds + publishes):     v0.4.0 one-line summary
+# Normal commit (no build):                   one-line summary
+#
+# A subject starting with vMAJOR.MINOR.PATCH triggers
+# .github/workflows/release.yml on push to main:
+#   export Windows + Linux (Godot 4.7.2) → tag vX.Y.Z → GitHub release
+#   with both zips → butler push to rctcwyvrn.itch.io/airfuel
+#   (--userversion X.Y.Z; the in-game menu shows the same number).
+#
+# The version must be NEW (CI refuses to re-release an existing tag) —
+# check the latest with: git tag --sort=-v:refname | head -1
+#
+# The body below the blank line becomes the GitHub release notes
+# (empty body → the subject is reused).

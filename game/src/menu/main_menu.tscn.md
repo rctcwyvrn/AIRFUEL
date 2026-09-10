@@ -14,7 +14,9 @@ join-by-IP LAN / join a lobby server with a username).
   `VBox/ServerRow/NameEdit` + `ServerIpEdit` (LineEdits) +
   `JoinServerButton` (the dedicated-lobby entry), `VBox/ErrorLabel`
   (hidden; the script drives it — grey connecting status / red failures,
-  autowrapped).
+  autowrapped), and `VersionLabel` (bottom-right corner grey Label,
+  in-scene text "dev"; `_ready` overwrites it with the build version from
+  `application/config/version` — "v0.4.0" on CI-stamped release builds).
 
 - `ControlsLabel` (Label, left side of the screen, outside `VBox`): static
   controls reference (WASD/Space/Q/Shift/LMB-RMB/Tab/T/Esc) added

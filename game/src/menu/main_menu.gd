@@ -15,9 +15,13 @@ const ERROR_COLOR := Color(1.0, 0.3, 0.25)
 @onready var name_edit: LineEdit = $VBox/ServerRow/NameEdit
 @onready var server_ip_edit: LineEdit = $VBox/ServerRow/ServerIpEdit
 @onready var error_label: Label = $VBox/ErrorLabel
+@onready var version_label: Label = $VersionLabel
 
 
 func _ready() -> void:
+	# CI stamps config/version with the release number ("dev" in-repo).
+	var version := str(ProjectSettings.get_setting("application/config/version", "dev"))
+	version_label.text = version if version == "dev" else "v" + version
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	Net.net_error.connect(_show_error)
 	if Net.last_error != "":

@@ -1,9 +1,10 @@
 # CLAUDE.md — Airfuel
 
 Airfuel is a solo-dev 6v6 movement shooter prototype in Godot 4.7 (GDScript).
-The toolchain is pinned: `shell.nix` (godot 4.7.2-stable) and
-`docker/Dockerfile` (`GODOT_VERSION=4.7.2`) must name the same version.
-Read this first, then the sidecar doc of any file you touch.
+The toolchain is pinned: `shell.nix` (godot 4.7.2-stable),
+`docker/Dockerfile` (`GODOT_VERSION=4.7.2`), and
+`.github/workflows/release.yml` (`GODOT_VERSION`) must name the same
+version. Read this first, then the sidecar doc of any file you touch.
 
 ## Where things are
 
@@ -78,6 +79,19 @@ pairs).
 - **Formatting/lint are enforced**: after editing any `.gd` file, run
   `gdformat <files>` and `gdlint game/src` (both in the devshell; config in
   `gdlintrc` at the repo root) — gdlint must exit clean.
+
+### Releases
+
+- CI (`.github/workflows/release.yml`): a push to `main` whose commit
+  subject starts with `vX.Y.Z` exports the "Windows Desktop" + "Linux"
+  presets, tags the commit, creates a GitHub release with both zips, and
+  butler-pushes to itch.io (`rctcwyvrn/airfuel`, channels
+  `windows`/`linux`, `--userversion X.Y.Z`). Ordinary subjects build
+  nothing. `.gitmessage` (wired via local `git config commit.template`)
+  documents the convention.
+- `game/project.godot` keeps `config/version="dev"` in-repo; CI seds in
+  the release number, and the main menu shows it (`VersionLabel`). Don't
+  commit a real number there.
 
 ### Process
 

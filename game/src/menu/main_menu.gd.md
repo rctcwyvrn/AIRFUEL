@@ -17,6 +17,11 @@ all networking lives in the `Net` autoload.
   field's placeholder), Enter in the server-IP field submits).
 - Persists the last username + server IP to `user://settings.cfg`
   (`[lobby] name/ip`) and prefills them on launch.
+- Shows the build version in `VersionLabel` (bottom-right): reads
+  `application/config/version` — "dev" in-repo shows verbatim, a
+  CI-stamped release number gets a "v" prefix ("v0.4.0"). Playtest use:
+  "which build are you on?" (release CI is
+  `.github/workflows/release.yml`).
 - Connection feedback via `VBox/ErrorLabel`: grey "connecting to <ip>..."
   status on either join click, red failure text from `Net.net_error`; on
   `_ready` it also consumes `Net.last_error` (clearing it) so failures that

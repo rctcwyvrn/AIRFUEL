@@ -1,0 +1,146 @@
+# Release pipeline: a push to main whose commit subject starts with
+# "vX.Y.Z" is a release. CI exports the Windows + Linux presets, tags the
+# commit, creates a GitHub release with both zips, and butler-pushes the
+# builds to itch.io (rctcwyvrn/airfuel) with --userversion.
+#
+# Ordinary commits ("hud", "lobby") skip everything after the version check.
+#
+# Setup this workflow needs (one-time, GitHub repo settings):
+#   - Secret BUTLER_API_KEY: from https://itch.io/user/settings/api-keys
+#
+# GODOT_VERSION is pinned and must match shell.nix and docker/Dockerfile —
+# see CLAUDE.md. The commit template (.gitmessage, repo root) documents the
+# commit-subject convention.
+
+name: release
+
+on:
+  push:
+    branches: [main]
+
+env:
+  GODOT_VERSION: "4.7.2"
+  ITCH_TARGET: rctcwyvrn/airfuel
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse version from commit subject
+        id: parse
+        run: |
+          subject="$(git log -1 --pretty=%s)"
+          if [[ "$subject" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)($|[[:space:]:]) ]]; then
+            echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "Release commit: v${BASH_REMATCH[1]}"
+          else
+            echo "version=" >> "$GITHUB_OUTPUT"
+            echo "Not a release commit ('$subject') — skipping build."
+          fi
+
+  build-release:
+    needs: version
+    if: needs.version.outputs.version != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse to re-release an existing version
+        run: |
+          if gh release view "v${VERSION}" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::v${VERSION} already has a release — bump the version in the commit subject."
+            exit 1
+          fi
+
+      - name: Cache Godot and export templates
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-bin
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot and export templates
+        run: |
+          set -euo pipefail
+          if [ ! -x "$HOME/godot-bin/godot" ]; then
+            mkdir -p "$HOME/godot-bin"
+            curl -fL -o /tmp/godot.zip \
+              "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+            unzip -q /tmp/godot.zip -d /tmp
+            mv "/tmp/Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$HOME/godot-bin/godot"
+          fi
+          tpl_dir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          if [ ! -f "$tpl_dir/linux_release.x86_64" ]; then
+            curl -fL -o /tmp/templates.tpz \
+              "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+            unzip -q /tmp/templates.tpz -d /tmp/templates
+            mkdir -p "$tpl_dir"
+            mv /tmp/templates/templates/* "$tpl_dir/"
+          fi
+          echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Stamp version into project.godot
+        run: |
+          sed -i "s|^config/version=\"dev\"|config/version=\"${VERSION}\"|" game/project.godot
+          grep -q "^config/version=\"${VERSION}\"" game/project.godot
+
+      - name: Import project
+        run: godot --headless --path game --import
+
+      - name: Export Windows + Linux
+        run: |
+          set -euo pipefail
+          mkdir -p build/windows build/linux
+          godot --headless --path game --export-release "Windows Desktop" "$PWD/build/windows/airfuel.exe"
+          godot --headless --path game --export-release "Linux" "$PWD/build/linux/airfuel.x86_64"
+          # Exports log errors without always failing — verify the artifacts.
+          test -s build/windows/airfuel.exe
+          test -s build/linux/airfuel.x86_64
+          test -s build/linux/airfuel.pck
+
+      - name: Zip release artifacts
+        run: |
+          (cd build/windows && zip -qr "../airfuel-windows-v${VERSION}.zip" .)
+          (cd build/linux && zip -qr "../airfuel-linux-v${VERSION}.zip" .)
+
+      - name: Create GitHub release (tags the commit)
+        run: |
+          notes="$(git log -1 --pretty=%b)"
+          [ -n "$notes" ] || notes="$(git log -1 --pretty=%s)"
+          gh release create "v${VERSION}" \
+            --target "$GITHUB_SHA" \
+            --title "Airfuel v${VERSION}" \
+            --notes "$notes" \
+            "build/airfuel-windows-v${VERSION}.zip" \
+            "build/airfuel-linux-v${VERSION}.zip"
+
+      - name: Push to itch.io via butler
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$BUTLER_API_KEY" ]; then
+            echo "::error::BUTLER_API_KEY secret is not set — add it in repo settings (itch.io API key)."
+            exit 1
+          fi
+          curl -fL -o /tmp/butler.zip \
+            "https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default"
+          mkdir -p "$HOME/butler"
+          unzip -q /tmp/butler.zip -d "$HOME/butler"
+          chmod +x "$HOME/butler/butler"
+          "$HOME/butler/butler" -V
+          "$HOME/butler/butler" push build/windows "${ITCH_TARGET}:windows" --userversion "${VERSION}"
+          "$HOME/butler/butler" push build/linux "${ITCH_TARGET}:linux" --userversion "${VERSION}"

@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Airfuel"
+config/version="dev"
 config/description="Prototype — Roadmap Steps 1+2: movement + railgun."
 run/main_scene="res://src/menu/main_menu.tscn"
 config/icon="res://icon.svg"

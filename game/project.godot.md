@@ -4,11 +4,16 @@
 
 Godot project configuration for the Steps 1+2 prototype. The `features` tag
 is 4.7, matching the pinned toolchain (shell.nix: godot 4.7.2-stable;
-docker/Dockerfile: `GODOT_VERSION=4.7.2` — keep all three in step).
+docker/Dockerfile and .github/workflows/release.yml: `GODOT_VERSION=4.7.2`
+— keep all four in step).
 
 ## Interface
 
 - Main scene: `res://src/menu/main_menu.tscn` (menu → corridor).
+- `config/version="dev"` — release CI seds this to the `vX.Y.Z` from the
+  commit subject before export (`.github/workflows/release.yml` anchors on
+  the literal `config/version="dev"` line); `main_menu.gd` reads it for the
+  menu's `VersionLabel`. It must stay `"dev"` in-repo.
 - Runtime/window icon: `res://icon.svg` (orange `>>>` chevrons — the brand
   mark, matching `icon.ico` used by the Windows export preset). Boot splash
   background is the identity dark grey (#16181C).
