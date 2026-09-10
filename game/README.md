@@ -112,7 +112,7 @@ godot4 --path game -- --lobby <ip> --name <username>  # join a server
 ## What to test (Step 1–3 questions from the design doc)
 
 - Does chained-short-runs feel emerge from the dismount reward?
-- Is curved-surface wallrun viable (orange cylinders)?
+- Is curved-surface wallrun viable (orange slots' rounded caps)?
 - How far apart can platforms be before flow breaks (floor gaps, teal panels)?
 - How long should the corridor actually be?
 - Does the rail charge feel good to commit to? (freeze + no cancel)

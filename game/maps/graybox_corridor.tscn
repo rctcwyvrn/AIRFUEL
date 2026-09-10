@@ -91,130 +91,130 @@ size = Vector3(82, 1, 880)
 cast_shadow = 0
 material = SubResource("mat_floor")
 
-[node name="BigCyl1" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, -313)
+[node name="BigSlot1" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -313)
 use_collision = true
-radius = 6.0
-height = 36.0
+polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="BigCyl2" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 18, -183)
+[node name="BigSlot2" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -8, 0, -183)
 use_collision = true
-radius = 6.0
-height = 36.0
+polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="BigCyl3" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 18, -53)
+[node name="BigSlot3" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 8, 0, -53)
 use_collision = true
-radius = 6.0
-height = 36.0
+polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="BigCyl4" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, 67)
+[node name="BigSlot4" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 67)
 use_collision = true
-radius = 6.0
-height = 36.0
+polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="BigCyl5" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 18, 197)
+[node name="BigSlot5" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -10, 0, 197)
 use_collision = true
-radius = 6.0
-height = 36.0
+polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="BigCyl6" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 18, 327)
+[node name="BigSlot6" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 10, 0, 327)
 use_collision = true
-radius = 6.0
-height = 36.0
+polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="MidCyl1" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 16, -400)
+[node name="MidSlot1" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, -400)
 use_collision = true
-radius = 5.0
-height = 32.0
+polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32
 material = SubResource("mat_cyl")
 
-[node name="MidCyl2" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 16, -260)
+[node name="MidSlot2" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, -260)
 use_collision = true
-radius = 5.0
-height = 32.0
+polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32
 material = SubResource("mat_cyl")
 
-[node name="MidCyl3" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 16, -120)
+[node name="MidSlot3" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, -120)
 use_collision = true
-radius = 5.0
-height = 32.0
+polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32
 material = SubResource("mat_cyl")
 
-[node name="MidCyl4" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 16, 20)
+[node name="MidSlot4" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 20)
 use_collision = true
-radius = 5.0
-height = 32.0
+polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32
 material = SubResource("mat_cyl")
 
-[node name="MidCyl5" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 16, 150)
+[node name="MidSlot5" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 150)
 use_collision = true
-radius = 5.0
-height = 32.0
+polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32
 material = SubResource("mat_cyl")
 
-[node name="MidCyl6" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 16, 290)
+[node name="MidSlot6" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 290)
 use_collision = true
-radius = 5.0
-height = 32.0
+polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32
 material = SubResource("mat_cyl")
 
-[node name="MidCyl7" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 16, 400)
+[node name="MidSlot7" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 400)
 use_collision = true
-radius = 5.0
-height = 32.0
+polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32
 material = SubResource("mat_cyl")
 
-[node name="CenterCyl1" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, -330)
+[node name="CenterSlot1" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -330)
 use_collision = true
-radius = 4.0
-height = 40.0
+polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40
 material = SubResource("mat_cyl")
 
-[node name="CenterCyl2" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, -155)
+[node name="CenterSlot2" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -155)
 use_collision = true
-radius = 4.0
-height = 40.0
+polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40
 material = SubResource("mat_cyl")
 
-[node name="CenterCyl3" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 45)
+[node name="CenterSlot3" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 45)
 use_collision = true
-radius = 4.0
-height = 40.0
+polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40
 material = SubResource("mat_cyl")
 
-[node name="CenterCyl4" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 225)
+[node name="CenterSlot4" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 225)
 use_collision = true
-radius = 4.0
-height = 40.0
+polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40
 material = SubResource("mat_cyl")
 
-[node name="CenterCyl5" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 310)
+[node name="CenterSlot5" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 310)
 use_collision = true
-radius = 4.0
-height = 40.0
+polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40
 material = SubResource("mat_cyl")
 
 [node name="Panel1" type="CSGBox3D" parent="."]
@@ -622,56 +622,56 @@ omni_range = 55.0
 [node name="LWedge1" type="CSGPolygon3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, -320)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 10, 3, 10)
+polygon = PackedVector2Array(0, 0, 3, 5, 0, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="LWedge2" type="CSGPolygon3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 8, -84)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 10, 3, 0)
+polygon = PackedVector2Array(0, 0, 3, 5, 0, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="LWedge3" type="CSGPolygon3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, 180)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 10, 3, 10)
+polygon = PackedVector2Array(0, 0, 3, 5, 0, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="LWedge4" type="CSGPolygon3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 8, 376)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 10, 3, 0)
+polygon = PackedVector2Array(0, 0, 3, 5, 0, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="RWedge1" type="CSGPolygon3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 8, -236)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 10, -3, 0)
+polygon = PackedVector2Array(0, 0, -3, 5, 0, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="RWedge2" type="CSGPolygon3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, -20)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 10, -3, 10)
+polygon = PackedVector2Array(0, 0, -3, 5, 0, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="RWedge3" type="CSGPolygon3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 8, 96)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 10, -3, 0)
+polygon = PackedVector2Array(0, 0, -3, 5, 0, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="RWedge4" type="CSGPolygon3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, 300)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 10, -3, 10)
+polygon = PackedVector2Array(0, 0, -3, 5, 0, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 

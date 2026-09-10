@@ -41,15 +41,23 @@ Color code:
   the interior; don't turn it on without adding interior lighting.
 - **Roof lights** — `LightPanel1-11` (emissive 6×6 strips under the roof
   every 80 m) each paired with an `OmniLight3D` (energy 0.8, range 55).
-- **Tan wall wedges** — `LWedge1-4` / `RWedge1-4`, small triangular
-  CSGPolygon3D kickers (6 m tall, 3 m jut over a 10 m run) flush against
-  the walls at alternating base heights 0 / 8 m. The slanted vertical face
-  is wallrunnable and nudges a runner ~17° off the wall; half face +z
-  runners, half −z. Polygon local frame: X = world X, Y = world Z,
-  extrusion rises upward (basis maps −Z to +Y).
-- **Orange cylinders** — `BigCyl1-6` (r 6, 36 tall), `MidCyl1-7` (r 5,
-  32 tall) at x = ±15, `CenterCyl1-5` (r 4, 40 tall) on the center line.
-  Curved-wallrun test surfaces (§22); radii sized for sweeping runs.
+- **Tan wall wedges** — `LWedge1-4` / `RWedge1-4`, symmetric triangular
+  CSGPolygon3D kickers (6 m tall, 3 m peak jut at mid-run over a 10 m
+  footprint — a kite in plan view) flush against the walls at alternating
+  base heights 0 / 8 m. Both slanted faces are wallrunnable and nudge a
+  runner ~31° off the wall with a launch lip at the apex, so they read the
+  same approached from +z or −z (made symmetric 2026-09-10, Lily's call —
+  the old one-sided ramps only launched one way). Polygon local frame:
+  X = world X, Y = world Z, extrusion rises upward (basis maps −Z to +Y).
+- **Orange slots** — `BigSlot1-6` (r 6, 36 tall), `MidSlot1-7` (r 5,
+  32 tall) at x = ±15, `CenterSlot1-5` (r 4, 40 tall) on the center line.
+  Extruded obround columns (stadium profile: two 8-segment semicircular
+  caps joined by a straight section of length 2r, long axis along z, total
+  footprint 4r × 2r), CSGPolygon3D with the same upward-extrusion basis as
+  the wedges, base at y 0. The rounded caps stay the §22 curved-wallrun
+  test surfaces; the flat sides add straight wallrun lanes (replaced plain
+  cylinders 2026-09-10, Lily's call). A couple of low Cover boxes merge
+  into slot bases where footprints touch — intentional-looking, harmless.
 - **Teal panels** — `Panel1-15` alternate x = ∓18 every 60 m at heights
   16/22/28, each 14 m tall (a chainable ladder line down the whole
   corridor); `OuterPanel1-6` at x = ±28 add a wider second line.
