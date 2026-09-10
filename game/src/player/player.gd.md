@@ -68,15 +68,17 @@ degrades turn rate.)
     (PREDICTED only); applied at the next tick's start.
   - `PlayerState.apply_cmd(self/body, c)` — writes a net cmd onto a body (DRIVEN on the
     server, or a history entry during reconciliation replay).
-  - `render_state() -> PackedFloat32Array` — the 12-float render row the
+  - `render_state() -> PackedFloat32Array` — the 13-float render row the
     server sends about this body for other clients' replicas:
-    `[pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp]`. The peer id
-    deliberately travels OUTSIDE the array, as a real int: float32's
-    24-bit mantissa silently corrupts 10-digit ENet peer ids (shipped
-    once as "replicas never moved").
+    `[pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp, sword_active]`.
+    The peer id deliberately travels OUTSIDE the array, as a real int:
+    float32's 24-bit mantissa silently corrupts 10-digit ENet peer ids
+    (shipped once as "replicas never moved").
   - `apply_replica(r)` — applies a render row to a REPLICA (position target,
-    velocity, look, arm progress, hp, loadout retint of the puppet arms);
-    indexed for the 12-float id-less row above.
+    velocity, look, arm progress, hp, loadout retint of the puppet arms,
+    and `sword_active` written directly — safe because replicas never
+    simulate — so `PlayerTrails` can draw the opponent's blue lunge
+    ribbon); indexed for the 13-float id-less row above.
   - `capture_state()` / `restore_state(s)` — delegate to `PlayerState`
     (fixed 42-slot codec, see `player_state.gd.md`).
   - `apply_damage(amount, from_id) -> bool` — server-side authoritative
@@ -111,7 +113,11 @@ degrades turn rate.)
   cooldowns; `_apply_loadout_visuals` swaps viewmodel mesh + stance (rail:
   level block; sword: long blade, rolled inward/tilted up — pose stored as
   `pose_rot` meta so recovery lerps return to stance, not zero). Lunges
-  play a stab (position + rotation kick, blade emission flare while live).
+  play a stab (position + rotation kick); while the blade is live the
+  lunging viewmodel's emission flares **blue** (`SWORD_FLARE_COLOR`,
+  matching the world-space `PlayerTrails` ribbon) and is reset to
+  `VM_EMISSION_WARM` after — the reset matters because rail shares the
+  same material instance per side.
 - **Remote weapon telegraph**: `render_state` carries both arms' progress +
   `loadout_index`; REPLICA bodies tint their shoulder `PuppetArm` blocks
   per loadout and glow rail arms with charge (from the snapshot-fed
@@ -314,10 +320,11 @@ real arm progress and `_net_prog` respectively.
   available briefly. **Jump buffer**: any jump press is buffered
   `jump_buffer_time`; landing consumes it. Air jump priority: wall coyote →
   ground coyote → fueled double jump.
-- **Flight trail** (`_update_trail_line`, `_process`, all bodies): one
-  long thin orange world-space line — 2 m position samples, 150-point /
-  4 s rolling window, alpha ramp to the tail, rebuilt into an
-  ImmediateMesh LINE_STRIP each frame; cleared on respawn.
+- **Trails** (`PlayerTrails` child node, `player_trails.gd`, created in
+  `_ready`, all bodies): the orange flight-path line and the blue
+  sword-lunge ribbon both live there now (split out for the 1200-line
+  cap); `_respawn` calls `_trails.clear()` so the flight line never
+  connects across a teleport. See `player_trails.gd.md`.
 - **TAS recording (F5, `record` action)**: offline only — the toggle is
   gated on `not Net.active` (tapes are a solo instrument) and the per-tick
   log line only runs on the LOCAL path of `_physics_process`. Toggling on
@@ -382,7 +389,7 @@ real arm progress and `_net_prog` respectively.
 - `move_locked` must derive only from arm `is_locking()` — freeze from first
   trigger press to last pending shot, never during COOLDOWN.
 - **Peer ids must never be packed into float arrays**: `render_state` is
-  12 floats with the id traveling beside it as a real int — float32's
+  13 floats with the id traveling beside it as a real int — float32's
   24-bit mantissa silently corrupts 10-digit ENet peer ids (this shipped
   as a real replication bug: replicas never moved).
 - **Netplay hit tests go through rewind**: in authoritative netplay

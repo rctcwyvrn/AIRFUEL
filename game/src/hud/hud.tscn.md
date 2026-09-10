@@ -24,7 +24,10 @@ alongside the player.
   `DeathFlash` (full-rect red ColorRect at alpha 0, MUST keep
   `mouse_filter = 2` and stays above gameplay readouts), `ThreatRing`
   (full-rect Control with `threat_ring.gd` — charge wedges + damage arcs),
-  `HpPips` (60×12 Control above the crosshair; hud.gd builds the pips),
+  `HpPips` (208×32 Control anchored bottom-right, stacked just above
+  `LoadoutLabel`, with a `Back` child ColorRect — a dark backdrop padded
+  8 px beyond the pip row so the pips read against bright geometry;
+  hud.gd builds the pips on top),
   `SwordWarnLabel` (red, below the hitmarker area, hidden by default),
   `KillBanner` (orange, upper-center, hidden by default), `KillFeed`
   (VBoxContainer below the minimap area — hud.gd adds fading lines),

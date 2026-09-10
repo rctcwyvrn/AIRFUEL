@@ -1,6 +1,6 @@
-# Airfuel
+# AIRFUEL 
 
-Game state: Pre-alpha, movement-tests-and-local-lan only. Not open source yet.
+Game state: Pre-alpha, 1v1 duel mode only
 
 ## What is it?
 A frenetic, highly challenging, absurdly fast 6v6 movement shooter
@@ -33,6 +33,6 @@ Are you ready to become an Airfuel Runner?
 ## Enjoy!
 This is a for fun project made by a single developer, using LLMs to assist with the coding to make the project possible.
 
-The full source code is available on GitHub, submit bugfixes and propose patches there. Download the game on itch.io
+The full source code is available on GitHub, submit bugfixes and propose patches there. Download the game on [itch.io](https://rctcwyvrn.itch.io/airfuel)
 
 _Stay swift, Runners._

@@ -109,6 +109,8 @@ var countdown := 0.0
 const LOADOUTS: Array = [["rail", "rail"], ["rail", "sword"], ["sword", "sword"]]
 const RAIL_VM_COLOR := Color(0.45, 0.47, 0.5)
 const SWORD_VM_COLOR := Color(0.82, 0.84, 0.88)
+const SWORD_FLARE_COLOR := Color(0.2, 0.5, 1.0)
+const VM_EMISSION_WARM := Color(1.0, 0.55, 0.15)
 var loadout_index := 0
 var arm_types: Array = ["rail", "rail"]
 var sword_cd: Array = [0.0, 0.0]
@@ -117,10 +119,7 @@ var sword_side := "L"
 var _net_prog := Vector2.ZERO
 var _rail_vm_mesh: BoxMesh
 var _sword_vm_mesh: BoxMesh
-var _trail_node: MeshInstance3D
-var _trail_mesh: ImmediateMesh
-var _trail_pts: Array[Vector3] = []
-var _trail_times: Array[float] = []
+var _trails: PlayerTrails
 
 
 func _ready() -> void:
@@ -139,16 +138,8 @@ func _ready() -> void:
 	_sword_vm_mesh = BoxMesh.new()
 	_sword_vm_mesh.size = Vector3(0.05, 0.2, 1.05)
 	_apply_loadout_visuals()
-	_trail_mesh = ImmediateMesh.new()
-	_trail_node = MeshInstance3D.new()
-	_trail_node.mesh = _trail_mesh
-	_trail_node.top_level = true
-	var tmat := StandardMaterial3D.new()
-	tmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	tmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	tmat.vertex_color_use_as_albedo = true
-	_trail_node.material_override = tmat
-	add_child(_trail_node)
+	_trails = PlayerTrails.new()
+	add_child(_trails)
 	base_fov = camera.fov
 	if ghost_controlled:
 		# TAS/bot body: real physics, no human input, translucent orange.
@@ -169,6 +160,9 @@ func _ready() -> void:
 		gmat.albedo_color = Color(1.0, 0.55, 0.1, 0.4)
 		gmat.emission = Color(1.0, 0.55, 0.1, 1.0)
 		bm.material_override = gmat
+		var ghost_head := $Head/HeadMesh as MeshInstance3D
+		ghost_head.visible = true
+		ghost_head.material_override = gmat
 	elif role == NetRole.REPLICA:
 		# Render-only puppet: state-synced from snapshots, never simulated here
 		camera.current = false
@@ -176,6 +170,7 @@ func _ready() -> void:
 		vm_left.visible = false
 		vm_right.visible = false
 		$BodyMesh.visible = true
+		$Head/HeadMesh.visible = true
 		# Shoulder weapon blocks: the remote player's loadout + charge tell.
 		# Materials duplicated so multiple puppets tint independently.
 		for arm: MeshInstance3D in [puppet_arm_l, puppet_arm_r]:
@@ -189,6 +184,7 @@ func _ready() -> void:
 		vm_left.visible = false
 		vm_right.visible = false
 		$BodyMesh.visible = true
+		$Head/HeadMesh.visible = true
 		for arm: MeshInstance3D in [puppet_arm_l, puppet_arm_r]:
 			arm.material_override = arm.material_override.duplicate()
 			arm.visible = true
@@ -373,12 +369,13 @@ func _maybe_reconcile() -> void:
 
 
 ## Render-state row the server sends about this body for other clients'
-## replicas: [pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp]. The peer
-## id deliberately travels OUTSIDE this array, as a real int — 32-bit floats
-## silently corrupt 10-digit ENet peer ids (24-bit mantissa).
+## replicas: [pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp,
+## sword_active]. The peer id deliberately travels OUTSIDE this array, as a
+## real int — 32-bit floats silently corrupt 10-digit ENet peer ids (24-bit
+## mantissa).
 func render_state() -> PackedFloat32Array:
 	var r := PackedFloat32Array()
-	r.resize(12)
+	r.resize(13)
 	var p := global_position
 	r[0] = p.x
 	r[1] = p.y
@@ -392,6 +389,7 @@ func render_state() -> PackedFloat32Array:
 	r[9] = arm_progress_right()
 	r[10] = float(loadout_index)
 	r[11] = float(hp)
+	r[12] = sword_active
 	return r
 
 
@@ -403,6 +401,8 @@ func apply_replica(r: PackedFloat32Array) -> void:
 	head.rotation.x = r[7]
 	_net_prog = Vector2(r[8], r[9])
 	hp = int(r[11])
+	# Safe to write directly: replicas never simulate, so nothing ticks it.
+	sword_active = r[12]
 	if int(r[10]) != loadout_index:
 		loadout_index = int(r[10])
 		arm_types = LOADOUTS[loadout_index]
@@ -439,7 +439,6 @@ func sim_active() -> bool:
 
 
 func _process(delta: float) -> void:
-	_update_trail_line()
 	if role == NetRole.DRIVEN:
 		# LAN host renders server bodies directly: real arm progress drives
 		# the shoulder-block charge tell.
@@ -844,30 +843,6 @@ func _fire_rail(arm: RailArm) -> void:
 		shot_fired.emit(side, result)  # offline hitmarker; netplay uses ev_shot
 
 
-## One long thin orange line tracing the recent flight path: world-space
-## line strip over a rolling position history (2 m samples, ~4 s / 150 pt
-## cap), alpha fading toward the tail. Replaces the old particle puffs.
-func _update_trail_line() -> void:
-	var now := Time.get_ticks_msec() / 1000.0
-	if _trail_pts.is_empty() or _trail_pts[-1].distance_to(global_position) > 2.0:
-		_trail_pts.append(global_position + Vector3.UP * 0.4)
-		_trail_times.append(now)
-	while not _trail_times.is_empty() and (now - _trail_times[0] > 4.0 or _trail_pts.size() > 150):
-		_trail_pts.pop_front()
-		_trail_times.pop_front()
-	_trail_node.global_transform = Transform3D.IDENTITY
-	_trail_mesh.clear_surfaces()
-	if _trail_pts.size() < 2:
-		return
-	_trail_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
-	var n := _trail_pts.size()
-	for i in n:
-		var a := float(i) / float(n - 1)
-		_trail_mesh.surface_set_color(Color(1.0, 0.55, 0.1, a * 0.8))
-		_trail_mesh.surface_add_vertex(_trail_pts[i])
-	_trail_mesh.surface_end()
-
-
 func _update_viewmodels(delta: float) -> void:
 	for i in 2:
 		var vm := vm_left if i == 0 else vm_right
@@ -876,8 +851,10 @@ func _update_viewmodels(delta: float) -> void:
 			var arm := arm_left if i == 0 else arm_right
 			mat.emission_energy_multiplier = arm.progress() * 3.0
 		else:
-			# only the lunging blade flares; the other idles warm
+			# only the lunging blade flares — blue, matching the world trail;
+			# the other idles warm (emission reset: rail shares the material)
 			var flaring: bool = sword_active > 0.0 and sword_side == ("L" if i == 0 else "R")
+			mat.emission = SWORD_FLARE_COLOR if flaring else VM_EMISSION_WARM
 			mat.emission_energy_multiplier = 2.5 if flaring else 0.3
 		vm.position = vm.position.lerp(vm.get_meta("rest_pos"), 1.0 - exp(-12.0 * delta))
 		vm.rotation = vm.rotation.lerp(vm.get_meta("pose_rot"), 1.0 - exp(-10.0 * delta))
@@ -1097,8 +1074,7 @@ func _respawn() -> void:
 	run_time = 0.0
 	run_finished = false
 	countdown = config.reset_countdown
-	_trail_pts.clear()
-	_trail_times.clear()
+	_trails.clear()
 	# Deterministic reset: recordings and replays must start from identical
 	# state, so no timer or arm state survives a respawn
 	dash_cooldown_timer = 0.0

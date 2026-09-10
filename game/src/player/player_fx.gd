@@ -39,6 +39,38 @@ static func spawn_beam(parent: Node, from: Vector3, to: Vector3) -> void:
 	tw.tween_callback(mi.queue_free)
 
 
+## One segment of the sword-lunge trail: fatter, bluer, and longer-lived
+## than the rail beam so a lunging player reads at a glance. Segments are
+## dropped along the lunge path by player.gd's _update_sword_trail and
+## overlap slightly so the ribbon has no gaps.
+static func spawn_sword_trail(parent: Node, from: Vector3, to: Vector3) -> void:
+	var dir := to - from
+	var length := dir.length()
+	if length < 0.05:
+		return
+	var mi := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.45, 0.45, length + 0.3)
+	mi.mesh = mesh
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.25, 0.55, 1.0, 0.85)
+	mat.emission_enabled = true
+	mat.emission = Color(0.2, 0.5, 1.0)
+	mat.emission_energy_multiplier = 6.0
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	mi.global_position = (from + to) * 0.5
+	var up := Vector3.UP if absf(dir.normalized().y) < 0.99 else Vector3.RIGHT
+	mi.look_at(to, up)
+	var tw := mi.create_tween()
+	tw.tween_property(mat, "albedo_color:a", 0.0, 0.45)
+	tw.parallel().tween_property(mat, "emission_energy_multiplier", 0.0, 0.45)
+	tw.tween_callback(mi.queue_free)
+
+
 ## Spent canister ejected sideways from the firing arm (8.1 bolt action).
 static func spawn_canister(shooter: CharacterBody3D, side_sign: float, cam: Transform3D) -> void:
 	var c := CANISTER.instantiate() as RigidBody3D

@@ -30,7 +30,11 @@ center, not the feet — spawn transforms need y ≥ ~2.3. Head sits at +1.7
 (eye near the capsule top). `BodyMesh` is a matching red emissive capsule,
 hidden for first-person roles (LOCAL/PREDICTED — your own camera is inside
 it) and shown on puppet-rendered bodies (REPLICA, DRIVEN on a LAN host's
-screen, the TAS ghost), along with `PuppetArmL/R` — shoulder weapon blocks
+screen, the TAS ghost). `Head/HeadMesh` is the head: a red sphere (r 0.55)
+at +0.85 above the Head node, same `mat_body` material, same
+visibility rules as BodyMesh — and because it hangs under `Head` it yaws
+with the body and pitches with the replica's synced aim, a free
+"where are they looking" tell. Puppets also show `PuppetArmL/R` — shoulder weapon blocks
 whose tint (grey rail / silver sword) and charge glow are driven from
 synced or real arm state; puppet-role code duplicates their materials so
 multiple puppets tint independently. Viewmodel meshes are swapped in code per loadout (chunky
@@ -41,11 +45,10 @@ ships the rail default. `ShadowMesh` is a matching capsule with `cast_shadow = 3
 each with its OWN emissive material (orange emission, energy 0 at rest) —
 `player.gd` drives emission with charge progress and kicks position on fire.
 
-The speed trail is code-built (no scene node): `player.gd` creates a
-top-level MeshInstance3D and redraws a world-space LINE_STRIP each frame
-from a rolling position history — one long thin orange line tracing the
-recent flight path, alpha-fading toward the tail, cleared on respawn.
-Drawn for every body (you, remotes, the ghost).
+The trails are code-built (no scene node): `player.gd` creates a
+`PlayerTrails` child in `_ready` (`player_trails.gd`) which draws the
+orange flight-path line and the blue sword-lunge ribbon for every body
+(you, remotes, the ghost).
 
 ## Assertions
 
@@ -59,9 +62,13 @@ Drawn for every body (you, remotes, the ghost).
   or freeze timing and fire timing diverge.
 - `mat_vm_l`/`mat_vm_r` must stay separate sub_resources — a shared material
   would make both arms glow when one charges.
-- `ShadowMesh` keeps `cast_shadow = 3` and `BodyMesh` stays `visible =
-  false` in-scene; only puppet-role (REPLICA/DRIVEN) or ghost code flips
-  BodyMesh on — visible on a first-person body, either would fill your
-  camera with red capsule interior.
+- `ShadowMesh` keeps `cast_shadow = 3` and `BodyMesh`/`Head/HeadMesh` stay
+  `visible = false` in-scene; only puppet-role (REPLICA/DRIVEN) or ghost
+  code flips them on — visible on a first-person body, BodyMesh would fill
+  your camera with red capsule interior (HeadMesh sits above the camera
+  frustum, but stays hidden with it anyway).
 - Collision capsule, ShadowMesh, and BodyMesh must stay the same size —
-  the visual IS the hitbox; a mismatch makes shots feel wrong.
+  the visual IS the hitbox; a mismatch makes shots feel wrong. Known,
+  deliberate exception (2026-09-10): `Head/HeadMesh` is cosmetic and pokes
+  ~0.85 m above the capsule — shots there do NOT hit. If playtests show
+  people aiming at the head, either shrink/sink it or grow the capsule.

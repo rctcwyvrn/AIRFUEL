@@ -38,9 +38,9 @@ const KEY_LAYOUT: Array = [
 	["respawn", "T", 110, 102, 30],
 ]
 
-const PIP_LIT := Color(1.0, 0.55, 0.1, 0.95)
-const PIP_LOW := Color(1.0, 0.15, 0.1, 0.95)
-const PIP_DIM := Color(0.5, 0.5, 0.55, 0.3)
+const PIP_LIT := Color(1.0, 0.55, 0.1, 1.0)
+const PIP_LOW := Color(1.0, 0.15, 0.1, 1.0)
+const PIP_DIM := Color(0.5, 0.5, 0.55, 0.45)
 const FEED_TTL := 4.0
 const BANNER_TIME := 1.8
 

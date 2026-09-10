@@ -19,7 +19,8 @@ plus the rotating-prism minimap
 Step 3 duel feedback layer (§15.2, §8.2): directional **threat ring** around
 the crosshair (enemy rail charges as escalating wedges — warn on EVERY
 charge, no filtering — and incoming-damage arcs toward the attacker, drawn
-by `threat_ring.gd`), **HP pips** above the crosshair with a persistent
+by `threat_ring.gd`), **HP pips** in the bottom-right corner (above the
+loadout label) with a persistent
 low-HP vignette at 1 hp, an orange **hit flash** on `damaged`, the
 sword proximity warning ("🗡WARNING️🗡 — AHEAD/BEHIND/LEFT/RIGHT",
 within `combat.sword_warning_range`, pulsing), and — via
@@ -52,8 +53,10 @@ within `combat.sword_warning_range`, pulsing), and — via
   `LockLabel`, `ScoreLabel`, `LoadoutLabel`, `TimerLabel`, `CountdownLabel`
   (Labels), `ControlsHint` (empty Control anchor — `_ready` builds the key
   grid into it from `KEY_LAYOUT`), `HitFlash`, `DeathFlash`, `MapBack`
-  (ColorRects), `ThreatRing` (`threat_ring.gd`), `HpPips` (empty Control —
-  pips are built at adoption from `hp_max`), `SwordWarnLabel`, `KillBanner`
+  (ColorRects), `ThreatRing` (`threat_ring.gd`), `HpPips` (Control holding
+  only the scene's `Back` backdrop — pips are built at adoption from
+  `hp_max`; `_build_hp_pips` frees only `pip_rects`, so Back
+  survives rebuilds), `SwordWarnLabel`, `KillBanner`
   (Labels), `KillFeed` (VBoxContainer — feed labels are runtime-built),
   `MapPrism` (`minimap.gd`). The scene's `Crosshair` is layout-only —
   the script never touches it.
