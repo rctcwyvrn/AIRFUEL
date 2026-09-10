@@ -40,7 +40,10 @@ Q dashes straight down. Up is the double jump's job.
 All netplay runs one netcode: an authoritative process simulates every
 player from per-tick input commands; your own client *predicts* its body
 locally and reconciles against server snapshots, opponents render as
-snapshot-fed puppets. Damage and kills only ever happen on the server.
+snapshot-fed puppets. Damage and kills only ever happen on the server,
+with **server-side rewind**: rail and sword hits are evaluated against
+where the victim was on the shooter's screen (capped by
+`ServerConfig.rewind_max_ms`, default 250 ms) — aim at what you see.
 
 **LAN listen server** — menu: **HOST LAN GAME** / **JOIN** (blank =
 127.0.0.1 for two instances locally). The host simulates everyone and plays
@@ -59,10 +62,12 @@ forward udp/27555 out of WSL.
 
 Dev/test flags (either mode): `--fake-lag <ms>` adds artificial round-trip
 latency on a client (prediction stress-test); `--autoduel` makes lobby
-clients challenge/accept/fire automatically (headless soak tests);
-`--spawn-gap <m>` spawns duelists close together with line of sight so
-autofire duels actually connect (pass it to the lobby server — it forwards
-to match servers — or to a LAN host).
+clients challenge/accept automatically, then cheat-aim at the opponent and
+strafe while firing (headless soak tests — at high fake-lag this only
+lands hits if rewind works); `--spawn-gap <m>` spawns duelists close
+together with line of sight so autoduels actually connect;
+`--rewind-ms <ms>` overrides the rewind window (0 disables — the lag-comp
+A/B lever). Server-side flags forward from the lobby to its match servers.
 
 ## Hosted lobby server (Docker)
 

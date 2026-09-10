@@ -19,9 +19,13 @@ extends Object
 const SIZE := 42
 const PENDING_CODES: Array = [[], ["L"], ["R"], ["L", "R"], ["R", "L"]]
 
-# Cmd wire format: [tick, move.x, move.y, vert, flags, yaw, pitch] — flags
-# bit order matches the TAS tape (jump|dash|fireL|fireR|swap|respawn).
-const CMD_SIZE := 7
+# Cmd wire format: [tick, move.x, move.y, vert, flags, yaw, pitch,
+# seen_server_tick] — flags bit order matches the TAS tape
+# (jump|dash|fireL|fireR|swap|respawn). seen_server_tick is the newest
+# server tick the client had rendered when it issued this cmd — the
+# server-side rewind (§20.2 N2) evaluates this player's shots against
+# victims' positions at that tick.
+const CMD_SIZE := 8
 
 
 static func encode_cmd(p: CharacterBody3D) -> PackedFloat32Array:
@@ -42,6 +46,7 @@ static func encode_cmd(p: CharacterBody3D) -> PackedFloat32Array:
 	c[4] = float(flags)
 	c[5] = p.rotation.y
 	c[6] = p.head.rotation.x
+	c[7] = float(p.seen_server_tick)
 	return c
 
 
@@ -60,6 +65,7 @@ static func apply_cmd(p: CharacterBody3D, c: PackedFloat32Array) -> void:
 	p.cmd_respawn = bool(flags & 32)
 	p.rotation.y = c[5]
 	p.head.rotation.x = c[6]
+	p.seen_server_tick = int(c[7])
 
 
 static func capture(p: CharacterBody3D) -> PackedFloat32Array:

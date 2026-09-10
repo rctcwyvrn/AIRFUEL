@@ -926,12 +926,25 @@ If revisited, the constraints established are:
   feel like the prototype did* → **N3** scale to 12 (unlocks the 6v6
   prototype and §22 risk 1 measurement).
 
-*N1 implemented 2026-09-10 (branch `netcode`): MatchHost + NetRole
+*N1 implemented 2026-09-10 (merged to main): MatchHost + NetRole
 architecture, per-match child servers, LAN converted, client-auth path
 deleted. Verified headless: full lobby→duel→result loop at 0/80/120 ms
 artificial latency, multi-match soak on rotating ports, and the TAS-ghost
 trajectory fingerprint bit-identical to the pre-refactor baseline (offline
-untouched). N2 (rewind) not started.*
+untouched).*
+
+*N2 implemented 2026-09-10: server-side rewind for rail + lunge. Clients
+echo the newest server tick they rendered inside each cmd; the server keeps
+a per-body position history (`rewind_max_ms`, default 250 ms — the cap on
+how far behind a laggy shooter can kill you) and evaluates rail shots as
+analytic ray-vs-capsule tests at the victim's rewound position (world
+raycast stays live for occlusion); sword reach uses the same rewound
+position. A/B-verified headless with strafing autoduel bots at 200 ms
+artificial lag: rewind ON = 27 hits / 0 misses, rewind OFF = 41 misses
+(by 2–4 m, the strafe displacement over the latency). The test also
+exposed and fixed an N1 replication bug (peer ids packed into 32-bit float
+arrays got rounded; replicas never moved). Next: the playtest gate — duels
+must feel like the prototype did — then N3 (scale to 12).*
 
 ### 20.3 Character controller
 

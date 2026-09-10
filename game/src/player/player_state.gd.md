@@ -7,7 +7,8 @@ everything a `_simulate()` tick's outcome depends on, packed as a
 fixed-layout `PackedFloat32Array`. The server captures post-tick to build
 snapshots; a predicting client captures after every tick and, on a
 misprediction, restores the server's state and replays. `agree()` is the
-misprediction test.
+misprediction test. Also houses the cmd wire codec, whose last slot
+carries the client's rewind echo for §20.2 N2 lag compensation.
 
 ## Interface
 
@@ -21,6 +22,20 @@ misprediction test.
   writes a captured state back onto a body.
 - `static agree(a, b) -> bool` — do a predicted state and the server's
   state match closely enough for the prediction to stand?
+- `const CMD_SIZE := 8` — the cmd wire format:
+  `[0] tick, [1-2] move.x/y, [3] vert, [4] flags, [5] yaw, [6] pitch,
+  [7] seen_server_tick`.
+- `static encode_cmd(p) -> PackedFloat32Array` /
+  `static apply_cmd(p, c) -> void` — pack a body's per-tick cmd fields /
+  write a cmd onto a body (DRIVEN on the server, or a history entry
+  during a reconciliation replay). Flags bit order is
+  jump|dash|fireL|fireR|swap|respawn, identical to the TAS tape. Slot
+  [7] `seen_server_tick` is the newest server tick the client had
+  rendered when it issued the cmd — the echoed rewind target: the
+  server-side rewind (§20.2 N2) evaluates this player's shots against
+  victims' positions at that tick. `apply_cmd` writes it onto
+  `p.seen_server_tick`; view angles are likewise applied directly
+  (client-authoritative, never part of captured state).
 - Consumers: `player.gd` wraps capture/restore as
   `capture_state()`/`restore_state()`; `_maybe_reconcile` calls `agree`.
   `MatchHost` captures server bodies for snapshots.
@@ -76,6 +91,7 @@ the format):
 - `SIZE` and the slot meanings are a shared format between server and
   client (snapshots on the wire, per-tick history compared index-by-index
   in `agree`): never reorder or repurpose slots — append and bump `SIZE`.
+  The same rule holds for the cmd layout and `CMD_SIZE`.
 - Any new field that `_simulate()`'s outcome depends on MUST be added to
   `capture`/`restore` (and to `agree` if its divergence matters);
   a missing field is a silent desync bug.

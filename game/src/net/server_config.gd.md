@@ -20,8 +20,15 @@ tier).
   `match_max_seconds` (600 s — child force-ends a match as a draw, orphan
   guard), `match_result_timeout` (900 s — lobby frees an unreported match
   record and its port).
+- "Lag Compensation" export group (§20.2 N2): `rewind_max_ms` (250 ms) —
+  server-side rewind window; hits are evaluated at the victim's position up
+  to this far in the past (the shooter's rendered view), so it caps how far
+  behind a laggy shooter can kill you. 0 disables rewind. Read via
+  `Net.rewind_ms()`, where the `--rewind-ms` test override beats it.
 - Consumed only by `Net` (`cfg`, preloaded from `default_server.tres`) —
-  the lobby process and its match-server children.
+  the lobby process and its match-server children, plus `rewind_max_ms` on
+  any simulating process (a LAN listen-server host reads it through
+  `Net.rewind_ms()` too).
 
 ## Implementation
 

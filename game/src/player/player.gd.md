@@ -3,7 +3,8 @@
 ## Function
 
 The Steps 1+2 player plus server-authoritative netplay (DESIGN.md §20.2
-stage N1): kinematic movement controller (§4, §5) plus the dual railgun arm
+stages N1+N2 — client prediction plus server-side rewind lag
+compensation): kinematic movement controller (§4, §5) plus the dual railgun arm
 system (§7, §8.1) — charge freeze/trajectory-lock, staggered dual-rail
 firing, hitscan damage, canister ejection — and the sword (§8.2). One body
 class plays four net roles (`NetRole`); the same `_simulate()` tick runs on
@@ -39,37 +40,59 @@ degrades turn rate.)
   filled by `_gather_input` from the Input singleton for humans, or by a
   controller (with `process_physics_priority < 0`) for ghosts/bots. New
   input reads in physics code MUST go through cmds, never Input directly.
-  With `Net.autoduel` a PREDICTED body autofires the left rail every 300
-  physics frames in `_gather_input` — headless smoke duels (spawns face
-  each other) run a first-to-N match to completion without a human.
+  With `Net.autoduel` a PREDICTED body runs `_autoduel_cmds()` from
+  `_gather_input`: cheat-aims at the opponent's REPLICA (i.e. where it
+  renders on *this* screen — exactly what rewind compensates for),
+  strafes side to side flipping every 96 ticks, and fires the left rail
+  on a 300-tick cadence phase-offset by 150 for the higher peer id so
+  the duelists alternate (one strafes while the other's shot lands) —
+  the §20.2 N2 rewind A/B instrument. Headless smoke duels run a
+  first-to-N match to completion without a human.
 - **Cmd encoding**: `PlayerState.encode_cmd(p)`/`PlayerState.apply_cmd(p, c)`
-  pack/unpack a `PlayerState.CMD_SIZE = 7` PackedFloat32Array (the codec
+  pack/unpack a `PlayerState.CMD_SIZE = 8` PackedFloat32Array (the codec
   lives in player_state.gd alongside the state codec):
   `[tick, move.x, move.y, vert, flags,
-  yaw, pitch]`. The flags bit order is jump|dash|fireL|fireR|swap|respawn —
-  identical to the TAS tape's button bitmask. View angles ride with cmds
-  (they are client-authoritative) and `PlayerState.apply_cmd` writes them directly;
-  they are deliberately **not** part of captured state.
+  yaw, pitch, seen_server_tick]`. The flags bit order is
+  jump|dash|fireL|fireR|swap|respawn — identical to the TAS tape's button
+  bitmask. View angles ride with cmds (they are client-authoritative) and
+  `PlayerState.apply_cmd` writes them directly; they are deliberately
+  **not** part of captured state.
+- **`seen_server_tick: int`** — the newest server tick this client has
+  rendered: set from arriving snapshots on a PREDICTED body, echoed to the
+  server in cmd slot [7], and written onto the DRIVEN body by
+  `PlayerState.apply_cmd`. It is the rewind target for this player's shots
+  (§20.2 N2 — `MatchHost` rewinds victims to where this shooter's screen
+  had them). `0` = never seen a snapshot / no rewind.
 - **Net API** (called by `Net` / `MatchHost`):
   - `on_server_snapshot(ack_tick, state)` — queues a server snapshot
     (PREDICTED only); applied at the next tick's start.
   - `PlayerState.apply_cmd(self/body, c)` — writes a net cmd onto a body (DRIVEN on the
     server, or a history entry during reconciliation replay).
-  - `render_state(id) -> PackedFloat32Array` — the 13-slot render row the
+  - `render_state() -> PackedFloat32Array` — the 12-float render row the
     server sends about this body for other clients' replicas:
-    `[id, pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp]`.
+    `[pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp]`. The peer id
+    deliberately travels OUTSIDE the array, as a real int: float32's
+    24-bit mantissa silently corrupts 10-digit ENet peer ids (shipped
+    once as "replicas never moved").
   - `apply_replica(r)` — applies a render row to a REPLICA (position target,
-    velocity, look, arm progress, hp, loadout retint of the puppet arms).
+    velocity, look, arm progress, hp, loadout retint of the puppet arms);
+    indexed for the 12-float id-less row above.
   - `capture_state()` / `restore_state(s)` — delegate to `PlayerState`
     (fixed 42-slot codec, see `player_state.gd.md`).
-  - `apply_damage(amount, from_id)` — server-side authoritative damage:
-    only LOCAL/DRIVEN bodies on the simulating process ever run it;
-    notifies `Net.match_host.on_damage`. Replaces the old LAN-trust
+  - `apply_damage(amount, from_id) -> bool` — server-side authoritative
+    damage; returns whether the hit killed (attackers turn it into
+    "kill" vs "body"). Only LOCAL/DRIVEN bodies on the simulating
+    process ever run it; notifies `Net.match_host.on_damage` (which
+    respawns the victim on a kill). Replaces the old LAN-trust
     `take_damage` rpc.
   - `sim_active() -> bool` — false only for REPLICA. KillZones etc. act on
     simulating bodies and must ignore render-only replicas.
-  - `_spawn_beam(from, to)` — also invoked by `Net._handle_shot` on a
-    REPLICA to mirror an opponent's shot fx.
+  - Beam/canister cosmetics live in the static `PlayerFx` class
+    (`player_fx.gd`): the player calls `PlayerFx.spawn_beam` /
+    `PlayerFx.spawn_canister` from `_fire_rail`, and `Net` calls
+    `PlayerFx.spawn_beam` directly to mirror an opponent's shot fx on
+    clients. `_spawn_beam`/`_spawn_canister` no longer exist on the
+    player.
 - **The old rpcs are gone**: `take_damage`, `_send_state`,
   `_remote_shot_fx`, and `round_reset` no longer exist. Damage is applied
   server-side via `apply_damage`; state flows through `MatchHost` snapshots
@@ -104,7 +127,10 @@ degrades turn rate.)
   (99 dmg, one hit per lunge). Kills only where the sim is authoritative:
   a PREDICTED lunge is pure movement (`_sword_hit_check` returns early);
   the server's copy of the lunge lands the kill via `apply_damage` +
-  `match_host.on_shot`. No freeze, no ranged component, ever.
+  `match_host.on_shot`. In netplay, reach against players is measured to
+  `Net.match_host.rewound_position(victim, self)` — where the victim was
+  on the lunger's screen, the same §20.2 N2 lag compensation as rail
+  hits. No freeze, no ranged component, ever.
 - Read by the HUD (polled): `fuel`, `ramp_grace_timer`, `config`,
   `horizontal_speed() -> float`, `state_name() -> String`; event-driven via
   the `shot_fired`/`damaged`/`died` signals.
@@ -170,8 +196,8 @@ never yank the camera.
 
 **`replaying` suppression**: replayed ticks keep gameplay math and the arm
 state machines honest but skip one-shot effects — `_fire_rail` returns
-right after `on_fired()` (no raycast, no damage, no beam/canister/kick, no
-match-host report), and `_trigger_arm`'s sword stab kick is skipped.
+right after `on_fired()` (no hit test, no damage, no beam/canister/kick,
+no match-host report), and `_trigger_arm`'s sword stab kick is skipped.
 Damage and effects happened when the tick first ran (or on the server);
 replays never re-do them.
 
@@ -181,22 +207,28 @@ closer than `min_shot_gap` apart, sequenced by **`shot_gap_timer`** — a
 tick timer decayed in `_simulate` and captured in state, replacing the old
 wall-clock `last_shot_time`, because prediction replays re-run this code.
 `_fire_rail` is role-dependent: `arm.on_fired()` always advances the state
-machine; `replaying` short-circuits everything else; otherwise it raycasts
-from the camera center (`range_max`, mask = player mask OR layer 2 so it
-hits movement-transparent targets), reads `hit_zone` meta for body/head
-damage against `TargetDummy`, and against players applies damage **only
-where the sim is authoritative** (`role != PREDICTED`) — a PREDICTED shot
-is muzzle-flash only; the server's copy of the same shot decides the hit
-and ev_shot brings the result back. Local fx (viewmodel kick, beam from
-the arm's muzzle `vm.global_transform * (0,0,-0.35)`, `canister.tscn`
-ejection) are gated on `not Net.headless`; `Net.match_host.on_shot(...)`
-reports the shot on the simulating process; `shot_fired` emits directly
-only offline (`not Net.active`).
+machine; `replaying` short-circuits everything else; then the hit test
+splits into two branches. **Authoritative netplay** (`Net.match_host !=
+null and role != PREDICTED`): `Net.match_host.eval_rail_hit(self, from,
+dir, range_max)` — the lag-compensated (§20.2 N2) hit test, which checks
+victims at their *rewound* positions (where this shooter's client had
+rendered them, keyed by the shooter's `seen_server_tick`) and returns
+`{end, victim}`; a non-null victim takes `apply_damage(damage_body, ...)`,
+whose bool return picks the "kill" vs "body" result. **Offline /
+PREDICTED**: a local raycast from the camera center (`range_max`, mask =
+player mask OR layer 2 so it hits movement-transparent targets), reading
+`hit_zone` meta for body/head damage against `TargetDummy`; against
+players a PREDICTED shot is muzzle-flash only ("body" visual result — the
+server's copy of the same shot decides the hit and ev_shot brings the
+result back). Local fx (viewmodel kick, `PlayerFx.spawn_beam` from the
+arm's muzzle `vm.global_transform * (0,0,-0.35)`,
+`PlayerFx.spawn_canister` ejection) are gated on `not Net.headless`;
+`Net.match_host.on_shot(...)` reports the shot on the simulating process;
+`shot_fired` emits directly only offline (`not Net.active`).
 
-**Graybox visuals**: `_spawn_beam` builds a thin emissive BoxMesh
-(0.05×0.05×length) at the midpoint, oriented with `look_at` (up-vector
-fallback for near-vertical shots), alpha+emission tweened to 0 over 0.2s
-then freed. `_update_viewmodels` (every rendered tick) sets each viewmodel
+**Graybox visuals**: the beam and canister one-shots moved to the static
+`PlayerFx` class (see `player_fx.gd.md`) — the player only decides *when*
+to call them. `_update_viewmodels` (every rendered tick) sets each viewmodel
 material's `emission_energy_multiplier` from charge progress (or the
 sword's lunge flare) and lerps the viewmodel back to its `rest_pos`/
 `pose_rot` metas after the fire kick. In `_process`, DRIVEN (LAN host
@@ -325,7 +357,7 @@ real arm progress and `_net_prog` respectively.
   (Current known exceptions to fix if touched: the vertical-settle rate `20.0`
   in `_wallrun_move`, camera-feel lerp rates and FOV factor, the 12-ray count,
   probe rotation `0.6`, the 25° rearm cone, the replica position-lerp rate,
-  and the autoduel fire cadence `300`.)
+  and the autoduel cadence literals `300`/`150`/`96`.)
 - `_update_state` never overrides WALLRUN — only wallrun code exits wallrun.
 - No charge cancel exists anywhere; a charge always ends in a shot. Dual
   shots are never closer than `combat.min_shot_gap`, sequenced FIFO through
@@ -333,8 +365,14 @@ real arm progress and `_net_prog` respectively.
   state, never wall clock (replays re-run this code).
 - `move_locked` must derive only from arm `is_locking()` — freeze from first
   trigger press to last pending shot, never during COOLDOWN.
-- Beam meshes always free themselves (tween callback) — a leaked beam per
-  shot would accumulate fast.
+- **Peer ids must never be packed into float arrays**: `render_state` is
+  12 floats with the id traveling beside it as a real int — float32's
+  24-bit mantissa silently corrupts 10-digit ENet peer ids (this shipped
+  as a real replication bug: replicas never moved).
+- **Netplay hit tests go through rewind**: in authoritative netplay
+  `_fire_rail` resolves victims via `Net.match_host.eval_rail_hit` and
+  `_sword_hit_check` measures reach against `rewound_position` — never
+  against victims' live server positions (§20.2 N2).
 - Coyote walljump must never grant fuel (falloff already did); jumping
   dismounts must clear `wall_coyote_timer` so boosts can't stack.
 - Glide only redirects horizontal speed — it must never add speed

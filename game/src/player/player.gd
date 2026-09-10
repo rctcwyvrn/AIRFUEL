@@ -26,8 +26,6 @@ signal damaged(amount: int, from_id: int)
 signal died
 signal respawned
 
-const CANISTER := preload("res://src/weapons/canister.tscn")
-
 @export var ghost_controlled := false
 @export var config: MovementConfig
 @export var combat: CombatConfig
@@ -81,6 +79,11 @@ var _net_target_pos := Vector3.ZERO
 # PREDICTED-role machinery: cmd/state history for reconciliation replays.
 # The cmd/state wire formats live in PlayerState (player_state.gd).
 var net_tick := 0
+
+# Newest server tick this client has seen (PREDICTED: from snapshots) or the
+# shooter's cmds reported (DRIVEN: via PlayerState.apply_cmd) — the rewind
+# target for this player's shots (§20.2 N2). 0 = never seen / no rewind.
+var seen_server_tick := 0
 var _cmd_history: Dictionary = {}  # tick -> PackedFloat32Array cmd
 var _state_history: Dictionary = {}  # tick -> capture_state()
 var _pending_snapshot: Array = []  # [ack_tick, state]; applied at tick start
@@ -363,37 +366,38 @@ func _maybe_reconcile() -> void:
 
 
 ## Render-state row the server sends about this body for other clients'
-## replicas: [id, pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp].
-func render_state(id: int) -> PackedFloat32Array:
+## replicas: [pos*3, vel*3, yaw, pitch, progL, progR, loadout, hp]. The peer
+## id deliberately travels OUTSIDE this array, as a real int — 32-bit floats
+## silently corrupt 10-digit ENet peer ids (24-bit mantissa).
+func render_state() -> PackedFloat32Array:
 	var r := PackedFloat32Array()
-	r.resize(13)
-	r[0] = float(id)
+	r.resize(12)
 	var p := global_position
-	r[1] = p.x
-	r[2] = p.y
-	r[3] = p.z
-	r[4] = velocity.x
-	r[5] = velocity.y
-	r[6] = velocity.z
-	r[7] = rotation.y
-	r[8] = head.rotation.x
-	r[9] = arm_progress_left()
-	r[10] = arm_progress_right()
-	r[11] = float(loadout_index)
-	r[12] = float(hp)
+	r[0] = p.x
+	r[1] = p.y
+	r[2] = p.z
+	r[3] = velocity.x
+	r[4] = velocity.y
+	r[5] = velocity.z
+	r[6] = rotation.y
+	r[7] = head.rotation.x
+	r[8] = arm_progress_left()
+	r[9] = arm_progress_right()
+	r[10] = float(loadout_index)
+	r[11] = float(hp)
 	return r
 
 
 ## Applies a render-state row to this REPLICA (position eased in _process).
 func apply_replica(r: PackedFloat32Array) -> void:
-	_net_target_pos = Vector3(r[1], r[2], r[3])
-	velocity = Vector3(r[4], r[5], r[6])
-	rotation.y = r[7]
-	head.rotation.x = r[8]
-	_net_prog = Vector2(r[9], r[10])
-	hp = int(r[12])
-	if int(r[11]) != loadout_index:
-		loadout_index = int(r[11])
+	_net_target_pos = Vector3(r[0], r[1], r[2])
+	velocity = Vector3(r[3], r[4], r[5])
+	rotation.y = r[6]
+	head.rotation.x = r[7]
+	_net_prog = Vector2(r[8], r[9])
+	hp = int(r[11])
+	if int(r[10]) != loadout_index:
+		loadout_index = int(r[10])
 		arm_types = LOADOUTS[loadout_index]
 		for i in 2:
 			var mat := (
@@ -413,10 +417,12 @@ func on_net_damage(attacker_id: int, hp_left: int) -> void:
 
 ## Server-side authoritative damage (replaces the LAN-trust take_damage rpc:
 ## only LOCAL/DRIVEN bodies on the simulating process ever run this).
-func apply_damage(amount: int, from_id: int) -> void:
+func apply_damage(amount: int, from_id: int) -> bool:
 	hp -= amount
+	var killed := hp <= 0
 	if Net.match_host != null:
-		Net.match_host.on_damage(self, from_id)
+		Net.match_host.on_damage(self, from_id)  # respawns us on a kill
+	return killed
 
 
 ## Does this body run real simulation on this machine? (KillZones etc. act on
@@ -723,6 +729,10 @@ func _sword_hit_check() -> void:
 		var pos := (node as Node3D).global_position
 		if node is TargetDummy:
 			pos += Vector3.UP * 2.55
+		elif node is AirfuelPlayer and Net.match_host != null:
+			# Lag compensation (§20.2 N2): reach is measured against where
+			# the victim was on this lunger's screen, same as rail hits.
+			pos = Net.match_host.rewound_position(node, self)
 		if global_position.distance_to(pos) > combat.sword_hit_range:
 			continue
 		sword_active = 0.0
@@ -783,67 +793,47 @@ func _fire_rail(arm: RailArm) -> void:
 	var cam := camera.global_transform
 	var from := cam.origin
 	var to := from + -cam.basis.z * combat.range_max
-	var space := get_world_3d().direct_space_state
-	# mask: world geometry (player's mask) + targets (layer 2, movement-transparent)
-	var params := PhysicsRayQueryParameters3D.create(from, to, collision_mask | 2, [get_rid()])
-	var hit := space.intersect_ray(params)
 	var end := to
 	var result := "miss"
-	if not hit.is_empty():
-		end = hit.position
-		var collider: Object = hit.collider
-		if collider.has_meta("hit_zone"):
-			var zone: String = collider.get_meta("hit_zone")
-			var damage: int = combat.damage_head if zone == "head" else combat.damage_body
-			var target := (collider as Node).get_parent()
-			if target is TargetDummy:
-				result = "kill" if target.take_hit(damage) else zone
-		elif collider is AirfuelPlayer and not collider.ghost_controlled:
-			# Damage only where the sim is authoritative (server / offline).
-			# A PREDICTED shot is muzzle-flash only; the server's copy of the
-			# same shot decides the hit and ev_shot brings the result back.
-			result = "body"
-			if role != NetRole.PREDICTED:
-				collider.apply_damage(combat.damage_body, get_multiplayer_authority())
+	if Net.match_host != null and role != NetRole.PREDICTED:
+		# Authoritative netplay shot: lag-compensated (§20.2 N2) — victims
+		# are tested at the position this shooter's client had rendered.
+		var ev: Dictionary = Net.match_host.eval_rail_hit(
+			self, from, -cam.basis.z, combat.range_max
+		)
+		end = ev.end
+		var victim := ev.victim as AirfuelPlayer
+		if victim != null:
+			var killed: bool = victim.apply_damage(combat.damage_body, get_multiplayer_authority())
+			result = "kill" if killed else "body"
+	else:
+		# Offline (dummies, hit zones) and PREDICTED muzzle-flash raycasts:
+		# the shooter's local view — mask: world + targets (layer 2).
+		var space := get_world_3d().direct_space_state
+		var params := PhysicsRayQueryParameters3D.create(from, to, collision_mask | 2, [get_rid()])
+		var hit := space.intersect_ray(params)
+		if not hit.is_empty():
+			end = hit.position
+			var collider: Object = hit.collider
+			if collider.has_meta("hit_zone"):
+				var zone: String = collider.get_meta("hit_zone")
+				var damage: int = combat.damage_head if zone == "head" else combat.damage_body
+				var target := (collider as Node).get_parent()
+				if target is TargetDummy:
+					result = "kill" if target.take_hit(damage) else zone
+			elif collider is AirfuelPlayer and not collider.ghost_controlled:
+				result = "body"  # PREDICTED visual only; the server decides
 	var side_sign := 1.0 if side == "R" else -1.0
 	var vm := vm_right if side == "R" else vm_left
 	var muzzle: Vector3 = vm.global_transform * Vector3(0, 0, -0.35)
 	if not Net.headless:
 		vm.position += Vector3(0.0, 0.02, 0.16)
-		_spawn_beam(muzzle, end)
-		_spawn_canister(side_sign, cam)
+		PlayerFx.spawn_beam(get_parent(), muzzle, end)
+		PlayerFx.spawn_canister(self, side_sign, cam)
 	if Net.match_host != null:
 		Net.match_host.on_shot(self, side, muzzle, end, result)
 	if not Net.active:
 		shot_fired.emit(side, result)  # offline hitmarker; netplay uses ev_shot
-
-
-func _spawn_beam(from: Vector3, to: Vector3) -> void:
-	var dir := to - from
-	var length := dir.length()
-	if length < 0.05:
-		return
-	var mi := MeshInstance3D.new()
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(0.05, 0.05, length)
-	mi.mesh = mesh
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(1.0, 0.85, 0.55, 0.9)
-	mat.emission_enabled = true
-	mat.emission = Color(1.0, 0.7, 0.3)
-	mat.emission_energy_multiplier = 4.0
-	mi.material_override = mat
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	get_parent().add_child(mi)
-	mi.global_position = (from + to) * 0.5
-	var up := Vector3.UP if absf(dir.normalized().y) < 0.99 else Vector3.RIGHT
-	mi.look_at(to, up)
-	var tw := mi.create_tween()
-	tw.tween_property(mat, "albedo_color:a", 0.0, 0.2)
-	tw.parallel().tween_property(mat, "emission_energy_multiplier", 0.0, 0.2)
-	tw.tween_callback(mi.queue_free)
 
 
 ## One long thin orange line tracing the recent flight path: world-space
@@ -883,16 +873,6 @@ func _update_viewmodels(delta: float) -> void:
 			mat.emission_energy_multiplier = 2.5 if flaring else 0.3
 		vm.position = vm.position.lerp(vm.get_meta("rest_pos"), 1.0 - exp(-12.0 * delta))
 		vm.rotation = vm.rotation.lerp(vm.get_meta("pose_rot"), 1.0 - exp(-10.0 * delta))
-
-
-func _spawn_canister(side_sign: float, cam: Transform3D) -> void:
-	var c := CANISTER.instantiate() as RigidBody3D
-	get_parent().add_child(c)
-	c.global_position = cam.origin + cam.basis.x * 0.35 * side_sign - cam.basis.y * 0.1
-	c.linear_velocity = (
-		velocity + cam.basis.x * side_sign * 2.5 + cam.basis.y * 2.0 + cam.basis.z * 1.5
-	)
-	c.angular_velocity = Vector3(randf_range(-12, 12), randf_range(-12, 12), randf_range(-12, 12))
 
 
 func _update_state() -> void:
@@ -994,10 +974,32 @@ func _gather_input() -> void:
 	if Input.is_action_just_pressed("record") and not Net.active:
 		_toggle_recording()  # TAS tapes are a solo instrument
 	if Net.autoduel and role == NetRole.PREDICTED:
-		# Headless smoke duels: stand still and fire the left rail on a fixed
-		# cadence — spawns face each other, so shots connect and a first-to-N
-		# match runs to completion without a human.
-		cmd_fire_l = Engine.get_physics_frames() % 300 == 0
+		_autoduel_cmds()
+
+
+## Headless smoke duels: cheat-aim at the opponent's REPLICA (i.e. where it
+## renders on THIS screen — exactly what rewind compensates for), strafe
+## side to side, and fire on a cadence offset by peer id so the two duelists
+## alternate: one strafes while the other charges. At high --fake-lag this
+## only lands kills if server-side rewind works.
+func _autoduel_cmds() -> void:
+	var opp: AirfuelPlayer = null
+	for p: Node in get_tree().get_nodes_in_group("player"):
+		if p != self and p is AirfuelPlayer:
+			opp = p
+	if opp == null:
+		return
+	var to_opp: Vector3 = opp.global_position + Vector3.UP * 1.7 - camera.global_position
+	rotation.y = atan2(-to_opp.x, -to_opp.z)
+	head.rotation.x = atan2(to_opp.y, Vector2(to_opp.x, to_opp.z).length())
+	var frames := Engine.get_physics_frames()
+	# Opposite fire phases (higher peer id fires 150 ticks later) so one
+	# duelist is mid-strafe while the other's shot lands — the rewind test.
+	var ids: Array = Net.match_names.keys()
+	var phase := 150 if not ids.is_empty() and multiplayer.get_unique_id() == ids.max() else 0
+	cmd_fire_l = (frames + phase) % 300 == 0
+	var strafe := 1.0 if floori(frames / 96.0) % 2 == 0 else -1.0
+	cmd_move = Vector2.ZERO if move_locked else Vector2(strafe, 0.0)
 
 
 func _wish_dir() -> Vector3:

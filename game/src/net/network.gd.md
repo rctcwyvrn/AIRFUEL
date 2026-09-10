@@ -3,10 +3,12 @@
 ## Function
 
 Autoload `Net` — server-authoritative multiplayer (DESIGN.md §20.2, stage
-N1). One netcode path everywhere: an authoritative process simulates every
-body from per-tick input cmds (a `MatchHost` node driving DRIVEN bodies),
-clients predict their own body (PREDICTED) and render opponents as REPLICA
-puppets from server snapshots. This replaces the earlier client-authoritative
+N1; the stage-N2 rewind lag compensation itself lives in `MatchHost`, this
+file carries its plumbing: the snapshot tick stamp, the `seen_server_tick`
+echo, and the `rewind_ms()` window accessor). One netcode path everywhere:
+an authoritative process simulates every body from per-tick input cmds (a
+`MatchHost` node driving DRIVEN bodies), clients predict their own body
+(PREDICTED) and render opponents as REPLICA puppets from server snapshots. This replaces the earlier client-authoritative
 LAN-trust netcode entirely.
 
 Three topologies:
@@ -36,7 +38,9 @@ Offline play (no CLI args, no menu action) is untouched.
   `match_serve(port, token, win_kills)` (child boot), `display_name(id)`
   (lobby username, "P%d" fallback).
 - Called by the local PREDICTED body: `send_cmd(c)` every tick. Called by
-  MatchHost: `send_snapshot(id, ack, own, others)`, `broadcast_shot(...)`,
+  MatchHost: `send_snapshot(id, server_tick, ack, own, others)`,
+  `rewind_ms()` (effective rewind window, ms — the `--rewind-ms` test
+  override beats `cfg.rewind_max_ms`; 0 disables), `broadcast_shot(...)`,
   `broadcast_damage(victim, attacker, hp_left)`,
   `broadcast_kill(killer, victim, kills)`,
   `finish_match(winner_id, forfeit, kills)` (winner 0 = draw).
@@ -58,7 +62,10 @@ Offline play (no CLI args, no menu action) is untouched.
 - CLI (after `--`): the mode flags above, plus dev flags `--autoduel`
   (auto challenge/accept + autofire), `--fake-lag <ms>` (client-side
   artificial round-trip latency), `--spawn-gap <m>` (LOS test spawns,
-  forwarded by the lobby to its children).
+  forwarded by the lobby to its children), `--rewind-ms <ms>` (overrides
+  `cfg.rewind_max_ms` on the simulating process; 0 disables rewind — the
+  A/B lever for proving lag compensation does something; forwarded by the
+  lobby to its children like `--spawn-gap`).
 - Consts: `PORT` 27555 (lobby and LAN), `MAX_PEERS` 8 (LAN cap only — the
   lobby cap is `cfg.max_peers`), `DEFAULT_SERVER` play.airfuel-game.com for
   a blank JOIN SERVER field / bare `--lobby` — **must stay a DNS-only
@@ -90,8 +97,8 @@ only revisits a port after the whole range
 [`cfg.match_port_start`, +`match_port_count`) has cycled. It then spawns the
 child via `OS.create_process(OS.get_executable_path(), …)` with `--headless`
 (plus `--path` when run from the editor), a `randi()` token,
-`--win-kills cfg.duel_win_kills`, and `--spawn-gap` if set; records the
-match with `deadline = cfg.match_result_timeout`, marks both roster rows
+`--win-kills cfg.duel_win_kills`, and `--spawn-gap` / `--rewind-ms` if
+set; records the match with `deadline = cfg.match_result_timeout`, marks both roster rows
 in-match, and `_match_launch.rpc_id`s both duelists. `_process` ticks
 challenge timeouts and match deadlines (an expired unreported match →
 `_close_match(mid, "")`, freeing the port with no record change).
@@ -144,10 +151,19 @@ anything earlier is a crash, same destination).
 **Cmd / snapshot plumbing.** `send_cmd` → `_client_cmd` rpc (any_peer,
 **unreliable_ordered**) → `match_host.queue_cmd(sender_id, cmd)` on the
 simulating process. `send_snapshot` (per remote client, from MatchHost) →
-`_snapshot` (authority, unreliable_ordered) → `_apply_snapshot`: the `own`
-row goes to the local body's `on_server_snapshot(ack, own)` (PREDICTED
-reconciliation), each `others` row to `apply_replica` on bodies that are
+`_snapshot` (authority, unreliable_ordered), whose leading param is the
+**server tick** the snapshot state is labeled with → `_apply_snapshot`:
+first stores that tick on the local PREDICTED body as `seen_server_tick`
+(*before* reconcile, so the very next cmd echoes it — it is the rewind
+target for §20.2 N2 lag compensation), then hands the `own` row to
+`on_server_snapshot(ack, own)` (PREDICTED reconciliation), then each
+`others` entry — an `[id, row]` pair, id as a real int because float32
+arrays corrupt 10-digit peer ids — to `apply_replica` on bodies that are
 actually REPLICA (guard drops rows for anything else).
+
+**Rewind window.** `rewind_ms()` is the single accessor MatchHost uses for
+the lag-compensation window: `--rewind-ms` (`rewind_ms_override`, −1 = no
+override) beats `cfg.rewind_max_ms`; 0 disables rewind.
 
 **Event fan-out.** `broadcast_shot/damage/kill` and `finish_match` run on
 the simulating process and rpc `_ev_*` (reliable) to `_client_peer_ids()`:
@@ -168,12 +184,16 @@ emits `kill_reported`.
 challenges the lowest, once per lobby visit (`_autoduel_sent`, **reset in
 `_return_to_lobby` so soak runs loop matches endlessly**); `_challenge_offer`
 auto-accepts. `--fake-lag <ms>`: half the value on each leg — outgoing cmds
-queue in `_lag_out`, incoming snapshots in `_lag_in`, both flushed by wall
-clock in `_process` (client roles only: the flush gates on
-MATCH_CLIENT / non-host LAN). `--spawn-gap <m>`: the lobby forwards it to
-children and `_begin_match` to clients; `_spawn_transform_for_index` then
-puts side 1 at the clear −z end, `gap` meters from side 0 and facing it —
-line of sight for headless autofire duels.
+queue in `_lag_out`, incoming snapshots in `_lag_in` (entries carry the
+snapshot's server tick so a delayed apply still sets `seen_server_tick`
+correctly), both flushed by wall clock in `_process` (client roles only:
+the flush gates on MATCH_CLIENT / non-host LAN). `--spawn-gap <m>`: the
+lobby forwards it to children and `_begin_match` to clients;
+`_spawn_transform_for_index` then puts side 1 at the clear −z end, `gap`
+meters from side 0 and facing it — line of sight for headless autofire
+duels. `--rewind-ms <ms>`: the lobby forwards it to children the same way
+`--spawn-gap` travels; on the simulating process `rewind_ms()` lets it
+override config.
 
 **Spawn bookkeeping.** `_spawn_player(id, index, role)`: authority set
 before `add_child`, transform from `_spawn_transform_for_index` (even index
@@ -231,3 +251,11 @@ a finished match); the engine prints an error, functionally harmless.
 - Every lobby server-side handler must tolerate stale peers and rpcs from
   vanished clients (roster lookups guarded; `_report_result` ignores
   unmatched names).
+- Peer ids never ride inside a `PackedFloat32Array` — float32 corrupts
+  10-digit ENet peer ids (this shipped as a real bug). Snapshot `others`
+  rows are `[id: int, row]` pairs; keep any future id-carrying payload out
+  of float arrays too.
+- `_apply_snapshot` sets `seen_server_tick` on the PREDICTED body *before*
+  calling `on_server_snapshot` — the tick is the server-side rewind target
+  and must track what the client has rendered, independent of how
+  reconciliation goes.

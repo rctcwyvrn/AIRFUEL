@@ -21,3 +21,9 @@ extends Resource
 @export var match_max_seconds := 600.0
 ## Lobby frees an unreported match record (and its port) after this long.
 @export var match_result_timeout := 900.0
+
+@export_group("Lag Compensation")
+## Server-side rewind window (§20.2 N2): hits are evaluated at the victim's
+## position up to this far in the past (the shooter's rendered view). Caps
+## how far behind a laggy shooter can kill you. 0 disables rewind.
+@export var rewind_max_ms := 250.0

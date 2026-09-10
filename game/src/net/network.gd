@@ -64,6 +64,10 @@ var fake_lag_ms := 0  # test aid: artificial round-trip latency on cmds + snapsh
 # this many meters from side 0 at the clear -z end instead of across the
 # corridor, giving headless autofire duels line of sight. 0 = normal ends.
 var match_spawn_gap := 0
+# Test aid (--rewind-ms <ms>, lobby forwards it to children): overrides
+# ServerConfig.rewind_max_ms (-1 = no override). 0 disables rewind — the
+# A/B lever for proving lag compensation does something.
+var rewind_ms_override := -1
 
 # Dedicated lobby state (matchmaker process only)
 var cfg: ServerConfig = SERVER_CONFIG
@@ -92,6 +96,7 @@ func _ready() -> void:
 	autoduel = "--autoduel" in args
 	fake_lag_ms = int(_arg_value(args, "--fake-lag", "0"))
 	match_spawn_gap = int(_arg_value(args, "--spawn-gap", "0"))
+	rewind_ms_override = int(_arg_value(args, "--rewind-ms", "-1"))
 	if "--dedicated" in args:
 		host_dedicated()
 	elif "--match-server" in args:
@@ -414,29 +419,46 @@ func _client_cmd(c: PackedFloat32Array) -> void:
 		match_host.queue_cmd(multiplayer.get_remote_sender_id(), c)
 
 
+## Effective rewind window: the test override beats config.
+func rewind_ms() -> float:
+	return float(rewind_ms_override) if rewind_ms_override >= 0 else cfg.rewind_max_ms
+
+
 ## Called by MatchHost for each remote client.
-func send_snapshot(id: int, ack: int, own: PackedFloat32Array, others: Array) -> void:
-	_snapshot.rpc_id(id, ack, own, others)
+func send_snapshot(
+	id: int, server_tick: int, ack: int, own: PackedFloat32Array, others: Array
+) -> void:
+	_snapshot.rpc_id(id, server_tick, ack, own, others)
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")
-func _snapshot(ack: int, own: PackedFloat32Array, others: Array) -> void:
+func _snapshot(server_tick: int, ack: int, own: PackedFloat32Array, others: Array) -> void:
 	if fake_lag_ms > 0:
-		_lag_in.append(
-			{at = Time.get_ticks_msec() + fake_lag_ms / 2.0, ack = ack, own = own, others = others}
+		(
+			_lag_in
+			. append(
+				{
+					at = Time.get_ticks_msec() + fake_lag_ms / 2.0,
+					tick = server_tick,
+					ack = ack,
+					own = own,
+					others = others,
+				}
+			)
 		)
 		return
-	_apply_snapshot(ack, own, others)
+	_apply_snapshot(server_tick, ack, own, others)
 
 
-func _apply_snapshot(ack: int, own: PackedFloat32Array, others: Array) -> void:
+func _apply_snapshot(server_tick: int, ack: int, own: PackedFloat32Array, others: Array) -> void:
 	var me := players.get(multiplayer.get_unique_id()) as AirfuelPlayer
 	if me != null:
+		me.seen_server_tick = server_tick  # echoed in cmds; the rewind target
 		me.on_server_snapshot(ack, own)
-	for row: PackedFloat32Array in others:
-		var rep := players.get(int(row[0])) as AirfuelPlayer
+	for pair: Array in others:
+		var rep := players.get(int(pair[0])) as AirfuelPlayer
 		if rep != null and rep.role == AirfuelPlayer.NetRole.REPLICA:
-			rep.apply_replica(row)
+			rep.apply_replica(pair[1])
 
 
 ## ---- Server -> client event fan-out ----
@@ -485,7 +507,7 @@ func _handle_shot(
 	if shooter_id == multiplayer.get_unique_id():
 		body.shot_fired.emit(side, result)  # authoritative hitmarker; beam was predicted
 	elif body.role == AirfuelPlayer.NetRole.REPLICA:
-		body._spawn_beam(muzzle, end_p)  # opponent fx (a LOCAL/DRIVEN shooter drew its own)
+		PlayerFx.spawn_beam(body.get_parent(), muzzle, end_p)  # opponent fx
 
 
 func broadcast_damage(victim_id: int, attacker_id: int, hp_left: int) -> void:
@@ -718,7 +740,7 @@ func _process(delta: float) -> void:
 				_client_cmd.rpc_id(1, o.cmd)
 		while not _lag_in.is_empty() and _lag_in[0].at <= now:
 			var s: Dictionary = _lag_in.pop_front()
-			_apply_snapshot(s.ack, s.own, s.others)
+			_apply_snapshot(s.tick, s.ack, s.own, s.others)
 	if mode != Mode.DEDICATED:
 		return
 	for from: int in pending_challenges.keys():
@@ -765,6 +787,8 @@ func _start_match(a: int, b: int) -> void:
 	)
 	if match_spawn_gap > 0:
 		args.append_array(["--spawn-gap", str(match_spawn_gap)])
+	if rewind_ms_override >= 0:
+		args.append_array(["--rewind-ms", str(rewind_ms_override)])
 	var pid := OS.create_process(OS.get_executable_path(), args)
 	if pid == -1:
 		_fail("Couldn't spawn a match server process.")
