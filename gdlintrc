@@ -6,6 +6,8 @@
 disable:
   - class-definitions-order
 
-# player.gd (the whole kinematic controller + arms + netsync) sits just over
-# the default 1000 after gdformat. Raised, not split — revisit if it grows.
+# network.gd (the whole Net autoload: LAN, lobby client, match plumbing)
+# sits just over the default 1000 after gdformat. player.gd was the other
+# offender until it was split into player_movement/combat/recorder
+# (2026-09-10) — split network.gd too if it grows past this.
 max-file-lines: 1200

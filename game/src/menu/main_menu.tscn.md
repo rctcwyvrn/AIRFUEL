@@ -2,14 +2,18 @@
 
 ## Function
 
-The game's main scene: title + four ways in (solo / parkour / host or
-join-by-IP LAN / join a lobby server with a username).
+The game's main scene: title + five ways in (solo / practice duel vs the
+AI with a chosen bot loadout / parkour / host or join-by-IP LAN / join a
+lobby server with a username).
 
 ## Interface
 
 - Root `MainMenu` (full-rect Control, `main_menu.gd`).
-- Children the script requires: `VBox/SoloButton`, `VBox/ParkourButton`,
-  `VBox/HostButton`,
+- Children the script requires: `VBox/SoloButton`, `VBox/DuelAiButton`
+  (toggles the picker), `VBox/AiLoadoutRow` (HBoxContainer, hidden until
+  toggled) with `RailRailButton` / `RailSwordButton` / `SwordSwordButton`
+  (the AI-loadout picker — indices 0/1/2 of `AirfuelPlayer.LOADOUTS`),
+  `VBox/ParkourButton`, `VBox/HostButton`,
   `VBox/JoinRow/IpEdit` (LineEdit), `VBox/JoinRow/JoinButton`,
   `VBox/ServerRow/NameEdit` + `ServerIpEdit` (LineEdits) +
   `JoinServerButton` (the dedicated-lobby entry), `VBox/ErrorLabel`

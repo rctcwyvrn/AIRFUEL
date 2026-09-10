@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
 [ext_resource type="PackedScene" path="res://src/targets/target.tscn" id="3_target"]
+[ext_resource type="Script" uid="uid://c7f2hojyqrci5" path="res://src/bot/practice_spawner.gd" id="4_practice"]
 [ext_resource type="Script" uid="uid://bap42pdwlte64" path="res://src/props/kite_wireframe.gd" id="4_wire"]
 [ext_resource type="Shader" uid="uid://bdcrxfgjvmkyj" path="res://maps/space_sky.gdshader" id="5_sky"]
 
@@ -97,7 +98,7 @@ material = SubResource("mat_floor")
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -313)
 use_collision = true
 polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
-depth = 36.0
+depth = 30.14
 material = SubResource("mat_kite_glass")
 metadata/deflector = true
 
@@ -105,7 +106,7 @@ metadata/deflector = true
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -8, 0, -183)
 use_collision = true
 polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
-depth = 36.0
+depth = 30.14
 material = SubResource("mat_kite_glass")
 metadata/deflector = true
 
@@ -113,7 +114,7 @@ metadata/deflector = true
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 8, 0, -53)
 use_collision = true
 polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
-depth = 36.0
+depth = 30.14
 material = SubResource("mat_kite_glass")
 metadata/deflector = true
 
@@ -177,7 +178,7 @@ metadata/deflector = true
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 150)
 use_collision = true
 polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
-depth = 32.0
+depth = 26.79
 material = SubResource("mat_kite_glass")
 metadata/deflector = true
 
@@ -185,7 +186,7 @@ metadata/deflector = true
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 290)
 use_collision = true
 polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
-depth = 32.0
+depth = 26.79
 material = SubResource("mat_kite_glass")
 metadata/deflector = true
 
@@ -249,7 +250,7 @@ metadata/deflector = true
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 22, 0, -180)
 use_collision = true
 polygon = PackedVector2Array(0, -30, 2.5, 0, 0, 30, -2.5, 0)
-depth = 36.0
+depth = 29.08
 material = SubResource("mat_kite_glass")
 metadata/deflector = true
 
@@ -265,7 +266,7 @@ metadata/deflector = true
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 22, 0, 120)
 use_collision = true
 polygon = PackedVector2Array(0, -30, 2.5, 0, 0, 30, -2.5, 0)
-depth = 36.0
+depth = 20.85
 material = SubResource("mat_kite_glass")
 metadata/deflector = true
 
@@ -525,3 +526,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 420)
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 2.6, -430)
 
 [node name="HUD" parent="." unique_id=2126556201 instance=ExtResource("2_hud")]
+
+[node name="PracticeSpawner" type="Node" parent="." unique_id=221706464]
+script = ExtResource("4_practice")

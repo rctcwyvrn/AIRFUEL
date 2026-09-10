@@ -31,10 +31,10 @@ within `combat.sword_warning_range`, pulsing), and — via
 
 - Extends `CanvasLayer`; script of `hud.tscn`'s root.
 - Finds the player via group `"player"`, picking the node that
-  `is_multiplayer_authority()` AND is not `ghost_controlled` (offline: you,
-  never the TAS ghost; networked: yours, not a remote puppet), lazily in
-  `_process`, re-resolving if it's freed.
-  Shows `player.hp` in the state line.
+  `is_multiplayer_authority()` AND is not `ghost_controlled` AND not
+  `bot_controlled` (offline: you, never the TAS ghost or the practice
+  bot; networked: yours, not a remote puppet), lazily in `_process`,
+  re-resolving if it's freed. Shows `player.hp` in the state line.
 - Reads only public player surface: `fuel`, `config.fuel_max`,
   `ramp_grace_timer`, `horizontal_speed()`, `state_name()`,
   `arm_progress_left/right()` (rail charge, or sword cooldown-readiness),
@@ -76,8 +76,10 @@ The controls highlighter is data-driven: `KEY_LAYOUT` rows are
 and `_process` polls `Input.is_action_pressed` to swap KEY_DIM/KEY_LIT.
 
 `_scan_threats` (every frame) walks group `"player"` for enemy bodies —
-skipping self, ghosts, and any `is_multiplayer_authority()` body, so offline
-it finds nothing and the whole layer is silently inert. Rail arms with
+skipping self, ghosts, and any `is_multiplayer_authority()` body UNLESS
+it's `bot_controlled` (the offline practice bot is an authority body but
+a real enemy: its charges and sword must warn like a puppet's). Plain
+offline solo finds nothing and the whole layer is silently inert. Rail arms with
 `display_arm_progress(i)` > 0 become `{angle, progress}` wedges on the
 ThreatRing — snapshot-fed on REPLICA puppets, real arm state on a LAN
 host's DRIVEN bodies (the host IS the sim there); progress > 0 is exactly
@@ -85,7 +87,10 @@ CHARGING/PENDING — RailArm.progress() is 0 in
 cooldown, so no false warning after the shot. The nearest sword carrier in
 range drives the warning label, side text from the yaw-relative bearing
 (`_bearing_to`: 0 = ahead, +PI/2 = right; ±45° AHEAD, ±135°+ BEHIND).
-`damaged` freezes the attacker's bearing at hit time into a fading arc.
+`damaged` freezes the attacker's bearing at hit time into a fading arc
+(the attacker resolves through `Net.players`; offline that misses, so it
+falls back to the `bot_controlled` body — the only possible offline
+attacker).
 Kill feed labels self-fade over 4 s then free; the banner shows 1.8 s.
 Peer tags (`_peer_tag`) resolve through `Net.display_name(id)` — real
 usernames in dedicated-server matches, "P%d" fallback in LAN.

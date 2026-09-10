@@ -148,6 +148,30 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "PLAY SOLO"
 
+[node name="DuelAiButton" type="Button" parent="VBox"]
+layout_mode = 2
+text = "DUEL VS AI"
+
+[node name="AiLoadoutRow" type="HBoxContainer" parent="VBox"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RailRailButton" type="Button" parent="VBox/AiLoadoutRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "RAIL + RAIL"
+
+[node name="RailSwordButton" type="Button" parent="VBox/AiLoadoutRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "RAIL + SWORD"
+
+[node name="SwordSwordButton" type="Button" parent="VBox/AiLoadoutRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SWORD + SWORD"
+
 [node name="ParkourButton" type="Button" parent="VBox" unique_id=1729817477]
 layout_mode = 2
 text = "PARKOUR TRACK"

@@ -11,6 +11,7 @@ const SETTINGS := "user://settings.cfg"
 const STATUS_COLOR := Color(0.55, 0.58, 0.63)
 const ERROR_COLOR := Color(1.0, 0.3, 0.25)
 
+@onready var ai_loadout_row: HBoxContainer = $VBox/AiLoadoutRow
 @onready var ip_edit: LineEdit = $VBox/JoinRow/IpEdit
 @onready var name_edit: LineEdit = $VBox/ServerRow/NameEdit
 @onready var server_ip_edit: LineEdit = $VBox/ServerRow/ServerIpEdit
@@ -29,6 +30,12 @@ func _ready() -> void:
 		# dropped mid-lobby/mid-match) surfaces here on return.
 		_show_error(Net.last_error)
 	$VBox/SoloButton.pressed.connect(func() -> void: get_tree().change_scene_to_file(ARENA))
+	$VBox/DuelAiButton.pressed.connect(
+		func() -> void: ai_loadout_row.visible = not ai_loadout_row.visible
+	)
+	$VBox/AiLoadoutRow/RailRailButton.pressed.connect(func() -> void: _start_practice(0))
+	$VBox/AiLoadoutRow/RailSwordButton.pressed.connect(func() -> void: _start_practice(1))
+	$VBox/AiLoadoutRow/SwordSwordButton.pressed.connect(func() -> void: _start_practice(2))
 	$VBox/ParkourButton.pressed.connect(func() -> void: get_tree().change_scene_to_file(PARKOUR))
 	$VBox/HostButton.pressed.connect(func() -> void: Net.host())
 	$VBox/JoinRow/JoinButton.pressed.connect(_join)
@@ -39,6 +46,14 @@ func _ready() -> void:
 	if cf.load(SETTINGS) == OK:
 		name_edit.text = cf.get_value("lobby", "name", "")
 		server_ip_edit.text = cf.get_value("lobby", "ip", "")
+
+
+## Practice duel (DESIGN.md Appendix A: bot as practice opponent): stash the
+## chosen AI loadout for the arena's PracticeSpawner and load the arena.
+## Pure scene change — no Net involvement, same rule as PLAY SOLO.
+func _start_practice(loadout: int) -> void:
+	BotController.pending_loadout = loadout
+	get_tree().change_scene_to_file(ARENA)
 
 
 func _join() -> void:

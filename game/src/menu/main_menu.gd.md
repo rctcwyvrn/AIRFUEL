@@ -2,15 +2,20 @@
 
 ## Function
 
-Entry menu logic: play solo, host a LAN game, join one by IP, or join a
-dedicated lobby server with a username. The menu only collects the choice —
-all networking lives in the `Net` autoload.
+Entry menu logic: play solo, duel the practice AI (with a bot-loadout
+picker), host a LAN game, join one by IP, or join a dedicated lobby
+server with a username. The menu only collects the choice — all
+networking lives in the `Net` autoload.
 
 ## Interface
 
 - Script of `main_menu.tscn` root. No exports, no signals out.
 - Calls: `get_tree().change_scene_to_file` with `ARENA` (solo corridor) or
   `PARKOUR` (parkour track), `Net.host()`,
+  `BotController.pending_loadout = 0/1/2` + `ARENA` (`_start_practice`,
+  from the AI-loadout picker buttons; DUEL VS AI itself only toggles the
+  `AiLoadoutRow` visibility — the arena's `PracticeSpawner` consumes the
+  static and spawns the bot),
   `Net.join(ip)` (blank IP field defaults to 127.0.0.1; Enter in the field
   submits), `Net.join_lobby(ip, username)` (JOIN SERVER row; blank name →
   "player", blank IP → `Net.DEFAULT_SERVER` (play.airfuel-game.com, also the
@@ -36,9 +41,13 @@ Buttons wired in `_ready` with lambdas; `ARENA` duplicates the path in
 
 ## Assertions
 
-- Node paths `VBox/SoloButton`, `VBox/ParkourButton`, `VBox/HostButton`,
+- Node paths `VBox/SoloButton`, `VBox/DuelAiButton`, `VBox/AiLoadoutRow`
+  (+ its `RailRailButton`/`RailSwordButton`/`SwordSwordButton`),
+  `VBox/ParkourButton`, `VBox/HostButton`,
   `VBox/JoinRow/IpEdit`, `VBox/JoinRow/JoinButton`, `VBox/ServerRow/NameEdit`,
   `VBox/ServerRow/ServerIpEdit`, `VBox/ServerRow/JoinServerButton`, and
   `VBox/ErrorLabel` are the contract with the scene.
-- Solo must stay a pure scene change — no Net involvement, so offline play
-  never depends on networking code.
+- Solo AND the practice duel must stay pure scene changes — no Net
+  involvement, so offline play never depends on networking code.
+- Picker button order must match `AirfuelPlayer.LOADOUTS` indices
+  (0 rail+rail, 1 rail+sword, 2 sword+sword).

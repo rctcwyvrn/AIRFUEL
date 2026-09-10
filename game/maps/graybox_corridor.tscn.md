@@ -13,12 +13,17 @@ per-peer bodies) — the project's main scene is the menu, not this map.
 ## Interface
 
 - Root `GrayboxCorridor` (Node3D); instances `player.tscn` (at z = −430,
-  y = 2.6, rotated 180° to face +Z), `hud.tscn`, and
+  y = 2.6, rotated 180° to face +Z), `hud.tscn`, a `PracticeSpawner`
+  node (`src/bot/practice_spawner.gd` — dormant unless the menu queued a
+  DUEL VS AI; spawns the practice bot at its default `bot_spawn`,
+  (0, 2.6, 430) — the opposite end of the corridor, facing the player
+  spawn — and removes all dummies for the duel), and
   15 `target.tscn` dummies (`Target1-15`): Target1
   (0, 0, −405) down the spawn sightline, the rest scattered at ground level
   every ~60–80 m across varied x (Target16-17 were removed with the
   elevated platforms they stood on, 2026-09-10).
-- Any replacement map must provide the same two instances and solid geometry
+- Any replacement map must provide the same two instances (plus a
+  `PracticeSpawner` if it should support DUEL VS AI) and solid geometry
   with default collision layers — the player probes walls via ray queries
   against `collision_mask` default.
 

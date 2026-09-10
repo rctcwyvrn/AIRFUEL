@@ -81,7 +81,7 @@ func _process(_delta: float) -> void:
 	if player == null or not is_instance_valid(player):
 		player = null
 		for p: Node in get_tree().get_nodes_in_group("player"):
-			if p.is_multiplayer_authority() and not p.ghost_controlled:
+			if p.is_multiplayer_authority() and not p.ghost_controlled and not p.bot_controlled:
 				player = p as AirfuelPlayer
 				break
 		if player == null:
@@ -101,7 +101,7 @@ func _process(_delta: float) -> void:
 	if get_tree().get_first_node_in_group("finish") != null:
 		timer_label.visible = true
 		var t := player.run_time
-		timer_label.text = "%d:%06.3f" % [int(t) / 60, fmod(t, 60.0)]
+		timer_label.text = "%d:%06.3f" % [int(t / 60.0), fmod(t, 60.0)]
 		timer_label.modulate = Color(0.3, 1.0, 0.4) if player.run_finished else Color(1, 1, 1)
 	else:
 		timer_label.visible = false
@@ -157,16 +157,17 @@ func _process(_delta: float) -> void:
 		var my_id := multiplayer.get_unique_id()
 		var lines: PackedStringArray = []
 		var ids: Array = Net.players.keys()
-		ids.sort_custom(func(a: int, b: int) -> bool: return a == my_id)
+		ids.sort_custom(func(a: int, _b: int) -> bool: return a == my_id)
 		for id: int in ids:
 			lines.append("%s  %d" % [_peer_tag(id, my_id), int(Net.scores.get(id, 0))])
 		score_label.text = "\n".join(lines)
 
 
-## Every enemy puppet is scanned each frame: rail charges feed the threat
+## Every enemy body is scanned each frame: rail charges feed the threat
 ## ring (warn on EVERY charge, DESIGN.md 15.2 — no filtering), and the
 ## nearest sword-carrier inside sword_warning_range drives the 8.2 proximity
-## warning. Offline there are no puppets, so both stay silent for free.
+## warning. Enemies are net puppets or the offline practice bot; plain
+## offline solo has neither, so both warnings stay silent for free.
 func _scan_threats() -> void:
 	var threats: Array = []
 	var nearest_sword: AirfuelPlayer = null
@@ -177,7 +178,7 @@ func _scan_threats() -> void:
 			enemy == null
 			or enemy == player
 			or enemy.ghost_controlled
-			or enemy.is_multiplayer_authority()
+			or (enemy.is_multiplayer_authority() and not enemy.bot_controlled)
 		):
 			continue
 		var bearing := _bearing_to(enemy.global_position)
@@ -215,6 +216,12 @@ func _bearing_to(world_pos: Vector3) -> float:
 func _on_damaged(_amount: int, from_id: int) -> void:
 	hit_flash_alpha = 0.45
 	var attacker: Node = Net.players.get(from_id)
+	if attacker == null:
+		# Offline practice duel: the only possible attacker is the bot.
+		for p: Node in get_tree().get_nodes_in_group("player"):
+			if p is AirfuelPlayer and p.bot_controlled:
+				attacker = p
+				break
 	if attacker != null and is_instance_valid(attacker):
 		threat_ring.add_damage_arc(_bearing_to((attacker as Node3D).global_position))
 
