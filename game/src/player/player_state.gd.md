@@ -23,7 +23,7 @@ carries the client's rewind echo for §20.2 N2 lag compensation.
 - `static agree(a, b) -> bool` — do a predicted state and the server's
   state match closely enough for the prediction to stand?
 - `const CMD_SIZE := 8` — the cmd wire format:
-  `[0] tick, [1-2] move.x/y, [3] vert, [4] flags, [5] yaw, [6] pitch,
+  `[0] tick, [1-2] move.x/y, [3] down_dash (0/1; was vert until the 2026-09-10 down-strafe cut), [4] flags, [5] yaw, [6] pitch,
   [7] seen_server_tick`.
 - `static encode_cmd(p) -> PackedFloat32Array` /
   `static apply_cmd(p, c) -> void` — pack a body's per-tick cmd fields /

@@ -154,7 +154,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone1" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.000, 34.000, 60.000)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.000, 9, 60.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -181,7 +181,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone2" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 34.000, 132.000)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 0.000, 9, 132.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -265,7 +265,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone3" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 34.000, 132.000)
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -26.000, 9, 132.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -298,7 +298,7 @@ size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone4" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -46.102, 34.511, 132.000)
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -46.102, 9.511, 132.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -325,7 +325,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone5" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.17365, -0.98481, 0.00000, 0.98481, 0.17365, 1.00000, -0.00000, 0.00000, -82.531, 40.416, 132.000)
+transform = Transform3D(0.00000, 0.17365, -0.98481, 0.00000, 0.98481, 0.17365, 1.00000, -0.00000, 0.00000, -82.531, 15.416, 132.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -352,7 +352,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone6" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -117.923, 46.184, 132.000)
+transform = Transform3D(0.00000, 0.08716, -0.99619, 0.00000, 0.99619, 0.08716, 1.00000, -0.00000, 0.00000, -117.923, 21.184, 132.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -379,7 +379,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone7" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 46.649, 132.000)
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -136.979, 21.649, 132.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -412,7 +412,7 @@ size = Vector3(5, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone8" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -162.979, 46.649, 132.000)
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -162.979, 21.649, 132.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -496,7 +496,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone9" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -162.979, 46.649, 194.000)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -162.979, 21.649, 194.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -529,7 +529,7 @@ size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone10" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -162.979, 46.649, 256.000)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -162.979, 21.649, 256.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -613,7 +613,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone11" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 46.649, 256.000)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -135.979, 21.649, 256.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -646,7 +646,7 @@ size = Vector3(24.0, 8, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone12" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -115.525, 46.149, 256.000)
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -115.525, 21.149, 256.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -673,7 +673,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone13" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.17365, 0.98481, 0.00000, 0.98481, -0.17365, -1.00000, 0.00000, 0.00000, -77.568, 39.964, 256.000)
+transform = Transform3D(0.00000, 0.17365, 0.98481, 0.00000, 0.98481, -0.17365, -1.00000, 0.00000, 0.00000, -77.568, 14.964, 256.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -700,7 +700,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone14" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -38.573, 33.642, 256.000)
+transform = Transform3D(0.00000, 0.08716, 0.99619, 0.00000, 0.99619, -0.08716, -1.00000, 0.00000, 0.00000, -38.573, 8.642, 256.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -727,7 +727,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone15" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 33.096, 256.000)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -17.073, 8.096, 256.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -760,7 +760,7 @@ size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone16" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 9.927, 33.096, 256.000)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 9.927, 8.096, 256.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -844,7 +844,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone17" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 33.096, 281.000)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 8.096, 281.000)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -877,7 +877,7 @@ size = Vector3(5, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone18" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 33.673, 299.799)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 8.673, 299.799)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -904,7 +904,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone19" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, 0.20791, 0.00000, -0.20791, 0.97815, 9.927, 40.261, 333.566)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, 0.20791, 0.00000, -0.20791, 0.97815, 9.927, 15.261, 333.566)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -931,7 +931,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone20" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 46.653, 366.092)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, 0.10453, 0.00000, -0.10453, 0.99452, 9.927, 21.653, 366.092)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -958,7 +958,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone21" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 47.163, 383.636)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 9.927, 22.163, 383.636)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -991,7 +991,7 @@ size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone22" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 9.927, 47.163, 408.636)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 9.927, 22.163, 408.636)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1075,7 +1075,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone23" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 47.163, 408.636)
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -72.073, 22.163, 408.636)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1108,7 +1108,7 @@ size = Vector3(24.0, 8, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone24" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -154.073, 47.163, 408.636)
+transform = Transform3D(0.00000, 0.00000, -1.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 0.00000, -154.073, 22.163, 408.636)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1192,7 +1192,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone25" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 47.163, 432.636)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 22.163, 432.636)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1225,7 +1225,7 @@ size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone26" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 46.694, 448.783)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 21.694, 448.783)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1252,7 +1252,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone27" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, -0.20791, 0.00000, 0.20791, 0.97815, -154.073, 40.802, 478.759)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.97815, -0.20791, 0.00000, 0.20791, 0.97815, -154.073, 15.802, 478.759)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1279,7 +1279,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone28" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 34.713, 509.976)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99452, -0.10453, 0.00000, 0.10453, 0.99452, -154.073, 9.713, 509.976)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1306,7 +1306,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone29" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 34.179, 527.377)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, -154.073, 9.179, 527.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1339,7 +1339,7 @@ size = Vector3(5, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone30" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -154.073, 34.179, 551.377)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, -154.073, 9.179, 551.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1423,7 +1423,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone31" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 34.179, 551.377)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -127.073, 9.179, 551.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1456,7 +1456,7 @@ size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone32" type="Area3D" parent="."]
-transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -105.573, 34.724, 551.377)
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -105.573, 9.724, 551.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1483,7 +1483,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone33" type="Area3D" parent="."]
-transform = Transform3D(0.00000, -0.17365, 0.98481, 0.00000, 0.98481, 0.17365, -1.00000, -0.00000, 0.00000, -66.578, 41.046, 551.377)
+transform = Transform3D(0.00000, -0.17365, 0.98481, 0.00000, 0.98481, 0.17365, -1.00000, -0.00000, 0.00000, -66.578, 16.046, 551.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1510,7 +1510,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone34" type="Area3D" parent="."]
-transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -28.621, 47.231, 551.377)
+transform = Transform3D(0.00000, -0.08716, 0.99619, 0.00000, 0.99619, 0.08716, -1.00000, -0.00000, 0.00000, -28.621, 22.231, 551.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1537,7 +1537,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone35" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 47.731, 551.377)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, -8.167, 22.731, 551.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1570,7 +1570,7 @@ size = Vector3(24.0, 8, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone36" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 18.833, 47.731, 551.377)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 18.833, 22.731, 551.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1654,7 +1654,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone37" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 18.833, 47.731, 628.377)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 18.833, 22.731, 628.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1687,7 +1687,7 @@ size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone38" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 18.833, 47.731, 705.377)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.00000, 0.00000, 1.00000, 18.833, 22.731, 705.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1771,7 +1771,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone39" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 47.731, 705.377)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 42.833, 22.731, 705.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1804,7 +1804,7 @@ size = Vector3(5, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone40" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 59.203, 47.411, 705.377)
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 59.203, 22.411, 705.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1831,7 +1831,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone41" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.13917, 0.99027, 0.00000, 0.99027, -0.13917, -1.00000, 0.00000, 0.00000, 89.718, 43.446, 705.377)
+transform = Transform3D(0.00000, 0.13917, 0.99027, 0.00000, 0.99027, -0.13917, -1.00000, 0.00000, 0.00000, 89.718, 18.446, 705.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1858,7 +1858,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone42" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 121.066, 39.393, 705.377)
+transform = Transform3D(0.00000, 0.06976, 0.99756, 0.00000, 0.99756, -0.06976, -1.00000, 0.00000, 0.00000, 121.066, 14.393, 705.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1885,7 +1885,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone43" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 39.043, 705.377)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 138.272, 14.043, 705.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -1918,7 +1918,7 @@ size = Vector3(13, 29, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone44" type="Area3D" parent="."]
-transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 162.272, 39.043, 705.377)
+transform = Transform3D(0.00000, 0.00000, 1.00000, 0.00000, 1.00000, 0.00000, -1.00000, 0.00000, 0.00000, 162.272, 14.043, 705.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -2002,7 +2002,7 @@ cast_shadow = 0
 material = SubResource("mat_arrow")
 
 [node name="KillZone45" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 39.043, 732.377)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 14.043, 732.377)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -2035,7 +2035,7 @@ size = Vector3(24.0, 8, 1.5)
 material = SubResource("mat_obstacle")
 
 [node name="KillZone46" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 39.477, 753.781)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 14.477, 753.781)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -2062,7 +2062,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone47" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99027, 0.13917, 0.00000, -0.13917, 0.99027, 162.272, 44.532, 792.862)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99027, 0.13917, 0.00000, -0.13917, 0.99027, 162.272, 19.532, 792.862)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -2089,7 +2089,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone48" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 49.499, 831.109)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 0.99756, 0.06976, 0.00000, -0.06976, 0.99756, 162.272, 24.499, 831.109)
 script = ExtResource("5_kill")
 collision_mask = 4
 
@@ -2116,7 +2116,7 @@ cast_shadow = 0
 material = SubResource("mat_floor")
 
 [node name="KillZone49" type="Area3D" parent="."]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 49.903, 851.676)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 162.272, 24.903, 851.676)
 script = ExtResource("5_kill")
 collision_mask = 4
 

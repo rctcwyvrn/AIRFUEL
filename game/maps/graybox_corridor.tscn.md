@@ -55,22 +55,23 @@ Color code:
   (rig-verified: 51 m/s carried off the lip). Polygon local frame:
   X = world X, Y = world Z, extrusion rises upward (basis maps −Z to
   +Y).
-- **Orange slots** — `BigSlot1-6` (r 6, 36 tall), `MidSlot1-7` (r 5,
-  32 tall) at x = ±15, `CenterSlot1-5` (r 4, 40 tall) on the center line.
-  Extruded obround columns (stadium profile: two 8-segment semicircular
-  caps joined by a straight section of length 2r, long axis along z, total
-  footprint 4r × 2r), CSGPolygon3D with the same upward-extrusion basis as
-  the wedges, base at y 0. The rounded caps stay the §22 curved-wallrun
-  test surfaces; the flat sides add straight wallrun lanes (replaced plain
-  cylinders 2026-09-10, Lily's call). A couple of low Cover boxes merge
-  into slot bases where footprints touch — intentional-looking, harmless.
-- **Long slots** — `LongSlot1-6`: the thin variant (r 2.5, 36 tall,
-  60 m total — straight section 55 m), zigzagging down the outer lanes at
-  x = ±22 in the space the old panel lines occupied. Same obround
-  construction and material as the other slots. ~15 m of clear lane
-  between each and its wall.
-- **Grounded fill** — `Rib1-4` (low 10×8×2 floor blocks to hop or wrap
-  around, tan).
+- **Kites** — every interior obstacle is now a rhombus prism (all-kite
+  pass 2026-09-10; the obround slots' rounded caps could stop a
+  dead-center runner): `BigKite1-6` (24 × 12, 36 tall), `MidKite1-7`
+  (20 × 10, 32 tall) at x = ±15, `CenterKite1-5` (16 × 8, 40 tall) on the
+  center line (CenterKite1 at z −336, shifted 6 m south — overlap fix),
+  and `LongKite1-6` (60 × 5, 36 tall) zigzagging the outer lanes at
+  x = ±22. Noses along ±z; faces are glancing to corridor travel (Big
+  ~27°, Long ~5°). Every kite carries `metadata/deflector = true`: the
+  glide assist skips its head-on rejection for tagged geometry, so even a
+  dead-center nose hit splits you around it at glide retention
+  (rig-verified) — bumping a kite can never stop you. Nose-corner normal
+  flips land in the wallrun corner-launch band where wide enough (Big
+  ~53°), so running a face off a nose ejects like the wall kites.
+  Rendered as transparent orange (`mat_kite_glass`, alpha 0.32) with
+  opaque wireframe borders on the actual edges — beams generated at
+  runtime by the sibling `KiteWireframes` node (`kite_wireframe.gd`,
+  discovers kites by the `deflector` meta; 12 beams per kite).
 - **Removed 2026-09-10** (Lily's look experiment — corridor stripped to
   shell + kites + slots + ribs; revert via git if it reads wrong): teal
   panel ladder lines, outer panels, purple platforms, diag/spine panels,

@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
 [ext_resource type="PackedScene" path="res://src/targets/target.tscn" id="3_target"]
+[ext_resource type="Script" path="res://src/props/kite_wireframe.gd" id="4_wire"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
 sky_top_color = Color(0.25, 0.32, 0.45, 1)
@@ -26,17 +27,18 @@ albedo_color = Color(0.42, 0.44, 0.47, 1)
 [sub_resource type="StandardMaterial3D" id="mat_wall"]
 albedo_color = Color(0.55, 0.62, 0.72, 1)
 
-[sub_resource type="StandardMaterial3D" id="mat_cyl"]
-albedo_color = Color(0.85, 0.5, 0.2, 1)
-
-[sub_resource type="StandardMaterial3D" id="mat_fin"]
-albedo_color = Color(0.75, 0.62, 0.4, 1)
+[sub_resource type="StandardMaterial3D" id="mat_kite_glass"]
+transparency = 1
+albedo_color = Color(0.85, 0.5, 0.2, 0.32)
 
 [sub_resource type="StandardMaterial3D" id="mat_light"]
 albedo_color = Color(1, 1, 0.95, 1)
 emission_enabled = true
 emission = Color(1, 0.98, 0.9, 1)
 emission_energy_multiplier = 2.5
+
+[sub_resource type="StandardMaterial3D" id="mat_fin"]
+albedo_color = Color(0.75, 0.62, 0.4, 1)
 
 [node name="GrayboxCorridor" type="Node3D" unique_id=745792861]
 
@@ -85,197 +87,200 @@ use_collision = true
 size = Vector3(82, 1, 880)
 material = SubResource("mat_floor")
 
-[node name="BigSlot1" type="CSGPolygon3D" parent="." unique_id=2015968035]
+[node name="BigKite1" type="CSGPolygon3D" parent="." unique_id=2015968035]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -313)
 use_collision = true
-polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
 depth = 36.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="BigSlot2" type="CSGPolygon3D" parent="." unique_id=674719603]
+[node name="BigKite2" type="CSGPolygon3D" parent="." unique_id=674719603]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -8, 0, -183)
 use_collision = true
-polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
 depth = 36.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="BigSlot3" type="CSGPolygon3D" parent="." unique_id=972418409]
+[node name="BigKite3" type="CSGPolygon3D" parent="." unique_id=972418409]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 8, 0, -53)
 use_collision = true
-polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
 depth = 36.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="BigSlot4" type="CSGPolygon3D" parent="." unique_id=1276740083]
+[node name="BigKite4" type="CSGPolygon3D" parent="." unique_id=1276740083]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 67)
 use_collision = true
-polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
 depth = 36.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="BigSlot5" type="CSGPolygon3D" parent="." unique_id=229832522]
+[node name="BigKite5" type="CSGPolygon3D" parent="." unique_id=229832522]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -10, 0, 197)
 use_collision = true
-polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
 depth = 36.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="BigSlot6" type="CSGPolygon3D" parent="." unique_id=1309018212]
+[node name="BigKite6" type="CSGPolygon3D" parent="." unique_id=1309018212]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 10, 0, 327)
 use_collision = true
-polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+polygon = PackedVector2Array(0, -12, 6, 0, 0, 12, -6, 0)
 depth = 36.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="MidSlot1" type="CSGPolygon3D" parent="." unique_id=332335100]
+[node name="MidKite1" type="CSGPolygon3D" parent="." unique_id=332335100]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, -400)
 use_collision = true
-polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
 depth = 32.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="MidSlot2" type="CSGPolygon3D" parent="." unique_id=1914460357]
+[node name="MidKite2" type="CSGPolygon3D" parent="." unique_id=1914460357]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, -260)
 use_collision = true
-polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
 depth = 32.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="MidSlot3" type="CSGPolygon3D" parent="." unique_id=160636897]
+[node name="MidKite3" type="CSGPolygon3D" parent="." unique_id=160636897]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, -120)
 use_collision = true
-polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
 depth = 32.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="MidSlot4" type="CSGPolygon3D" parent="." unique_id=1168273095]
+[node name="MidKite4" type="CSGPolygon3D" parent="." unique_id=1168273095]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 20)
 use_collision = true
-polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
 depth = 32.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="MidSlot5" type="CSGPolygon3D" parent="." unique_id=585069440]
+[node name="MidKite5" type="CSGPolygon3D" parent="." unique_id=585069440]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 150)
 use_collision = true
-polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
 depth = 32.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="MidSlot6" type="CSGPolygon3D" parent="." unique_id=1109299187]
+[node name="MidKite6" type="CSGPolygon3D" parent="." unique_id=1109299187]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 290)
 use_collision = true
-polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
 depth = 32.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="MidSlot7" type="CSGPolygon3D" parent="." unique_id=1088411633]
+[node name="MidKite7" type="CSGPolygon3D" parent="." unique_id=1088411633]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 400)
 use_collision = true
-polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+polygon = PackedVector2Array(0, -10, 5, 0, 0, 10, -5, 0)
 depth = 32.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="CenterSlot1" type="CSGPolygon3D" parent="." unique_id=1421028981]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -330)
+[node name="CenterKite1" type="CSGPolygon3D" parent="." unique_id=1421028981]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -336)
 use_collision = true
-polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+polygon = PackedVector2Array(0, -8, 4, 0, 0, 8, -4, 0)
 depth = 40.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="CenterSlot2" type="CSGPolygon3D" parent="." unique_id=1669068020]
+[node name="CenterKite2" type="CSGPolygon3D" parent="." unique_id=1669068020]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -155)
 use_collision = true
-polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+polygon = PackedVector2Array(0, -8, 4, 0, 0, 8, -4, 0)
 depth = 40.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="CenterSlot3" type="CSGPolygon3D" parent="." unique_id=1291329732]
+[node name="CenterKite3" type="CSGPolygon3D" parent="." unique_id=1291329732]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 45)
 use_collision = true
-polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+polygon = PackedVector2Array(0, -8, 4, 0, 0, 8, -4, 0)
 depth = 40.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="CenterSlot4" type="CSGPolygon3D" parent="." unique_id=1194291387]
+[node name="CenterKite4" type="CSGPolygon3D" parent="." unique_id=1194291387]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 225)
 use_collision = true
-polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+polygon = PackedVector2Array(0, -8, 4, 0, 0, 8, -4, 0)
 depth = 40.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="CenterSlot5" type="CSGPolygon3D" parent="." unique_id=1218909381]
+[node name="CenterKite5" type="CSGPolygon3D" parent="." unique_id=1218909381]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 310)
 use_collision = true
-polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+polygon = PackedVector2Array(0, -8, 4, 0, 0, 8, -4, 0)
 depth = 40.0
-material = SubResource("mat_cyl")
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="LongSlot1" type="CSGPolygon3D" parent="."]
+[node name="LongKite1" type="CSGPolygon3D" parent="." unique_id=1152106557]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -22, 0, -350)
 use_collision = true
-polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
-depth = 36
-material = SubResource("mat_cyl")
+polygon = PackedVector2Array(0, -30, 2.5, 0, 0, 30, -2.5, 0)
+depth = 36.0
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="LongSlot2" type="CSGPolygon3D" parent="."]
+[node name="LongKite2" type="CSGPolygon3D" parent="." unique_id=1914235089]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 22, 0, -180)
 use_collision = true
-polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
-depth = 36
-material = SubResource("mat_cyl")
+polygon = PackedVector2Array(0, -30, 2.5, 0, 0, 30, -2.5, 0)
+depth = 36.0
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="LongSlot3" type="CSGPolygon3D" parent="."]
+[node name="LongKite3" type="CSGPolygon3D" parent="." unique_id=1950696285]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -22, 0, 0)
 use_collision = true
-polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
-depth = 36
-material = SubResource("mat_cyl")
+polygon = PackedVector2Array(0, -30, 2.5, 0, 0, 30, -2.5, 0)
+depth = 36.0
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="LongSlot4" type="CSGPolygon3D" parent="."]
+[node name="LongKite4" type="CSGPolygon3D" parent="." unique_id=1401525301]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 22, 0, 120)
 use_collision = true
-polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
-depth = 36
-material = SubResource("mat_cyl")
+polygon = PackedVector2Array(0, -30, 2.5, 0, 0, 30, -2.5, 0)
+depth = 36.0
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="LongSlot5" type="CSGPolygon3D" parent="."]
+[node name="LongKite5" type="CSGPolygon3D" parent="." unique_id=369669819]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -22, 0, 250)
 use_collision = true
-polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
-depth = 36
-material = SubResource("mat_cyl")
+polygon = PackedVector2Array(0, -30, 2.5, 0, 0, 30, -2.5, 0)
+depth = 36.0
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="LongSlot6" type="CSGPolygon3D" parent="."]
+[node name="LongKite6" type="CSGPolygon3D" parent="." unique_id=902845616]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 22, 0, 380)
 use_collision = true
-polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
-depth = 36
-material = SubResource("mat_cyl")
+polygon = PackedVector2Array(0, -30, 2.5, 0, 0, 30, -2.5, 0)
+depth = 36.0
+material = SubResource("mat_kite_glass")
+metadata/deflector = true
 
-[node name="Rib1" type="CSGBox3D" parent="." unique_id=104857831]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 4, -300)
-use_collision = true
-size = Vector3(10, 8, 2)
-material = SubResource("mat_fin")
-
-[node name="Rib2" type="CSGBox3D" parent="." unique_id=117627012]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 4, -70)
-use_collision = true
-size = Vector3(10, 8, 2)
-material = SubResource("mat_fin")
-
-[node name="Rib3" type="CSGBox3D" parent="." unique_id=456597384]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 4, 180)
-use_collision = true
-size = Vector3(10, 8, 2)
-material = SubResource("mat_fin")
-
-[node name="Rib4" type="CSGBox3D" parent="." unique_id=797145427]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 4, 300)
-use_collision = true
-size = Vector3(10, 8, 2)
-material = SubResource("mat_fin")
+[node name="KiteWireframes" type="Node3D" parent="."]
+script = ExtResource("4_wire")
 
 [node name="LightPanel1" type="CSGBox3D" parent="." unique_id=1284510470]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, -400)

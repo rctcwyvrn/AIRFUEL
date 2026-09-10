@@ -93,7 +93,7 @@ func _physics_process(delta: float) -> void:
 		body.rotation.y = r[0]
 		body.head.rotation.x = r[1]
 		body.cmd_move = Vector2(r[2], r[3])
-		body.cmd_vert = r[4]
+		body.cmd_down_dash = r[4] != 0.0
 		var fl: int = r[5]
 		body.cmd_jump = bool(fl & 1)
 		body.cmd_dash = bool(fl & 2)
@@ -131,7 +131,7 @@ func _physics_process(delta: float) -> void:
 	body.head.rotation.x = clampf(atan2(to.y, flat_dist) * 0.4, -0.55, 0.55)
 
 	body.cmd_move = Vector2(0, -1)  # hold W
-	body.cmd_vert = 0.0
+	body.cmd_down_dash = false
 	body.cmd_jump = false
 	body.cmd_dash = false
 

@@ -19,21 +19,22 @@ godot4 --path game             # just play
 | Input | Action |
 |---|---|
 | WASD + mouse | Strafe / look |
-| Q | Strafe down in the air (fuel) |
+| Q | Down dash (fuel; on a wall: slide down without detaching) |
 | Space | Jump / double jump (fuel) / wallrun dismount |
-| Shift + WASD/Q | Dash in that direction (fuel); Shift+Q alone = down dash |
+| Shift + WASD | Dash in that direction (fuel, camera-aimed) |
 | LMB / RMB | Fire left / right arm — rail: 1s charge, auto-fire, locks movement; sword: fueled lunge-kill |
 | Tab | Cycle loadout: rail+rail / rail+sword / sword+sword |
 | T | Reset the run (solo only; 3-2-1 countdown, then timer/ghost/recording go) |
 | F5 | Dev: record a TAS ghost tape (toggle; finish line auto-saves) |
 | Esc | Release mouse |
 
-Bare Shift does nothing — a dash always needs a held direction. Dashing
-while wallrunning dismounts with the full jump boost + dash impulse
-(the wall you left locks out briefly); Shift+Q on the wall slides you
-down it without detaching. WASD dashes
-follow the camera (W+Shift = wherever you're looking, pitch included);
-Q dashes straight down. Up is the double jump's job.
+Bare Shift does nothing — a directional dash always needs held WASD, and
+dashing while wallrunning dismounts with the full jump boost + dash
+impulse (the wall you left locks out briefly). WASD dashes follow the
+camera (W+Shift = wherever you're looking, pitch included); Q is its own
+button — always straight down, and on a wall it slides you down without
+detaching. Up is the double jump's job. (Down-strafe was removed
+2026-09-10 — Q no longer applies held thrust, it only dashes.)
 
 ## Multiplayer (server-authoritative — §20.2 stage N1)
 

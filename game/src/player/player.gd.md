@@ -36,7 +36,7 @@ degrades turn rate.)
     processing disabled in `_ready`, fed by render-state rows, position
     eased in `_process`. Never simulated here.
 - **Command layer**: all gameplay input flows through per-tick `cmd_move/
-  cmd_vert/cmd_jump/cmd_dash/cmd_fire_l/cmd_fire_r/cmd_swap/cmd_respawn`,
+  cmd_down_dash/cmd_jump/cmd_dash/cmd_fire_l/cmd_fire_r/cmd_swap/cmd_respawn`,
   filled by `_gather_input` from the Input singleton for humans, or by a
   controller (with `process_physics_priority < 0`) for ghosts/bots. New
   input reads in physics code MUST go through cmds, never Input directly.
@@ -51,7 +51,7 @@ degrades turn rate.)
 - **Cmd encoding**: `PlayerState.encode_cmd(p)`/`PlayerState.apply_cmd(p, c)`
   pack/unpack a `PlayerState.CMD_SIZE = 8` PackedFloat32Array (the codec
   lives in player_state.gd alongside the state codec):
-  `[tick, move.x, move.y, vert, flags,
+  `[tick, move.x, move.y, down_dash, flags,
   yaw, pitch, seen_server_tick]`. The flags bit order is
   jump|dash|fireL|fireR|swap|respawn — identical to the TAS tape's button
   bitmask. View angles ride with cmds (they are client-authoritative) and
@@ -145,8 +145,9 @@ degrades turn rate.)
   `Head/Camera3D/ViewmodelL`/`ViewmodelR` (first-person arm blocks);
   `PuppetArmL`/`PuppetArmR` and `BodyMesh` (puppet visuals). Yaw goes
   on the body itself.
-- Consumes input actions: `move_forward/back/left/right`, `strafe_down`
-  (Q — up was removed; double jump covers it), `jump`, `dash` (Shift),
+- Consumes input actions: `move_forward/back/left/right`, `down_dash`
+  (Q, just-pressed — renamed from `strafe_down` 2026-09-10 when
+  down-strafe was cut), `jump`, `dash` (Shift),
   `fire_left` (LMB), `fire_right` (RMB), `swap_loadout` (Tab), `record`
   (F5), `respawn`, `ui_cancel`.
 - `MoveState { GROUNDED, AIRBORNE, WALLRUN }` in `state`.
@@ -274,10 +275,9 @@ real arm progress and `_net_prog` respectively.
   only up to a cap along the wish direction). Free control caps at
   `base_run_speed`; the fueled strafe tier caps at `air_strafe_speed_cap` and
   drains `air_strafe_cost_per_sec` only when it can actually add speed.
-  Vertical strafe (inline in `_air_move`) is Q-down only, fueled, capped at
-  `air_strafe_vertical_cap`, airborne only; upward mobility is the double
-  jump.
-- **Wallrun exits**: jump and dash leave the wall; Shift+Q does NOT — on a
+  (Down-strafe was removed 2026-09-10 — Appendix A; upward mobility is the
+  double jump, downward is the Q down dash.)
+- **Wallrun exits**: jump and dash leave the wall; Q does NOT — on a
   wall it's a stick-and-slide (down-dash velocity while staying attached).
   A dash off the wall is a full jump-grade dismount (fuel + speed boost)
   with the dash impulse stacked on top — dashing must never leave you
@@ -286,13 +286,14 @@ real arm progress and `_net_prog` respectively.
   `terminal_velocity`**: uncapped, the dash-off→re-attach loop compounded
   to hundreds of m/s (shipped once). The sword lunge stays the only thing
   allowed past terminal.
-- **Dash is Shift + held direction, camera-aimed** (Lily's scheme, revised
+- **Dash is Shift + held WASD, camera-aimed** (Lily's scheme, revised
   2026-09-08 from yaw-plane to full camera): WASD components follow the
-  camera basis including pitch — W+Shift goes wherever you look; Q adds
-  world-down. Bare Shift is inert. Shift+Q with no WASD held fires the §4.4
-  down dash instead, with its own `down_dash_*` tuning and no cooldown (fuel
-  is its limiter); every other direction uses
-  `air_dash_impulse`/`air_dash_cost`/`air_dash_cooldown`.
+  camera basis including pitch — W+Shift goes wherever you look. Bare
+  Shift is inert. **Q is the §4.4 down dash directly** (2026-09-10: no
+  Shift chord, and it no longer blends into directional dashes), with its
+  own `down_dash_*` tuning and no cooldown (fuel is its limiter);
+  directional dashes use `air_dash_impulse`/`air_dash_cost`/
+  `air_dash_cooldown`.
   Double jump is fuel-gated plus a short cooldown (interpretation of §4.5:
   fuel is the constraint, cooldown just prevents hover-spam).
 - **Feel assists (Celeste-inspired, all in the Assists config group)**:
@@ -300,7 +301,12 @@ real arm progress and `_net_prog` respectively.
   glancing hit against a wall-ish surface it restores horizontal speed
   (`glide_speed_retention`, default 90%) along the slide direction, so
   obstacles deflect instead of stopping; impacts steeper than
-  `glide_max_impact_angle_deg` from the surface still stop you. **Wall
+  `glide_max_impact_angle_deg` from the surface still stop you — UNLESS
+  the collider carries `metadata/deflector = true` (the graybox's pointed
+  BigKites, 2026-09-10): tagged geometry skips the head-on rejection, so
+  even a dead-center edge hit splits you around it (a capsule-vs-edge
+  contact normal always reads head-on regardless of face angles, which is
+  why this is a per-obstacle tag and not a shape fix). **Wall
   coyote**: falling off a wall arms `wall_coyote_timer` — jump within it
   and `_coyote_walljump` applies the full dismount boost (fuel was already
   granted at falloff, so no double-grant). **Ground coyote**: walking off

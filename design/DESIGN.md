@@ -1155,6 +1155,11 @@ by loadout-selected upgrades.
 **Personal gravity (held state).** Replaced by a universal down dash. Same jobs,
 instantly legible, one ability instead of a state to tune and explain.
 
+**Down-strafe (held-Q downward air thrust).** Cut 2026-09-10. Redundant with
+the down dash's job and muddied the button: Q is now the down dash directly
+(no Shift chord), one press, one meaning. Also freed the dash chord to be
+purely WASD-directional.
+
 **The Tagger (tag-then-missile weapon).** As a "difficult to dodge one-shot" it
 was just a railgun that didn't require aim, which undercut the rail's skill
 expression. The missile-dodging fantasy survives as an upgrade (§10.1). Cutting

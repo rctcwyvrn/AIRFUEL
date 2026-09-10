@@ -18,7 +18,7 @@ docker/Dockerfile: `GODOT_VERSION=4.7.2` — keep all three in step).
   (`--server`/`--client`/`--lobby`/`--dedicated`/`--match-server`).
 - Input actions defined here and consumed by `player.gd` (`hud.gd`'s
   controls-hint widget polls the same action names to light up keys):
-  `move_forward/back/left/right` (WASD), `strafe_down` (Q),
+  `move_forward/back/left/right` (WASD), `down_dash` (Q),
   `jump` (Space), `dash` (Shift, combines with held direction keys),
   `fire_left` (mouse left), `fire_right` (mouse right), `swap_loadout`
   (Tab, cycles the three 8.3 loadouts), `respawn` (T — moved off R, too close to E), `record` (F5, TAS tape). Keys

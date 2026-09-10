@@ -30,7 +30,7 @@ const KEY_LAYOUT: Array = [
 	["move_left", "A", 0, 34, 30],
 	["move_back", "S", 34, 34, 30],
 	["move_right", "D", 68, 34, 30],
-	["strafe_down", "Q", 110, 34, 30],
+	["down_dash", "Q", 110, 34, 30],
 	["dash", "SHIFT", 0, 68, 64],
 	["jump", "SPACE", 68, 68, 72],
 	["fire_left", "LMB", 0, 102, 47],

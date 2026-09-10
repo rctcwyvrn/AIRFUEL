@@ -19,7 +19,7 @@ extends Object
 const SIZE := 42
 const PENDING_CODES: Array = [[], ["L"], ["R"], ["L", "R"], ["R", "L"]]
 
-# Cmd wire format: [tick, move.x, move.y, vert, flags, yaw, pitch,
+# Cmd wire format: [tick, move.x, move.y, down_dash, flags, yaw, pitch,
 # seen_server_tick] — flags bit order matches the TAS tape
 # (jump|dash|fireL|fireR|swap|respawn). seen_server_tick is the newest
 # server tick the client had rendered when it issued this cmd — the
@@ -42,7 +42,7 @@ static func encode_cmd(p: CharacterBody3D) -> PackedFloat32Array:
 	c[0] = float(p.net_tick)
 	c[1] = p.cmd_move.x
 	c[2] = p.cmd_move.y
-	c[3] = p.cmd_vert
+	c[3] = 1.0 if p.cmd_down_dash else 0.0
 	c[4] = float(flags)
 	c[5] = p.rotation.y
 	c[6] = p.head.rotation.x
@@ -55,7 +55,7 @@ static func encode_cmd(p: CharacterBody3D) -> PackedFloat32Array:
 ## are client-authoritative and travel with the cmd, never with state.
 static func apply_cmd(p: CharacterBody3D, c: PackedFloat32Array) -> void:
 	p.cmd_move = Vector2(c[1], c[2])
-	p.cmd_vert = c[3]
+	p.cmd_down_dash = c[3] != 0.0
 	var flags := int(c[4])
 	p.cmd_jump = bool(flags & 1)
 	p.cmd_dash = bool(flags & 2)

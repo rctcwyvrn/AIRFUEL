@@ -16,6 +16,10 @@ join-by-IP LAN / join a lobby server with a username).
   (hidden; the script drives it — grey connecting status / red failures,
   autowrapped).
 
+- `ControlsLabel` (Label, left side of the screen, outside `VBox`): static
+  controls reference (WASD/Space/Q/Shift/LMB-RMB/Tab/T/Esc) added
+  2026-09-10; purely informational, never referenced by the script.
+
 ## Implementation
 
 Dark full-screen ColorRect (#16181C) + centered VBoxContainer, styled by an

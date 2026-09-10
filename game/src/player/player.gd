@@ -91,7 +91,7 @@ var _pending_snapshot: Array = []  # [ack_tick, state]; applied at tick start
 # Per-tick command state: filled from Input for humans, written directly by
 # a controller (TAS ghost, future bots) when ghost_controlled.
 var cmd_move := Vector2.ZERO
-var cmd_vert := 0.0
+var cmd_down_dash := false
 var cmd_jump := false
 var cmd_dash := false
 var cmd_fire_l := false
@@ -249,7 +249,14 @@ func _physics_process(delta: float) -> void:
 		_tape_lines.append(
 			(
 				"%.5f %.5f %.3f %.3f %.1f %d"
-				% [rotation.y, head.rotation.x, cmd_move.x, cmd_move.y, cmd_vert, flags]
+				% [
+					rotation.y,
+					head.rotation.x,
+					cmd_move.x,
+					cmd_move.y,
+					1.0 if cmd_down_dash else 0.0,
+					flags
+				]
 			)
 		)
 
@@ -492,16 +499,6 @@ func _air_move(wish: Vector3, delta: float) -> void:
 		):
 			_air_accelerate(wish, config.air_strafe_accel, config.air_strafe_speed_cap, delta)
 
-	# Q vertical strafe: fueled downward thrust only
-	var vert := 0.0 if move_locked else cmd_vert
-	if vert != 0.0:
-		var vdir := Vector3.UP * vert
-		if (
-			velocity.dot(vdir) < config.air_strafe_vertical_cap
-			and _spend(config.air_strafe_cost_per_sec * delta)
-		):
-			_air_accelerate(vdir, config.air_strafe_accel, config.air_strafe_vertical_cap, delta)
-
 	if ramp_grace_timer > 0.0:
 		ramp_grace_timer -= delta
 	else:
@@ -658,19 +655,18 @@ func _probe_wall_at(dir: Vector3, dist_scale := 1.0) -> Dictionary:
 func _handle_dashes() -> void:
 	if move_locked:
 		return
+	var on_wall := state == MoveState.WALLRUN
+	if cmd_down_dash:
+		# Q is the down dash (DESIGN.md 4.4): own tuning, no cooldown. On a
+		# wall you STAY attached and slide down it fast. Independent of
+		# Shift — pressing Q always means straight down.
+		if (on_wall or state == MoveState.AIRBORNE) and _spend(config.down_dash_cost):
+			velocity.y = minf(velocity.y, -config.down_dash_speed)
 	if not cmd_dash:
 		return
 	var input := cmd_move
-	var vert := cmd_vert
-	if input == Vector2.ZERO and vert == 0.0:
-		return  # bare Shift is inert: dash requires a held direction
-	var on_wall := state == MoveState.WALLRUN
-	if input == Vector2.ZERO and vert < 0.0:
-		# Shift+Q alone is the down dash (DESIGN.md 4.4): own tuning, no
-		# cooldown. On a wall you STAY attached and slide down it fast.
-		if (on_wall or state == MoveState.AIRBORNE) and _spend(config.down_dash_cost):
-			velocity.y = minf(velocity.y, -config.down_dash_speed)
-		return
+	if input == Vector2.ZERO:
+		return  # bare Shift is inert: a directional dash needs held WASD
 	if dash_cooldown_timer > 0.0 or not _spend(config.air_dash_cost):
 		return
 	if on_wall:
@@ -680,10 +676,9 @@ func _handle_dashes() -> void:
 		# straight back in compounded boosts to absurd speeds)
 		_dismount(true)
 		wall_rearm_timer = config.dash_wall_rearm_time
-	# Camera-aimed: W+Shift dashes wherever you're looking (pitch included);
-	# E/Q contribute world-vertical on top.
+	# Camera-aimed: W+Shift dashes wherever you're looking (pitch included)
 	var cb := camera.global_transform.basis
-	var dir := (cb.x * input.x + -cb.z * -input.y + Vector3.UP * vert).normalized()
+	var dir := (cb.x * input.x + -cb.z * -input.y).normalized()
 	velocity += dir * config.air_dash_impulse
 	dash_cooldown_timer = config.air_dash_cooldown
 
@@ -931,15 +926,25 @@ func _apply_glide(pre_vel: Vector3) -> void:
 	if post_h.length() >= pre_speed * 0.98:
 		return
 	var normal := Vector3.ZERO
+	var deflector := false
 	for i in get_slide_collision_count():
-		var n := get_slide_collision(i).get_normal()
+		var col := get_slide_collision(i)
+		var n := col.get_normal()
 		if absf(n.y) < 0.4:
 			normal = n
+			var body := col.get_collider() as Node
+			# Map-authored "deflector" geometry (pointed kite obstacles):
+			# even a dead-center hit splits you around it instead of
+			# stopping — the head-on rejection below is skipped.
+			deflector = body != null and body.has_meta("deflector")
 			break
 	if normal == Vector3.ZERO:
 		return
 	var pre_dir := pre_h / pre_speed
-	if absf(pre_dir.dot(normal)) > sin(deg_to_rad(config.glide_max_impact_angle_deg)):
+	if (
+		not deflector
+		and absf(pre_dir.dot(normal)) > sin(deg_to_rad(config.glide_max_impact_angle_deg))
+	):
 		return
 	var slide := pre_h.slide(normal)
 	if slide.length() < 0.05:
@@ -977,7 +982,7 @@ func _gather_input() -> void:
 	if ghost_controlled:
 		return  # controller wrote the cmds (process_physics_priority < 0)
 	cmd_move = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	cmd_vert = -1.0 if Input.is_action_pressed("strafe_down") else 0.0
+	cmd_down_dash = Input.is_action_just_pressed("down_dash")
 	cmd_jump = Input.is_action_just_pressed("jump")
 	cmd_dash = Input.is_action_just_pressed("dash")
 	cmd_fire_l = Input.is_action_just_pressed("fire_left")
