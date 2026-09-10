@@ -909,6 +909,23 @@ If revisited, the constraints established are:
   the hardest networking problem. Do not trade this away.
 - Target 12 players.
 
+**Architecture decisions (2026-09-09, with the roadmap gates passed):**
+
+- **Per-match server processes.** The lobby stays matchmaker-only; it spawns a
+  child authoritative-server process per match. Isolation and crash
+  containment over single-process simplicity.
+- **The LAN listen-server converts to server-auth** — the host's process runs
+  the authoritative sim and the host plays as a zero-latency client. One
+  netcode path everywhere; the legacy client-auth LAN-trust path is retired
+  with it. Offline solo stays locally simulated and untouched.
+- **Sword lunges use the same server-side rewind as rail hitscan.**
+  Consistent attacker feel; the proximity warning remains the victim's
+  mitigation (§22 risk 3).
+- **Staging: N1** server-auth 1v1 parity (prediction + reconciliation) →
+  **N2** server-side rewind for hitscan + lunge → *playtest gate: duels must
+  feel like the prototype did* → **N3** scale to 12 (unlocks the 6v6
+  prototype and §22 risk 1 measurement).
+
 ### 20.3 Character controller
 
 Godot's `CharacterBody3D` is a starting point, but a custom kinematic controller
@@ -1075,6 +1092,11 @@ instrument.)
 *Answers:* **is the charge-freeze-dodge rhythm a fun conversation or a coinflip?**
 Everything downstream depends on this.
 
+**Answered 2026-09-09: a fair conversation.** Remote 1v1s on the lobby server
+play well from both seats; the HUD information layer does its job (exact
+presentation and warning filtering stay tunable, §23). The §23 combat/movement
+numbers are good enough to proceed and stay open as tuning, not blockers.
+
 **Step 4 — Networked lunge-melee at ~60ms.**
 Two real clients. Sword only.
 
@@ -1082,7 +1104,14 @@ Two real clients. Sword only.
 deliberately — see §22. A prototype-tier networked sword already exists, so
 this folds into the same LAN playtesting sessions as Step 3.
 
-Everything else waits.
+**Answered 2026-09-09: yes.** Lunge melee held up at real latency in the same
+remote duels; no sword-only session format was needed. §22 risk 3 is
+downgraded from "may change the weapon design" to a netcode-quality concern
+for the §20.2 implementation.
+
+Everything else waits. *(All four gates passed 2026-09-09. Next milestone,
+chosen the same day: the §20.2 netcode — authoritative server, client
+prediction, server-side rewind — staged to 1v1 parity first.)*
 
 ---
 

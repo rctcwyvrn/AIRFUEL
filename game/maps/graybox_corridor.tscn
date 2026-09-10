@@ -620,56 +620,56 @@ light_energy = 0.8
 omni_range = 55.0
 
 [node name="LWedge1" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -40, 0, -320)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, -320)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 10, 3, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="LWedge2" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -40, 8, -84)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 8, -84)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 10, 3, 0)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="LWedge3" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -40, 0, 180)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, 180)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 10, 3, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="LWedge4" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -40, 8, 376)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 8, 376)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 10, 3, 0)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="RWedge1" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 40, 8, -236)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 8, -236)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 10, -3, 0)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="RWedge2" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 40, 0, -20)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, -20)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 10, -3, 10)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="RWedge3" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 40, 8, 96)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 8, 96)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 10, -3, 0)
 depth = 6.0
 material = SubResource("mat_fin")
 
 [node name="RWedge4" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 40, 0, 300)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, 300)
 use_collision = true
 polygon = PackedVector2Array(0, 0, 0, 10, -3, 10)
 depth = 6.0
