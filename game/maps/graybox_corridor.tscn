@@ -3,13 +3,11 @@
 [ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
 [ext_resource type="PackedScene" path="res://src/targets/target.tscn" id="3_target"]
-[ext_resource type="Script" path="res://src/props/kite_wireframe.gd" id="4_wire"]
+[ext_resource type="Script" uid="uid://bap42pdwlte64" path="res://src/props/kite_wireframe.gd" id="4_wire"]
+[ext_resource type="Shader" uid="uid://bdcrxfgjvmkyj" path="res://maps/space_sky.gdshader" id="5_sky"]
 
-[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
-sky_top_color = Color(0.25, 0.32, 0.45, 1)
-sky_horizon_color = Color(0.55, 0.58, 0.62, 1)
-ground_bottom_color = Color(0.12, 0.12, 0.14, 1)
-ground_horizon_color = Color(0.55, 0.58, 0.62, 1)
+[sub_resource type="ShaderMaterial" id="sky_mat"]
+shader = ExtResource("5_sky")
 
 [sub_resource type="Sky" id="sky"]
 sky_material = SubResource("sky_mat")
@@ -17,6 +15,9 @@ sky_material = SubResource("sky_mat")
 [sub_resource type="Environment" id="env"]
 background_mode = 2
 sky = SubResource("sky")
+ambient_light_source = 2
+ambient_light_color = Color(0.52, 0.55, 0.62, 1)
+ambient_light_energy = 1.6
 glow_enabled = true
 glow_intensity = 0.6
 glow_bloom = 0.1
@@ -25,7 +26,8 @@ glow_bloom = 0.1
 albedo_color = Color(0.42, 0.44, 0.47, 1)
 
 [sub_resource type="StandardMaterial3D" id="mat_wall"]
-albedo_color = Color(0.55, 0.62, 0.72, 1)
+transparency = 1
+albedo_color = Color(0.55, 0.62, 0.72, 0.75)
 
 [sub_resource type="StandardMaterial3D" id="mat_kite_glass"]
 transparency = 1
@@ -58,24 +60,28 @@ material = SubResource("mat_floor")
 
 [node name="WallL" type="CSGBox3D" parent="." unique_id=1200921372]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 20, 0)
+cast_shadow = 0
 use_collision = true
 size = Vector3(1, 40, 880)
 material = SubResource("mat_wall")
 
 [node name="WallR" type="CSGBox3D" parent="." unique_id=547106577]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 20, 0)
+cast_shadow = 0
 use_collision = true
 size = Vector3(1, 40, 880)
 material = SubResource("mat_wall")
 
 [node name="EndWallN" type="CSGBox3D" parent="." unique_id=1097692827]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, -440.5)
+cast_shadow = 0
 use_collision = true
 size = Vector3(82, 42, 1)
 material = SubResource("mat_wall")
 
 [node name="EndWallS" type="CSGBox3D" parent="." unique_id=958423506]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 440.5)
+cast_shadow = 0
 use_collision = true
 size = Vector3(82, 42, 1)
 material = SubResource("mat_wall")
@@ -279,7 +285,7 @@ depth = 36.0
 material = SubResource("mat_kite_glass")
 metadata/deflector = true
 
-[node name="KiteWireframes" type="Node3D" parent="."]
+[node name="KiteWireframes" type="Node3D" parent="." unique_id=850997076]
 script = ExtResource("4_wire")
 
 [node name="LightPanel1" type="CSGBox3D" parent="." unique_id=1284510470]
@@ -474,13 +480,13 @@ material = SubResource("mat_fin")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -405)
 
 [node name="Target2" parent="." unique_id=396137093 instance=ExtResource("3_target")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 20)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.940016, 0, 20)
 
 [node name="Target3" parent="." unique_id=1536141551 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24.5, 100)
 
 [node name="Target4" parent="." unique_id=81868856 instance=ExtResource("3_target")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -350)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.383476, 0, -350)
 
 [node name="Target5" parent="." unique_id=957539298 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, -300)

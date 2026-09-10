@@ -37,7 +37,10 @@ Color code:
   box, `kill_y` is unreachable in practice.
 - **Blue-gray walls** (x = ±40) — continuous, floor to roof; you cannot
   fall out the sides. Infinite parallel wallrun surfaces, so interior
-  features are what force crossings now.
+  features are what force crossings now. Slightly translucent
+  (2026-09-10: `mat_wall` alpha 0.75) so the spacescape sky shows through;
+  their `cast_shadow` is OFF to match — an opaque shadow from a
+  see-through wall reads as a bug.
 - **Roof** (y 40.5, gray) — `cast_shadow` is OFF so the sun still lights
   the interior; don't turn it on without adding interior lighting.
 - **Roof lights** — `LightPanel1-11` (emissive 6×6 strips under the roof
@@ -80,8 +83,14 @@ Color code:
   with the Covers — revisit before the next playtest round.
 
 Lighting: one DirectionalLight3D (shadow distance raised to 400 for the long
-corridor) + ProceduralSky environment with `glow_enabled` — glow is what
-makes the beam and charging-viewmodel emissive materials actually bloom.
+corridor) + a **spacescape sky** (2026-09-10): the Environment's Sky uses a
+ShaderMaterial on `res://maps/space_sky.gdshader` (procedural stars/nebulae
++ a sun disc aligned to the DirectionalLight — see its sidecar). Because
+the space sky contributes almost no light, ambient is explicit:
+`ambient_light_source = 2` (color) with a blue-grey color at energy 1.6 —
+without it the corridor interior goes murky (verified via screenshot rig).
+`glow_enabled` stays on — glow is what makes the beam and
+charging-viewmodel emissive materials actually bloom.
 
 ## Assertions
 

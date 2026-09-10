@@ -7,9 +7,12 @@ cd "$(dirname "$0")/../../.."
 
 status=0
 
-# Godot files: scripts, scenes, resources, project config.
+# Godot files: scripts, scenes, resources, shaders, project config.
 mapfile -t godot_files < <(
-  { find game -name '*.gd' -o -name '*.tscn' -o -name '*.tres'; echo game/project.godot; } | sort
+  {
+    find game -name '*.gd' -o -name '*.tscn' -o -name '*.tres' -o -name '*.gdshader'
+    echo game/project.godot
+  } | sort
 )
 
 echo "== Missing sidecars =="
@@ -37,7 +40,7 @@ while IFS= read -r md; do
     echo "ORPHAN   $md"
     status=1
   fi
-done < <(find game -name '*.gd.md' -o -name '*.tscn.md' -o -name '*.tres.md' -o -name 'project.godot.md' | sort)
+done < <(find game -name '*.gd.md' -o -name '*.tscn.md' -o -name '*.tres.md' -o -name '*.gdshader.md' -o -name 'project.godot.md' | sort)
 
 echo
 echo "== All pairs =="
