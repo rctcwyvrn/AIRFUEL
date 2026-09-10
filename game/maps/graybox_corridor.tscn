@@ -6,6 +6,8 @@
 [ext_resource type="Script" uid="uid://c7f2hojyqrci5" path="res://src/bot/practice_spawner.gd" id="4_practice"]
 [ext_resource type="Script" uid="uid://bap42pdwlte64" path="res://src/props/kite_wireframe.gd" id="4_wire"]
 [ext_resource type="Shader" uid="uid://bdcrxfgjvmkyj" path="res://maps/space_sky.gdshader" id="5_sky"]
+[ext_resource type="AudioStream" path="res://sounds/bgm.wav" id="6_bgm"]
+[ext_resource type="Script" path="res://src/props/bgm_player.gd" id="7_bgm_script"]
 
 [sub_resource type="ShaderMaterial" id="sky_mat"]
 shader = ExtResource("5_sky")
@@ -529,3 +531,8 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 2.6, -430)
 
 [node name="PracticeSpawner" type="Node" parent="." unique_id=221706464]
 script = ExtResource("4_practice")
+
+[node name="Bgm" type="AudioStreamPlayer" parent="." unique_id=1462093578]
+stream = ExtResource("6_bgm")
+volume_db = -10.0
+script = ExtResource("7_bgm_script")

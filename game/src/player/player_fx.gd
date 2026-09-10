@@ -7,6 +7,40 @@ extends Object
 ## entirely, and the headless server never calls them).
 
 const CANISTER := preload("res://src/weapons/canister.tscn")
+const RAIL_SOUND := preload("res://sounds/rail.wav")
+const SLASH_SOUND := preload("res://sounds/slash.wav")
+
+## Weapon one-shots sit above the arena BGM (source RMS is ~equal, so the
+## boost here + the -10 dB on the map's Bgm node keeps activations on top).
+const RAIL_VOLUME_DB := 6.0
+const SLASH_VOLUME_DB := 4.0
+## §16 "loud, directional": big unit size so shots carry across the arena.
+const SOUND_UNIT_SIZE := 20.0
+
+
+## Railgun activation sound at the muzzle (DESIGN.md §16). Played by the
+## shooter's own fire_rail and by Net for an opponent's shot on REPLICAs.
+static func play_rail_sound(parent: Node, pos: Vector3) -> void:
+	_play_sound_at(parent, RAIL_SOUND, pos, RAIL_VOLUME_DB)
+
+
+## Sword lunge activation sound (DESIGN.md §16), triggered off the lunge
+## rising edge in PlayerTrails so every rendered role (local + replica)
+## sounds the same tell that shows the blue ribbon.
+static func play_slash_sound(parent: Node, pos: Vector3) -> void:
+	_play_sound_at(parent, SLASH_SOUND, pos, SLASH_VOLUME_DB)
+
+
+## Fire-and-forget positional one-shot; frees itself when done.
+static func _play_sound_at(parent: Node, stream: AudioStream, pos: Vector3, db: float) -> void:
+	var sp := AudioStreamPlayer3D.new()
+	sp.stream = stream
+	sp.volume_db = db
+	sp.unit_size = SOUND_UNIT_SIZE
+	parent.add_child(sp)
+	sp.global_position = pos
+	sp.finished.connect(sp.queue_free)
+	sp.play()
 
 
 ## Fading emissive beam from muzzle to impact, parented next to the shooter

@@ -78,9 +78,12 @@ func _update_sword_trail() -> void:
 		return
 	var pos: Vector3 = _player.global_position + Vector3.UP * 0.7
 	if not _sword_live:
-		# Lunge just started: anchor here, first segment next frame.
+		# Lunge just started: anchor here, first segment next frame. The
+		# activation sound rides the same rising edge so local players and
+		# replicas alike are audible (§16).
 		_sword_live = true
 		_sword_last = pos
+		PlayerFx.play_slash_sound(_player.get_parent(), pos)
 		return
 	if pos.distance_to(_sword_last) < 0.4:
 		return

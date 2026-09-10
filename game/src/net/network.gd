@@ -507,7 +507,9 @@ func _handle_shot(
 	if shooter_id == multiplayer.get_unique_id():
 		body.shot_fired.emit(side, result)  # authoritative hitmarker; beam was predicted
 	elif body.role == AirfuelPlayer.NetRole.REPLICA:
-		PlayerFx.spawn_beam(body.get_parent(), muzzle, end_p)  # opponent fx
+		# Opponent fx: their predicted client already played its own.
+		PlayerFx.spawn_beam(body.get_parent(), muzzle, end_p)
+		PlayerFx.play_rail_sound(body.get_parent(), muzzle)
 
 
 func broadcast_damage(victim_id: int, attacker_id: int, hp_left: int) -> void:

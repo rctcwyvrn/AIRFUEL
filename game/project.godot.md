@@ -33,7 +33,8 @@ docker/Dockerfile and .github/workflows/release.yml: `GODOT_VERSION=4.7.2`
 
 ## Implementation
 
-120 Hz physics because the movement ceiling (~55 m/s terminal) makes 60 Hz
+120 Hz physics because the movement ceiling (80 m/s terminal per
+`default_tuning.tres`) makes 60 Hz
 tunneling and wall-probe misses likelier; the controller does all its work in
 `_physics_process`, so this is also the input sampling rate for movement.
 Window 1600×900. The editor rewrites this file on save (header comment,

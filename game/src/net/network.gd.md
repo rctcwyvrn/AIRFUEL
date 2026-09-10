@@ -173,8 +173,9 @@ filter exists because DRIVEN bodies can outlive their client for a beat
 a dropped peer just spam ENet send errors. `_host_plays()` (LAN host, also a
 player) additionally handles each event locally by direct call — no
 self-rpc. `_handle_shot`: own id → `shot_fired` (authoritative hitmarker;
-the beam was predicted), REPLICA shooter → `_spawn_beam` opponent fx (a
-LOCAL/DRIVEN shooter drew its own). `_handle_damage`: only the victim
+the beam was predicted), REPLICA shooter → `PlayerFx.spawn_beam` +
+`play_rail_sound` opponent fx at the reported muzzle (a LOCAL/DRIVEN
+shooter drew and sounded its own). `_handle_damage`: only the victim
 reacts, via the body's own `on_net_damage(attacker, hp_left)` (which syncs
 hp and emits `damaged`/`died` in-class — signals stay class-internal, no
 UNUSED_SIGNAL warning). `_ev_kill` replaces `scores` wholesale and

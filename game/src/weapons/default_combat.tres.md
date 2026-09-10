@@ -12,9 +12,15 @@ and both `ArmLeft`/`ArmRight` `config` exports — all share this one resource.
 
 ## Implementation
 
-`charge_time = 1.0` is pinned by DESIGN.md 8.1 ("~1s") and the fixed-rhythm
-principle: every shot takes the same time so the dodge is learnable. Damage
-(1 body / 2 head vs 2 HP) is design-fixed, not really tunable.
+The two lines actually in the file are sword overrides:
+`sword_lunge_cooldown = 3` (schema default 1.2 — a lunge is a commitment,
+not a spammable dash) and `sword_active_time = 0.2` (default 0.35 — a
+shorter live-blade window). Both are feel knobs from sword playtesting.
+
+The rail values all ship at schema defaults (so no lines here):
+`charge_time` 1.0 is pinned by DESIGN.md 8.1 ("~1s") and the fixed-rhythm
+principle — every shot takes the same time so the dodge is learnable.
+Damage (1 body / 2 head vs 2 HP) is design-fixed, not really tunable.
 `min_shot_gap` is the "generous defender window" knob (7.1) — tune by feel.
 
 Aim crush is gone entirely (cut 2026-09-09, DESIGN.md Appendix A; it had

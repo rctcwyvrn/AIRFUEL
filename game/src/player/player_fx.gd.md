@@ -2,9 +2,10 @@
 
 ## Function
 
-Stateless one-shot combat cosmetics (DESIGN.md §17 feedback beats), split
-out of `player.gd`: the rail beam, the sword-lunge trail segment, and the
-ejected canister. Pure visuals — nothing here may ever affect simulation.
+Stateless one-shot combat cosmetics (DESIGN.md §17 feedback beats, §16
+audio), split out of `player.gd`: the rail beam, the sword-lunge trail
+segment, the ejected canister, and the positional weapon-activation
+sounds. Pure visuals/audio — nothing here may ever affect simulation.
 Prediction replays skip these calls entirely (the `replaying` guard in
 `player.gd`; the sword trail is driven from render-side `_process`), and
 the headless server never makes them.
@@ -14,6 +15,16 @@ the headless server never makes them.
 - `class_name PlayerFx extends Object` — all-static, never instanced.
 - `const CANISTER` — preload of `res://src/weapons/canister.tscn` (moved
   here from `player.gd`).
+- `const RAIL_SOUND` / `const SLASH_SOUND` — preloads of
+  `res://sounds/rail.wav` / `slash.wav`.
+- `static play_rail_sound(parent: Node, pos: Vector3) -> void` — railgun
+  activation one-shot at the muzzle. Callers: the shooter's own
+  `fire_rail` (player_combat.gd) and `Net._handle_shot` for an opponent's
+  shot on REPLICA views.
+- `static play_slash_sound(parent: Node, pos: Vector3) -> void` — sword
+  lunge activation one-shot; caller is `PlayerTrails._update_sword_trail`
+  on the lunge's rising edge (so local players and replicas share the
+  hook).
 - `static spawn_beam(parent: Node, from: Vector3, to: Vector3) -> void` —
   fading emissive beam from muzzle to impact, added as a child of
   `parent` but positioned in world space. Callers: the shooter's own
@@ -45,6 +56,13 @@ the headless server never makes them.
   spawns beside the camera on the firing side, inherits the shooter's
   velocity plus a sideways/up/back kick, and gets a random tumble. The
   canister scene owns its own lifetime.
+- **Sounds** (`_play_sound_at`): a transient `AudioStreamPlayer3D` child
+  of `parent` at the world position, freed on `finished`. Positional and
+  loud on purpose (§16 "loud, directional"): `SOUND_UNIT_SIZE = 20` so
+  shots carry across the arena. Volumes (`RAIL_VOLUME_DB` +6,
+  `SLASH_VOLUME_DB` +4) boost the one-shots over the arena BGM — all
+  three source wavs have near-equal RMS (~-25 dBFS), so the spread comes
+  entirely from these constants plus the Bgm node's -10 dB.
 
 ## Assertions
 
@@ -52,6 +70,7 @@ the headless server never makes them.
   deal damage, or be required for a tick's outcome — `_simulate()` must
   behave identically whether or not these ever ran.
 - Beam meshes always free themselves (tween callback) — a leaked beam per
-  shot would accumulate fast.
+  shot would accumulate fast. Sound players likewise free themselves on
+  `finished`.
 - `spawn_beam` keeps its degenerate-length guard: a zero-length beam
   means a broken mesh and a `look_at` error.

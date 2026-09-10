@@ -14,7 +14,8 @@ scene, green once finished),
 and — netplay only — a kill scoreboard (top-right, YOU first, from
 `Net.players`/`Net.scores` — scores are server-fed by the kill events)
 plus the rotating-prism minimap
-(see `minimap.gd` — hud.gd only toggles its visibility with `Net.active`).
+(see `minimap.gd` — hud.gd toggles its visibility with `Net.active` and
+assigns its `track` target to the local player).
 
 Step 3 duel feedback layer (§15.2, §8.2): directional **threat ring** around
 the crosshair (enemy rail charges as escalating wedges — warn on EVERY

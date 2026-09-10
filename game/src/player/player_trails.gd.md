@@ -19,7 +19,8 @@ or ever affect simulation.
   class_name reference to `AirfuelPlayer`).
 - `clear()` — respawn hook, called by `player.gd._respawn()`: drops the
   flight-path history so the line never connects across a teleport.
-- Calls `PlayerFx.spawn_sword_trail` for ribbon segments.
+- Calls `PlayerFx.spawn_sword_trail` for ribbon segments and
+  `PlayerFx.play_slash_sound` on the lunge's rising edge.
 
 ## Implementation
 
@@ -36,9 +37,11 @@ or ever affect simulation.
 - **Sword ribbon** (`_update_sword_trail`): while the parent's
   `sword_active > 0`, drop a `PlayerFx.spawn_sword_trail` segment (parented
   beside the player) every 0.4 m of travel at chest height (+0.7); the
-  first frame of a lunge only anchors the start point. `_sword_live`
-  latches so each lunge starts a fresh anchor instead of connecting to the
-  previous lunge's end.
+  first frame of a lunge only anchors the start point and plays the slash
+  activation sound (§16) — the same rising edge for every rendered role, so
+  an opponent's lunge is audible exactly when its ribbon starts.
+  `_sword_live` latches so each lunge starts a fresh anchor instead of
+  connecting to the previous lunge's end.
 
 ## Assertions
 

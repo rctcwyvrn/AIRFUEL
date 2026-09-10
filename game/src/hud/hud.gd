@@ -232,6 +232,7 @@ func _on_kill_reported(killer_id: int, victim_id: int) -> void:
 	lb.text = "%s  ▸  %s" % [_peer_tag(killer_id, my_id), _peer_tag(victim_id, my_id)]
 	lb.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	lb.add_theme_font_size_override("font_size", 15)
+	lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	kill_feed.add_child(lb)
 	feed_items.append({label = lb, ttl = FEED_TTL})
 	if killer_id == my_id:

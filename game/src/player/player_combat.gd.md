@@ -39,8 +39,9 @@ check, loadout visuals, and the per-frame weapon viewmodel glow.
   player-group bodies a PREDICTED shot is muzzle-flash only ("body"
   visual — the server decides), while a LOCAL shot (offline practice
   duel) applies real `apply_damage`. Local fx (viewmodel kick,
-  `PlayerFx.spawn_beam`/`spawn_canister`) are gated on `not
-  Net.headless`; `shot_fired` emits directly only offline.
+  `PlayerFx.spawn_beam`/`spawn_canister`/`play_rail_sound` at the
+  muzzle) are gated on `not Net.headless`; `shot_fired` emits directly
+  only offline.
 - **Sword (§8.2)**: `trigger_arm` on a sword side lunges toward the
   camera — full-commit redirect to `sword_lunge_speed`, ramp grace,
   fueled via `p._spend`, per-arm cooldown, blocked only while

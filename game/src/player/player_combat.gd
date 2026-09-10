@@ -156,6 +156,7 @@ static func fire_rail(p: CharacterBody3D, arm: RailArm) -> void:
 		vm.position += Vector3(0.0, 0.02, 0.16)
 		PlayerFx.spawn_beam(p.get_parent(), muzzle, end)
 		PlayerFx.spawn_canister(p, side_sign, cam)
+		PlayerFx.play_rail_sound(p.get_parent(), muzzle)
 	if Net.match_host != null:
 		Net.match_host.on_shot(p, side, muzzle, end, result)
 	if not Net.active:

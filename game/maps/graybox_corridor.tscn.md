@@ -22,6 +22,11 @@ per-peer bodies) — the project's main scene is the menu, not this map.
   (0, 0, −405) down the spawn sightline, the rest scattered at ground level
   every ~60–80 m across varied x (Target16-17 were removed with the
   elevated platforms they stood on, 2026-09-10).
+- `Bgm` (AudioStreamPlayer, `src/props/bgm_player.gd`): combat background
+  music — `res://sounds/bgm.wav` at −10 dB, forward-looped via its
+  `.import` (`edit/loop_mode=1`). The script (not the autoplay flag)
+  starts it so the headless server stays silent; the menu and parkour
+  map have no BGM by design (Lily, 2026-09-10: "bgm for combat").
 - Any replacement map must provide the same two instances (plus a
   `PracticeSpawner` if it should support DUEL VS AI) and solid geometry
   with default collision layers — the player probes walls via ray queries

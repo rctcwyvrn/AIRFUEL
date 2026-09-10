@@ -17,6 +17,9 @@ short-lived arcs toward the attacker.
   every frame by `hud.gd._scan_threats`; never mutated here.
 - `add_damage_arc(angle: float)` — event-driven, called from
   `hud.gd._on_damaged`; arcs self-expire after `DAMAGE_ARC_TTL` (1.2 s).
+- `damage_arcs: Array` of `{angle: float, ttl: float}` — the arcs behind
+  the above, appended by `add_damage_arc` and ttl-filtered in `_process`;
+  outside callers use the method, not the field.
 - Angles are yaw-relative bearings: 0 = ahead (drawn screen-up),
   +PI/2 = right. `hud.gd._bearing_to` is the producer.
 
