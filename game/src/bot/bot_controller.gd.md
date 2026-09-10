@@ -47,11 +47,15 @@ land — charge → tell → dodge stays winnable against it.
 - **Think** (`brain_hz`): rolls `want_stagger`, `want_jump`, re-rolls the
   Gaussian aim-noise offsets; switches ENGAGE ↔ REFUEL on the fuel
   thresholds; re-picks the refuel wall while approaching.
-- **Aim**: rate-limited yaw/pitch toward the *oldest* buffered opponent
-  position (`aim_lag`), plus noise **scaled by the opponent's speed
-  relative to `base_run_speed`** — a stationary target dies, a dashing one
-  survives (this scaling is load-bearing: flat noise left the bot unable
-  to finish stationary targets in headless tests). Turn rate lerps
+- **Aim**: smoothed yaw/pitch toward the *oldest* buffered opponent
+  position (`aim_lag`) — proportional (exponential, `aim_smoothing`)
+  approach clamped by the turn-rate cap, so big swings run at the cap
+  and arrivals decelerate instead of snapping (Lily's call 2026-09-10).
+  Noise offsets ease (`noise_ease`) toward per-think re-rolled targets
+  rather than jumping, and are **scaled by the opponent's speed relative
+  to `base_run_speed`** — a stationary target dies, a dashing one
+  survives (load-bearing: flat noise left the bot unable to finish
+  stationary targets in headless tests). The rate cap lerps
   free → charged with the bot's own max rail progress (the aim crush).
 - **Dodge pipeline** (Lily's spec): each enemy rail charge is an
   INDEPENDENT event per arm — detect (progress 0 → >0; no LOS needed,
@@ -68,7 +72,18 @@ land — charge → tell → dodge stays winnable against it.
 - **Engage movement**: held strafes flipped on `strafe_hold_*` timers
   (never per-tick jitter), advance/retreat at the band edges
   (`preferred_range_*`; `dual_sword_range_*` when both arms are swords),
-  occasional grounded hops.
+  plus **air hunger** (`_air_habits`, 2026-09-10, Lily's call — the bots
+  live in the air): hop off every floor contact, double-jump on fading
+  arcs while fuel > `air_fuel_floor`, ride an engaged wall
+  `engage_wall_ride_time` then jump off for the dismount grant, and
+  spend surplus fuel (> `dash_fuel_floor`) on per-think movement dashes.
+  Dodging keeps priority on the shared dash cooldown: no movement dash
+  while an enemy charge is up or a dodge dash is owed. **Fuel management
+  is wallrun-first** (Lily's call): below `wall_seek_fuel` the strafe
+  side (`_pick_strafe_dir`) points at the nearest side wall (world-only
+  raycasts both ways) so the orbit drifts into auto-attach and the
+  ride/dismount habit farms the §5.1 grant mid-fight — the REFUEL
+  intent stays the last resort.
 - **Combat**: no arm commits on a dash tick or without LOS (world-only
   raycast, mask 1). Rails charge when aim error < `fire_cone_deg`, the
   arm is IDLE, and no dodge dash is owed (charging would freeze the bot

@@ -17,18 +17,35 @@ literals in `bot_controller.gd`.
   shape: slow goals, per-tick execution).
 - **Aim**: `turn_rate_free` / `turn_rate_charged` (rad/s) — the bot-only
   aim crush: tracking degrades toward `turn_rate_charged` as the bot's own
-  rail charge builds. `aim_lag` (s of target-position staleness),
-  `aim_noise_deg` (Gaussian wander, scaled live by target speed),
-  `fire_cone_deg` (max aim error to start a charge), `stagger_chance`
-  (per-think odds the second rail charges while the first is locking).
+  rail charge builds. `aim_smoothing` (per-second proportional gain — the
+  tracking eases into targets instead of slam-stopping; the rate cap
+  still binds on big swings), `noise_ease` (per-second easing of the
+  noise offsets toward their per-think targets — no 8 Hz snapping),
+  `aim_lag` (s of target-position staleness), `aim_noise_deg` (Gaussian
+  wander, scaled live by target speed), `fire_cone_deg` (max aim error
+  to start a charge), `stagger_chance` (per-think odds the second rail
+  charges while the first is locking).
 - **Dodge**: `reaction_mean/dev/min/max` (s, clamped Gaussian reaction to
   an enemy charge), `dodge_weight_dash/strafe/none` (response roll),
   `dodge_lead` ± `dodge_lead_jitter` (s before shot-land to dash),
   `dodge_probe_range` (wall check before dashing sideways).
 - **Movement**: `strafe_hold_min/max` (s between strafe flips),
   `preferred_range_min/max` (rail orbit band),
-  `dual_sword_range_min/max` (much closer band for sword+sword),
-  `jump_chance` (per-think hop odds).
+  `dual_sword_range_min/max` (much closer band for sword+sword), and the
+  air-hunger knobs (2026-09-10, Lily's calls — bots live in the air,
+  and fuel management is wallrun-first, not dash-first):
+  `air_fuel_floor` (80 — fuel below which double jumps stop),
+  `dash_fuel_floor` (100 — movement dashes are the luxury spend, gated
+  higher than double jumps; dodge dashes are unaffected),
+  `wall_seek_fuel` (120 — below this the engage orbit drifts toward the
+  nearest side wall to farm ride/dismount fuel mid-fight),
+  `move_dash_chance` (per-think odds of a movement dash),
+  `engage_wall_ride_time` (wall time before jumping off for the
+  dismount grant), `double_jump_fall_speed` (falling speed that
+  triggers a fueled double jump). Ordering invariant:
+  `refuel_enter < air_fuel_floor < dash_fuel_floor < wall_seek_fuel` —
+  income behaviors engage before spends shut off, and last-resort
+  REFUEL stays the bottom of the ladder.
 - **Fuel**: `refuel_enter`/`refuel_exit` (fuel thresholds for the
   wallrun-refuel intent), `refuel_ride_time` (wall time before the
   dismount jump), `refuel_probe_range`, `refuel_approach_lead` (how far

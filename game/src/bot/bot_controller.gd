@@ -32,13 +32,17 @@ var intent := Intent.ENGAGE
 var clock := 0.0
 var think_timer := 0.0
 var want_stagger := false
-var want_jump := false
+var want_move_dash := false
 
 # Aiming: ring buffer of opponent positions — the bot tracks a slightly
-# stale target (aim_lag), plus slow-wandering noise re-rolled per think.
+# stale target (aim_lag), plus wandering noise. The noise TARGETS are
+# re-rolled per think; the live offsets ease toward them every tick so
+# the aim point drifts instead of snapping 8 times a second.
 var aim_samples: Array[Vector3] = []
 var noise_yaw := 0.0
 var noise_pitch := 0.0
+var noise_yaw_target := 0.0
+var noise_pitch_target := 0.0
 
 var strafe_dir := 1.0
 var strafe_timer := 0.0
@@ -91,10 +95,9 @@ func _physics_process(delta: float) -> void:
 ## Slow layer: intent switching and the per-think dice (stagger, hop, noise).
 func _think() -> void:
 	want_stagger = randf() < bot.stagger_chance
-	if randf() < bot.jump_chance:
-		want_jump = true
-	noise_yaw = deg_to_rad(randfn(0.0, bot.aim_noise_deg))
-	noise_pitch = deg_to_rad(randfn(0.0, bot.aim_noise_deg))
+	want_move_dash = randf() < bot.move_dash_chance
+	noise_yaw_target = deg_to_rad(randfn(0.0, bot.aim_noise_deg))
+	noise_pitch_target = deg_to_rad(randfn(0.0, bot.aim_noise_deg))
 	if intent == Intent.ENGAGE and body.fuel < bot.refuel_enter:
 		intent = Intent.REFUEL
 		has_refuel_target = false
@@ -130,7 +133,7 @@ func _on_respawned() -> void:
 	aim_samples.clear()
 	intent = Intent.ENGAGE
 	has_refuel_target = false
-	want_jump = false
+	want_move_dash = false
 	strafe_timer = 0.0
 
 
@@ -231,12 +234,20 @@ func _dodge_dash_pending() -> bool:
 	return false
 
 
-## Rate-limited tracking toward a lagged target sample. The rate degrades
-## with the bot's own charge — the bot-only aim crush — so a terminal-window
-## dash outruns its tracking exactly when a shot is about to land.
+## Smoothed tracking toward a lagged target sample: proportional
+## (exponential) approach clamped by a max turn rate, so big swings run at
+## the cap and arrivals decelerate into the target instead of snapping.
+## The cap degrades with the bot's own charge — the bot-only aim crush —
+## so a terminal-window dash outruns its tracking exactly when a shot is
+## about to land.
 func _aim_at_opponent(delta: float) -> void:
 	if aim_samples.is_empty():
 		return
+	# Noise offsets drift toward their per-think targets instead of
+	# snapping to them 8 times a second.
+	var ease := 1.0 - exp(-bot.noise_ease * delta)
+	noise_yaw = lerpf(noise_yaw, noise_yaw_target, ease)
+	noise_pitch = lerpf(noise_pitch, noise_pitch_target, ease)
 	var to := aim_samples[0] - body.camera.global_position
 	var flat := Vector2(to.x, to.z).length()
 	# Noise scales with the target's speed: a stationary target dies, a
@@ -249,9 +260,15 @@ func _aim_at_opponent(delta: float) -> void:
 		atan2(to.y, flat) + noise_pitch * noise_scale, -PI / 2 + 0.1, PI / 2 - 0.1
 	)
 	var rate := lerpf(bot.turn_rate_free, bot.turn_rate_charged, _own_charge())
-	var step := rate * delta
-	body.rotation.y += clampf(angle_difference(body.rotation.y, desired_yaw), -step, step)
-	body.head.rotation.x += clampf(desired_pitch - body.head.rotation.x, -step, step)
+	body.rotation.y += _aim_step(angle_difference(body.rotation.y, desired_yaw), rate, delta)
+	body.head.rotation.x += _aim_step(desired_pitch - body.head.rotation.x, rate, delta)
+
+
+## One smoothed angular step: proportional pull toward the target
+## (aim_smoothing gain), clamped by the current max turn rate.
+func _aim_step(diff: float, rate: float, delta: float) -> float:
+	var pull := diff * (1.0 - exp(-bot.aim_smoothing * delta))
+	return clampf(pull, -rate * delta, rate * delta)
 
 
 func _own_charge() -> float:
@@ -294,16 +311,81 @@ func _engage_move(dist: float, delta: float) -> void:
 	strafe_timer -= delta
 	if strafe_timer <= 0.0:
 		strafe_timer = randf_range(bot.strafe_hold_min, bot.strafe_hold_max)
-		strafe_dir = 1.0 if randf() < 0.5 else -1.0
+		strafe_dir = _pick_strafe_dir()
 	var fwd := 0.0
 	if dist > rmax:
 		fwd = -1.0
 	elif dist < rmin:
 		fwd = 1.0
 	body.cmd_move = Vector2(strafe_dir, fwd)
-	if want_jump and body.is_on_floor():
-		want_jump = false
+	_air_habits()
+
+
+## Air hunger (Lily's call: the bots should live in the air): hop off
+## every floor contact, double-jump on fading arcs while fuel-rich, ride
+## an engaged wall briefly then jump off for the dismount grant, and
+## spend spare fuel on movement dashes. Dodging keeps priority on the
+## dash cooldown: no movement dash while a charge is up or a dodge is
+## owed, and everything fueled sits above air_fuel_floor so the REFUEL
+## intent still has something to work with.
+func _air_habits() -> void:
+	if body.state == AirfuelPlayer.MoveState.WALLRUN:
+		if body.wallrun_time >= bot.engage_wall_ride_time:
+			body.cmd_jump = true  # dismount: fuel + speed, back to the air
+		return
+	if body.is_on_floor():
+		body.cmd_jump = true  # never linger on the ground
+		return
+	if (
+		body.fuel > bot.air_fuel_floor
+		and body.velocity.y < -bot.double_jump_fall_speed
+		and body.double_jump_timer == 0.0
+	):
 		body.cmd_jump = true
+	# Movement dashes are the LUXURY spend (higher floor than double
+	# jumps): wallrun dismounts are the income, dashes only ride surplus.
+	if (
+		want_move_dash
+		and body.fuel > bot.dash_fuel_floor
+		and body.dash_cooldown_timer == 0.0
+		and not _dodge_dash_pending()
+		and prev_charge[0] <= 0.0
+		and prev_charge[1] <= 0.0
+	):
+		want_move_dash = false
+		body.cmd_dash = true  # dashes along the current strafe/advance input
+
+
+## Strafe side for the engage orbit. Fuel management is wallrun-first
+## (Lily's call): below wall_seek_fuel the orbit drifts toward the nearest
+## side wall so auto-attach + the ride/dismount habit farm the §5.1 grant
+## mid-fight, long before the last-resort REFUEL intent triggers. With a
+## full tank the side is random.
+func _pick_strafe_dir() -> float:
+	if body.fuel < bot.wall_seek_fuel:
+		var left := _side_wall_dist(-1.0)
+		var right := _side_wall_dist(1.0)
+		if left < INF or right < INF:
+			return -1.0 if left <= right else 1.0
+	return 1.0 if randf() < 0.5 else -1.0
+
+
+func _side_wall_dist(side: float) -> float:
+	var dir: Vector3 = body.global_transform.basis.x * side
+	dir.y = 0.0
+	if dir.length() < 0.01:
+		return INF
+	var space := body.get_world_3d().direct_space_state
+	var params := PhysicsRayQueryParameters3D.create(
+		body.global_position,
+		body.global_position + dir.normalized() * bot.refuel_probe_range,
+		1,
+		[body.get_rid()]
+	)
+	var hit := space.intersect_ray(params)
+	if hit.is_empty() or absf(hit.normal.y) > 0.4:
+		return INF
+	return body.global_position.distance_to(hit.position)
 
 
 func _dual_sword() -> bool:

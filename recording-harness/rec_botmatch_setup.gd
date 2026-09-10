@@ -19,7 +19,7 @@ const PLAYER_SCENE := preload("res://src/player/player.tscn")
 const BOT_CONFIG := preload("res://src/bot/default_bot.tres")
 const POV_SPAWN := Vector3(0, 2.6, -430)  # the corridor's human spawn
 const POV_YAW_DEG := 180.0  # face +Z, down-corridor
-const ENEMY_SPAWN := Vector3(0, 2.6, -350)
+const ENEMY_SPAWN := Vector3(0, 2.6, 430)  # far end — matches PracticeSpawner
 const ENEMY_YAW_DEG := 0.0  # face -Z, toward the POV spawn
 
 var pov_loadout := 0

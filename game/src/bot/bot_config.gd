@@ -13,6 +13,8 @@ extends Resource
 @export_group("Aim")
 @export var turn_rate_free := 7.0
 @export var turn_rate_charged := 1.1
+@export var aim_smoothing := 10.0
+@export var noise_ease := 6.0
 @export var aim_lag := 0.12
 @export var aim_noise_deg := 2.0
 @export var fire_cone_deg := 3.0
@@ -37,7 +39,12 @@ extends Resource
 @export var preferred_range_max := 60.0
 @export var dual_sword_range_min := 6.0
 @export var dual_sword_range_max := 14.0
-@export var jump_chance := 0.15
+@export var air_fuel_floor := 80.0
+@export var dash_fuel_floor := 100.0
+@export var wall_seek_fuel := 120.0
+@export var move_dash_chance := 0.3
+@export var engage_wall_ride_time := 0.6
+@export var double_jump_fall_speed := 3.0
 
 @export_group("Fuel")
 @export var refuel_enter := 40.0
