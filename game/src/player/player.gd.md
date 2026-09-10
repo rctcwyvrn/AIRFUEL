@@ -249,6 +249,16 @@ real arm progress and `_net_prog` respectively.
   (`_try_attach_wall`), best = nearest hit with a wall-ish normal. Maintain:
   re-probe toward `-wall_normal` each tick at 1.6× distance, falling back to
   ±0.6 rad rotations so the normal tracks curvature (`_wallrun_move`).
+- **Corner launch** (2026-09-10): if the re-probed normal jumps by an angle
+  inside `[wallrun_corner_dismount_deg, wallrun_corner_wrap_deg)` (50-80°)
+  in one tick AND `velocity.dot(new_normal) > 0` (convex — the surface
+  falls away), `_dismount(false)` fires BEFORE the normal is adopted:
+  velocity leaves along the old tangent intact instead of folding onto the
+  far face (which ate all the speed at wall-wedge apexes). Concave corners
+  (switchback interiors) and ≥80° hairpins (obstacle ends, switchback
+  outers) still track/wrap — the shipped parkour TAS tape wraps a 45°
+  convex blend, which is exactly why the band opens at 50°: the tape's
+  trajectory fingerprint must stay bit-identical.
 - **Dismount** (`_dismount`): fuel grant scales with along-wall speed *above*
   `min_wallrun_speed` (slow wall-hugging ≈ nothing). Jump dismounts also get
   the speed boost + push-off + up-velocity; falling off / timing out grants

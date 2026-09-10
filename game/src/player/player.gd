@@ -524,7 +524,7 @@ func _wallrun_move(delta: float) -> void:
 		_dismount(false)
 		return
 
-	# Re-probe every tick so the normal tracks curved surfaces (cylinders).
+	# Re-probe every tick so the normal tracks curved surfaces (slot caps).
 	var hit := _probe_wall_at(-wall_normal, 1.6)
 	if hit.is_empty():
 		for s: float in [1.0, -1.0]:
@@ -532,6 +532,19 @@ func _wallrun_move(delta: float) -> void:
 			if not hit.is_empty():
 				break
 	if hit.is_empty():
+		_dismount(false)
+		return
+	var bend := (hit.normal as Vector3).angle_to(wall_normal)
+	if (
+		bend > deg_to_rad(config.wallrun_corner_dismount_deg)
+		and bend < deg_to_rad(config.wallrun_corner_wrap_deg)
+		and velocity.dot(hit.normal) > 0.0
+	):
+		# A moderate CONVEX corner (a wedge apex — surface falls away and
+		# we're moving off it): launch along the tangent with velocity
+		# intact instead of folding onto the far face and eating the speed.
+		# Concave corners and hairpins (>= wrap_deg) still track: wrapping
+		# a switchback or an obstacle end stays legitimate technique.
 		_dismount(false)
 		return
 	wall_normal = hit.normal

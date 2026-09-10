@@ -42,6 +42,13 @@ extends Resource
 @export var wallrun_max_speed := 38.0
 @export var wallrun_gravity := 2.0
 @export var wall_stick_speed := 3.0
+## Wallrun tracks curved surfaces, but a CONVEX normal jump in a single tick
+## between these two angles is a launch lip (a wall wedge's apex): dismount
+## with velocity preserved instead of folding onto the far face. Below the
+## band = a curve (slot caps, track); at/above the top = a hairpin — full
+## corner wraps stay legitimate technique (concave corners always track).
+@export var wallrun_corner_dismount_deg := 50.0
+@export var wallrun_corner_wrap_deg := 80.0
 @export var wallrun_camera_roll_deg := 18.0
 @export var wallrun_camera_roll_speed := 14.0
 @export var wallrun_fov_bonus := 7.0

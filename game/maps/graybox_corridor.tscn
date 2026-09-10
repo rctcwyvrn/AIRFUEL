@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene format=3 uid="uid://bb204g071u2ph"]
 
 [ext_resource type="PackedScene" path="res://src/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://src/hud/hud.tscn" id="2_hud"]
@@ -29,14 +29,8 @@ albedo_color = Color(0.55, 0.62, 0.72, 1)
 [sub_resource type="StandardMaterial3D" id="mat_cyl"]
 albedo_color = Color(0.85, 0.5, 0.2, 1)
 
-[sub_resource type="StandardMaterial3D" id="mat_panel"]
-albedo_color = Color(0.3, 0.72, 0.65, 1)
-
 [sub_resource type="StandardMaterial3D" id="mat_fin"]
 albedo_color = Color(0.75, 0.62, 0.4, 1)
-
-[sub_resource type="StandardMaterial3D" id="mat_plat"]
-albedo_color = Color(0.6, 0.45, 0.75, 1)
 
 [sub_resource type="StandardMaterial3D" id="mat_light"]
 albedo_color = Color(1, 1, 0.95, 1)
@@ -44,1115 +38,479 @@ emission_enabled = true
 emission = Color(1, 0.98, 0.9, 1)
 emission_energy_multiplier = 2.5
 
-[node name="GrayboxCorridor" type="Node3D"]
+[node name="GrayboxCorridor" type="Node3D" unique_id=745792861]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=769072787]
 environment = SubResource("env")
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1888549603]
 transform = Transform3D(0.866025, 0, -0.5, -0.353553, 0.707107, -0.612372, 0.353553, 0.707107, 0.612372, 0, 30, 0)
 shadow_enabled = true
 directional_shadow_max_distance = 400.0
 
-[node name="Floor" type="CSGBox3D" parent="."]
+[node name="Floor" type="CSGBox3D" parent="." unique_id=434323932]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 use_collision = true
 size = Vector3(80, 1, 880)
 material = SubResource("mat_floor")
 
-[node name="WallL" type="CSGBox3D" parent="."]
+[node name="WallL" type="CSGBox3D" parent="." unique_id=1200921372]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 20, 0)
 use_collision = true
 size = Vector3(1, 40, 880)
 material = SubResource("mat_wall")
 
-[node name="WallR" type="CSGBox3D" parent="."]
+[node name="WallR" type="CSGBox3D" parent="." unique_id=547106577]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 20, 0)
 use_collision = true
 size = Vector3(1, 40, 880)
 material = SubResource("mat_wall")
 
-[node name="EndWallN" type="CSGBox3D" parent="."]
+[node name="EndWallN" type="CSGBox3D" parent="." unique_id=1097692827]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, -440.5)
 use_collision = true
 size = Vector3(82, 42, 1)
 material = SubResource("mat_wall")
 
-[node name="EndWallS" type="CSGBox3D" parent="."]
+[node name="EndWallS" type="CSGBox3D" parent="." unique_id=958423506]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 440.5)
 use_collision = true
 size = Vector3(82, 42, 1)
 material = SubResource("mat_wall")
 
-[node name="Roof" type="CSGBox3D" parent="."]
+[node name="Roof" type="CSGBox3D" parent="." unique_id=361093655]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40.5, 0)
+cast_shadow = 0
 use_collision = true
 size = Vector3(82, 1, 880)
-cast_shadow = 0
 material = SubResource("mat_floor")
 
-[node name="BigSlot1" type="CSGPolygon3D" parent="."]
+[node name="BigSlot1" type="CSGPolygon3D" parent="." unique_id=2015968035]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -313)
 use_collision = true
-polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
-depth = 36
+polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36.0
 material = SubResource("mat_cyl")
 
-[node name="BigSlot2" type="CSGPolygon3D" parent="."]
+[node name="BigSlot2" type="CSGPolygon3D" parent="." unique_id=674719603]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -8, 0, -183)
 use_collision = true
-polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
-depth = 36
+polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36.0
 material = SubResource("mat_cyl")
 
-[node name="BigSlot3" type="CSGPolygon3D" parent="."]
+[node name="BigSlot3" type="CSGPolygon3D" parent="." unique_id=972418409]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 8, 0, -53)
 use_collision = true
-polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
-depth = 36
+polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36.0
 material = SubResource("mat_cyl")
 
-[node name="BigSlot4" type="CSGPolygon3D" parent="."]
+[node name="BigSlot4" type="CSGPolygon3D" parent="." unique_id=1276740083]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 67)
 use_collision = true
-polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
-depth = 36
+polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36.0
 material = SubResource("mat_cyl")
 
-[node name="BigSlot5" type="CSGPolygon3D" parent="."]
+[node name="BigSlot5" type="CSGPolygon3D" parent="." unique_id=229832522]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -10, 0, 197)
 use_collision = true
-polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
-depth = 36
+polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36.0
 material = SubResource("mat_cyl")
 
-[node name="BigSlot6" type="CSGPolygon3D" parent="."]
+[node name="BigSlot6" type="CSGPolygon3D" parent="." unique_id=1309018212]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 10, 0, 327)
 use_collision = true
-polygon = PackedVector2Array(6.000, 6.000, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0.000, 12.000, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6.000, 6.000, -6.000, -6.000, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, -0.000, -12.000, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+polygon = PackedVector2Array(6, 6, 5.543, 8.296, 4.243, 10.243, 2.296, 11.543, 0, 12, -2.296, 11.543, -4.243, 10.243, -5.543, 8.296, -6, 6, -6, -6, -5.543, -8.296, -4.243, -10.243, -2.296, -11.543, 0, -12, 2.296, -11.543, 4.243, -10.243, 5.543, -8.296)
+depth = 36.0
+material = SubResource("mat_cyl")
+
+[node name="MidSlot1" type="CSGPolygon3D" parent="." unique_id=332335100]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, -400)
+use_collision = true
+polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32.0
+material = SubResource("mat_cyl")
+
+[node name="MidSlot2" type="CSGPolygon3D" parent="." unique_id=1914460357]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, -260)
+use_collision = true
+polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32.0
+material = SubResource("mat_cyl")
+
+[node name="MidSlot3" type="CSGPolygon3D" parent="." unique_id=160636897]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, -120)
+use_collision = true
+polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32.0
+material = SubResource("mat_cyl")
+
+[node name="MidSlot4" type="CSGPolygon3D" parent="." unique_id=1168273095]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 20)
+use_collision = true
+polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32.0
+material = SubResource("mat_cyl")
+
+[node name="MidSlot5" type="CSGPolygon3D" parent="." unique_id=585069440]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 150)
+use_collision = true
+polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32.0
+material = SubResource("mat_cyl")
+
+[node name="MidSlot6" type="CSGPolygon3D" parent="." unique_id=1109299187]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 290)
+use_collision = true
+polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32.0
+material = SubResource("mat_cyl")
+
+[node name="MidSlot7" type="CSGPolygon3D" parent="." unique_id=1088411633]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 400)
+use_collision = true
+polygon = PackedVector2Array(5, 5, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0, 10, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5, 5, -5, -5, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, 0, -10, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
+depth = 32.0
+material = SubResource("mat_cyl")
+
+[node name="CenterSlot1" type="CSGPolygon3D" parent="." unique_id=1421028981]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -330)
+use_collision = true
+polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40.0
+material = SubResource("mat_cyl")
+
+[node name="CenterSlot2" type="CSGPolygon3D" parent="." unique_id=1669068020]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -155)
+use_collision = true
+polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40.0
+material = SubResource("mat_cyl")
+
+[node name="CenterSlot3" type="CSGPolygon3D" parent="." unique_id=1291329732]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 45)
+use_collision = true
+polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40.0
+material = SubResource("mat_cyl")
+
+[node name="CenterSlot4" type="CSGPolygon3D" parent="." unique_id=1194291387]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 225)
+use_collision = true
+polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40.0
+material = SubResource("mat_cyl")
+
+[node name="CenterSlot5" type="CSGPolygon3D" parent="." unique_id=1218909381]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 310)
+use_collision = true
+polygon = PackedVector2Array(4, 4, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0, 8, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4, 4, -4, -4, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, 0, -8, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
+depth = 40.0
+material = SubResource("mat_cyl")
+
+[node name="LongSlot1" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -22, 0, -350)
+use_collision = true
+polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
 depth = 36
 material = SubResource("mat_cyl")
 
-[node name="MidSlot1" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, -400)
+[node name="LongSlot2" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 22, 0, -180)
 use_collision = true
-polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
-depth = 32
+polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="MidSlot2" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, -260)
+[node name="LongSlot3" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -22, 0, 0)
 use_collision = true
-polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
-depth = 32
+polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="MidSlot3" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, -120)
+[node name="LongSlot4" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 22, 0, 120)
 use_collision = true
-polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
-depth = 32
+polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="MidSlot4" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 20)
+[node name="LongSlot5" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -22, 0, 250)
 use_collision = true
-polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
-depth = 32
+polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="MidSlot5" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 150)
+[node name="LongSlot6" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 22, 0, 380)
 use_collision = true
-polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
-depth = 32
+polygon = PackedVector2Array(2.500, 27.500, 2.310, 28.457, 1.768, 29.268, 0.957, 29.810, 0.000, 30.000, -0.957, 29.810, -1.768, 29.268, -2.310, 28.457, -2.500, 27.500, -2.500, -27.500, -2.310, -28.457, -1.768, -29.268, -0.957, -29.810, -0.000, -30.000, 0.957, -29.810, 1.768, -29.268, 2.310, -28.457)
+depth = 36
 material = SubResource("mat_cyl")
 
-[node name="MidSlot6" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 15, 0, 290)
-use_collision = true
-polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
-depth = 32
-material = SubResource("mat_cyl")
-
-[node name="MidSlot7" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -15, 0, 400)
-use_collision = true
-polygon = PackedVector2Array(5.000, 5.000, 4.619, 6.913, 3.536, 8.536, 1.913, 9.619, 0.000, 10.000, -1.913, 9.619, -3.536, 8.536, -4.619, 6.913, -5.000, 5.000, -5.000, -5.000, -4.619, -6.913, -3.536, -8.536, -1.913, -9.619, -0.000, -10.000, 1.913, -9.619, 3.536, -8.536, 4.619, -6.913)
-depth = 32
-material = SubResource("mat_cyl")
-
-[node name="CenterSlot1" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -330)
-use_collision = true
-polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
-depth = 40
-material = SubResource("mat_cyl")
-
-[node name="CenterSlot2" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -155)
-use_collision = true
-polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
-depth = 40
-material = SubResource("mat_cyl")
-
-[node name="CenterSlot3" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 45)
-use_collision = true
-polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
-depth = 40
-material = SubResource("mat_cyl")
-
-[node name="CenterSlot4" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 225)
-use_collision = true
-polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
-depth = 40
-material = SubResource("mat_cyl")
-
-[node name="CenterSlot5" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 310)
-use_collision = true
-polygon = PackedVector2Array(4.000, 4.000, 3.696, 5.531, 2.828, 6.828, 1.531, 7.696, 0.000, 8.000, -1.531, 7.696, -2.828, 6.828, -3.696, 5.531, -4.000, 4.000, -4.000, -4.000, -3.696, -5.531, -2.828, -6.828, -1.531, -7.696, -0.000, -8.000, 1.531, -7.696, 2.828, -6.828, 3.696, -5.531)
-depth = 40
-material = SubResource("mat_cyl")
-
-[node name="Panel1" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 16, -420)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 22, -360)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 28, -300)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel4" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 16, -240)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel5" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 22, -180)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel6" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 28, -120)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel7" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 16, -60)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel8" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 22, 0)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel9" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 28, 60)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel10" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 16, 120)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel11" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 22, 180)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel12" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 28, 240)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel13" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 16, 300)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel14" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 22, 360)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="Panel15" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 28, 420)
-use_collision = true
-size = Vector3(1, 14, 20)
-material = SubResource("mat_panel")
-
-[node name="OuterPanel1" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 18, -360)
-use_collision = true
-size = Vector3(1, 12, 24)
-material = SubResource("mat_panel")
-
-[node name="OuterPanel2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 24, -300)
-use_collision = true
-size = Vector3(1, 12, 24)
-material = SubResource("mat_panel")
-
-[node name="OuterPanel3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 20, -30)
-use_collision = true
-size = Vector3(1, 12, 24)
-material = SubResource("mat_panel")
-
-[node name="OuterPanel4" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 18, 120)
-use_collision = true
-size = Vector3(1, 12, 24)
-material = SubResource("mat_panel")
-
-[node name="OuterPanel5" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 26, 240)
-use_collision = true
-size = Vector3(1, 12, 24)
-material = SubResource("mat_panel")
-
-[node name="OuterPanel6" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 20, 360)
-use_collision = true
-size = Vector3(1, 12, 24)
-material = SubResource("mat_panel")
-
-[node name="DiagPanel1" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -10, 18, -390)
-use_collision = true
-size = Vector3(1, 14, 22)
-material = SubResource("mat_panel")
-
-[node name="DiagPanel2" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 10, 18, -275)
-use_collision = true
-size = Vector3(1, 14, 22)
-material = SubResource("mat_panel")
-
-[node name="DiagPanel3" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -10, 18, -140)
-use_collision = true
-size = Vector3(1, 14, 22)
-material = SubResource("mat_panel")
-
-[node name="DiagPanel4" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 10, 18, -5)
-use_collision = true
-size = Vector3(1, 14, 22)
-material = SubResource("mat_panel")
-
-[node name="DiagPanel5" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -10, 18, 110)
-use_collision = true
-size = Vector3(1, 14, 22)
-material = SubResource("mat_panel")
-
-[node name="DiagPanel6" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 10, 18, 245)
-use_collision = true
-size = Vector3(1, 14, 22)
-material = SubResource("mat_panel")
-
-[node name="DiagPanel7" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -10, 18, 330)
-use_collision = true
-size = Vector3(1, 14, 22)
-material = SubResource("mat_panel")
-
-[node name="DiagPanel8" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 10, 18, 415)
-use_collision = true
-size = Vector3(1, 14, 22)
-material = SubResource("mat_panel")
-
-[node name="Tower1" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 14, -370)
-use_collision = true
-size = Vector3(4, 28, 4)
-material = SubResource("mat_wall")
-
-[node name="Tower2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 14, -210)
-use_collision = true
-size = Vector3(4, 28, 4)
-material = SubResource("mat_wall")
-
-[node name="Tower3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 14, -30)
-use_collision = true
-size = Vector3(4, 28, 4)
-material = SubResource("mat_wall")
-
-[node name="Tower4" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 14, 130)
-use_collision = true
-size = Vector3(4, 28, 4)
-material = SubResource("mat_wall")
-
-[node name="Tower5" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 14, 260)
-use_collision = true
-size = Vector3(4, 28, 4)
-material = SubResource("mat_wall")
-
-[node name="Tower6" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 14, 420)
-use_collision = true
-size = Vector3(4, 28, 4)
-material = SubResource("mat_wall")
-
-[node name="Rib1" type="CSGBox3D" parent="."]
+[node name="Rib1" type="CSGBox3D" parent="." unique_id=104857831]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 4, -300)
 use_collision = true
 size = Vector3(10, 8, 2)
 material = SubResource("mat_fin")
 
-[node name="Rib2" type="CSGBox3D" parent="."]
+[node name="Rib2" type="CSGBox3D" parent="." unique_id=117627012]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 4, -70)
 use_collision = true
 size = Vector3(10, 8, 2)
 material = SubResource("mat_fin")
 
-[node name="Rib3" type="CSGBox3D" parent="."]
+[node name="Rib3" type="CSGBox3D" parent="." unique_id=456597384]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 4, 180)
 use_collision = true
 size = Vector3(10, 8, 2)
 material = SubResource("mat_fin")
 
-[node name="Rib4" type="CSGBox3D" parent="."]
+[node name="Rib4" type="CSGBox3D" parent="." unique_id=797145427]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 4, 300)
 use_collision = true
 size = Vector3(10, 8, 2)
 material = SubResource("mat_fin")
 
-[node name="SpinePanel1" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, -240)
-use_collision = true
-size = Vector3(1, 12, 18)
-material = SubResource("mat_panel")
-
-[node name="SpinePanel2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 0)
-use_collision = true
-size = Vector3(1, 12, 18)
-material = SubResource("mat_panel")
-
-[node name="SpinePanel3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 270)
-use_collision = true
-size = Vector3(1, 12, 18)
-material = SubResource("mat_panel")
-
-[node name="Platform1" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 24, -250)
-use_collision = true
-size = Vector3(12, 1, 12)
-material = SubResource("mat_plat")
-
-[node name="Platform2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 100)
-use_collision = true
-size = Vector3(12, 1, 12)
-material = SubResource("mat_plat")
-
-[node name="Platform3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 28, 350)
-use_collision = true
-size = Vector3(12, 1, 12)
-material = SubResource("mat_plat")
-
-[node name="LightPanel1" type="CSGBox3D" parent="."]
+[node name="LightPanel1" type="CSGBox3D" parent="." unique_id=1284510470]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, -400)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light1" type="OmniLight3D" parent="."]
+[node name="Light1" type="OmniLight3D" parent="." unique_id=391001413]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, -400)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel2" type="CSGBox3D" parent="."]
+[node name="LightPanel2" type="CSGBox3D" parent="." unique_id=1268489507]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, -320)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light2" type="OmniLight3D" parent="."]
+[node name="Light2" type="OmniLight3D" parent="." unique_id=966376347]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, -320)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel3" type="CSGBox3D" parent="."]
+[node name="LightPanel3" type="CSGBox3D" parent="." unique_id=2130544854]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, -240)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light3" type="OmniLight3D" parent="."]
+[node name="Light3" type="OmniLight3D" parent="." unique_id=878813811]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, -240)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel4" type="CSGBox3D" parent="."]
+[node name="LightPanel4" type="CSGBox3D" parent="." unique_id=771283041]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, -160)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light4" type="OmniLight3D" parent="."]
+[node name="Light4" type="OmniLight3D" parent="." unique_id=1087543376]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, -160)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel5" type="CSGBox3D" parent="."]
+[node name="LightPanel5" type="CSGBox3D" parent="." unique_id=929653399]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, -80)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light5" type="OmniLight3D" parent="."]
+[node name="Light5" type="OmniLight3D" parent="." unique_id=1503867389]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, -80)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel6" type="CSGBox3D" parent="."]
+[node name="LightPanel6" type="CSGBox3D" parent="." unique_id=50617655]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, 0)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light6" type="OmniLight3D" parent="."]
+[node name="Light6" type="OmniLight3D" parent="." unique_id=953963132]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, 0)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel7" type="CSGBox3D" parent="."]
+[node name="LightPanel7" type="CSGBox3D" parent="." unique_id=425599811]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, 80)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light7" type="OmniLight3D" parent="."]
+[node name="Light7" type="OmniLight3D" parent="." unique_id=2088621309]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, 80)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel8" type="CSGBox3D" parent="."]
+[node name="LightPanel8" type="CSGBox3D" parent="." unique_id=1158619550]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, 160)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light8" type="OmniLight3D" parent="."]
+[node name="Light8" type="OmniLight3D" parent="." unique_id=462812118]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, 160)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel9" type="CSGBox3D" parent="."]
+[node name="LightPanel9" type="CSGBox3D" parent="." unique_id=1091951709]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, 240)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light9" type="OmniLight3D" parent="."]
+[node name="Light9" type="OmniLight3D" parent="." unique_id=532720728]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, 240)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel10" type="CSGBox3D" parent="."]
+[node name="LightPanel10" type="CSGBox3D" parent="." unique_id=1166632991]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, 320)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light10" type="OmniLight3D" parent="."]
+[node name="Light10" type="OmniLight3D" parent="." unique_id=1571820254]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, 320)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LightPanel11" type="CSGBox3D" parent="."]
+[node name="LightPanel11" type="CSGBox3D" parent="." unique_id=1451211222]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.6, 400)
+cast_shadow = 0
 use_collision = true
 size = Vector3(6, 0.3, 6)
-cast_shadow = 0
 material = SubResource("mat_light")
 
-[node name="Light11" type="OmniLight3D" parent="."]
+[node name="Light11" type="OmniLight3D" parent="." unique_id=1729655483]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38, 400)
 light_energy = 0.8
 omni_range = 55.0
 
-[node name="LWedge1" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, -320)
+[node name="LWedge1" type="CSGPolygon3D" parent="." unique_id=1221284028]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, -325)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 3, 5, 0, 10)
-depth = 6.0
+polygon = PackedVector2Array(0, 0, 6, 10, 0, 20)
+depth = 40.0
 material = SubResource("mat_fin")
 
-[node name="LWedge2" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 8, -84)
+[node name="LWedge2" type="CSGPolygon3D" parent="." unique_id=309372134]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, -89)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 3, 5, 0, 10)
-depth = 6.0
+polygon = PackedVector2Array(0, 0, 6, 10, 0, 20)
+depth = 40.0
 material = SubResource("mat_fin")
 
-[node name="LWedge3" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, 180)
+[node name="LWedge3" type="CSGPolygon3D" parent="." unique_id=1506083607]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, 175)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 3, 5, 0, 10)
-depth = 6.0
+polygon = PackedVector2Array(0, 0, 6, 10, 0, 20)
+depth = 40.0
 material = SubResource("mat_fin")
 
-[node name="LWedge4" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 8, 376)
+[node name="LWedge4" type="CSGPolygon3D" parent="." unique_id=1757214520]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -40, 0, 371)
 use_collision = true
-polygon = PackedVector2Array(0, 0, 3, 5, 0, 10)
-depth = 6.0
+polygon = PackedVector2Array(0, 0, 6, 10, 0, 20)
+depth = 40.0
 material = SubResource("mat_fin")
 
-[node name="RWedge1" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 8, -236)
+[node name="RWedge1" type="CSGPolygon3D" parent="." unique_id=1409745098]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, -241)
 use_collision = true
-polygon = PackedVector2Array(0, 0, -3, 5, 0, 10)
-depth = 6.0
+polygon = PackedVector2Array(0, 0, -6, 10, 0, 20)
+depth = 40.0
 material = SubResource("mat_fin")
 
-[node name="RWedge2" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, -20)
+[node name="RWedge2" type="CSGPolygon3D" parent="." unique_id=913886514]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, -25)
 use_collision = true
-polygon = PackedVector2Array(0, 0, -3, 5, 0, 10)
-depth = 6.0
+polygon = PackedVector2Array(0, 0, -6, 10, 0, 20)
+depth = 40.0
 material = SubResource("mat_fin")
 
-[node name="RWedge3" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 8, 96)
+[node name="RWedge3" type="CSGPolygon3D" parent="." unique_id=266799894]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, 91)
 use_collision = true
-polygon = PackedVector2Array(0, 0, -3, 5, 0, 10)
-depth = 6.0
+polygon = PackedVector2Array(0, 0, -6, 10, 0, 20)
+depth = 40.0
 material = SubResource("mat_fin")
 
-[node name="RWedge4" type="CSGPolygon3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, 300)
+[node name="RWedge4" type="CSGPolygon3D" parent="." unique_id=1180131419]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 40, 0, 295)
 use_collision = true
-polygon = PackedVector2Array(0, 0, -3, 5, 0, 10)
-depth = 6.0
+polygon = PackedVector2Array(0, 0, -6, 10, 0, 20)
+depth = 40.0
 material = SubResource("mat_fin")
 
-[node name="Cover1" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 1.5, -424)
-use_collision = true
-size = Vector3(6, 3, 4)
-material = SubResource("mat_wall")
-
-[node name="Cover2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.25, -389)
-use_collision = true
-size = Vector3(8, 2.5, 1.5)
-material = SubResource("mat_wall")
-
-[node name="Cover3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 2.5, -349)
-use_collision = true
-size = Vector3(5, 5, 5)
-material = SubResource("mat_wall")
-
-[node name="Cover4" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 1.0, -313)
-use_collision = true
-size = Vector3(3, 2, 3)
-material = SubResource("mat_wall")
-
-[node name="Cover5" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 2.0, -270)
-use_collision = true
-size = Vector3(7, 4, 2)
-material = SubResource("mat_wall")
-
-[node name="Cover6" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 1.5, -236)
-use_collision = true
-size = Vector3(4, 3, 4)
-material = SubResource("mat_wall")
-
-[node name="Cover7" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1.5, -187)
-use_collision = true
-size = Vector3(6, 3, 4)
-material = SubResource("mat_wall")
-
-[node name="Cover8" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 1.25, -155)
-use_collision = true
-size = Vector3(8, 2.5, 1.5)
-material = SubResource("mat_wall")
-
-[node name="Cover9" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 2.5, -111)
-use_collision = true
-size = Vector3(5, 5, 5)
-material = SubResource("mat_wall")
-
-[node name="Cover10" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.0, -83)
-use_collision = true
-size = Vector3(3, 2, 3)
-material = SubResource("mat_wall")
-
-[node name="Cover11" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 2.0, -47)
-use_collision = true
-size = Vector3(7, 4, 2)
-material = SubResource("mat_wall")
-
-[node name="Cover12" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1.5, -9)
-use_collision = true
-size = Vector3(4, 3, 4)
-material = SubResource("mat_wall")
-
-[node name="Cover13" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 1.5, 29)
-use_collision = true
-size = Vector3(6, 3, 4)
-material = SubResource("mat_wall")
-
-[node name="Cover14" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 1.25, 70)
-use_collision = true
-size = Vector3(8, 2.5, 1.5)
-material = SubResource("mat_wall")
-
-[node name="Cover15" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 2.5, 117)
-use_collision = true
-size = Vector3(5, 5, 5)
-material = SubResource("mat_wall")
-
-[node name="Cover16" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 1.0, 145)
-use_collision = true
-size = Vector3(3, 2, 3)
-material = SubResource("mat_wall")
-
-[node name="Cover17" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2.0, 185)
-use_collision = true
-size = Vector3(7, 4, 2)
-material = SubResource("mat_wall")
-
-[node name="Cover18" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 1.5, 224)
-use_collision = true
-size = Vector3(4, 3, 4)
-material = SubResource("mat_wall")
-
-[node name="Cover19" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 1.5, 259)
-use_collision = true
-size = Vector3(6, 3, 4)
-material = SubResource("mat_wall")
-
-[node name="Cover20" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 1.25, 296)
-use_collision = true
-size = Vector3(8, 2.5, 1.5)
-material = SubResource("mat_wall")
-
-[node name="Cover21" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 2.5, 338)
-use_collision = true
-size = Vector3(5, 5, 5)
-material = SubResource("mat_wall")
-
-[node name="Cover22" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.0, 383)
-use_collision = true
-size = Vector3(3, 2, 3)
-material = SubResource("mat_wall")
-
-[node name="Cover23" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.0, 422)
-use_collision = true
-size = Vector3(7, 4, 2)
-material = SubResource("mat_wall")
-
-[node name="FloatWall1" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, 37, 18, -424)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall2" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, 34, 18, -409)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall3" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -10, 26, -392)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall4" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 36, 18, -370)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall5" type="CSGBox3D" parent="."]
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -21, 14, -360)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall6" type="CSGBox3D" parent="."]
-transform = Transform3D(1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, -21, 18, -334)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall7" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, -33, 14, -321)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall8" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, -17, 4, -302)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall9" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -29, 4, -289)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall10" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, -7, 4, -262)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall11" type="CSGBox3D" parent="."]
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 33, 14, -247)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall12" type="CSGBox3D" parent="."]
-transform = Transform3D(1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, -7, 7, -228)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall13" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, 8, 4, -210)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall14" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, -26, 22, -198)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall15" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, 27, 26, -183)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall16" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 7, 26, -163)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall17" type="CSGBox3D" parent="."]
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 5, 4, -139)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall18" type="CSGBox3D" parent="."]
-transform = Transform3D(1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, -26, 4, -126)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall19" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, 23, 4, -102)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall20" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, -36, 7, -94)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall21" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, 34, 22, -70)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall22" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 23, 18, -48)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall23" type="CSGBox3D" parent="."]
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -5, 22, -36)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall24" type="CSGBox3D" parent="."]
-transform = Transform3D(1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 15, 10, -17)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall25" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, -34, 26, -3)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall26" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, -20, 22, 15)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall27" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -37, 14, 44)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall28" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 32, 22, 58)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall29" type="CSGBox3D" parent="."]
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -8, 18, 71)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall30" type="CSGBox3D" parent="."]
-transform = Transform3D(1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, -18, 22, 92)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall31" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, -26, 14, 107)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall32" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, -35, 26, 134)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall33" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, 5, 7, 142)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall34" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 29, 18, 168)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall35" type="CSGBox3D" parent="."]
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -29, 7, 179)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall36" type="CSGBox3D" parent="."]
-transform = Transform3D(1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 33, 4, 206)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall37" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, 21, 10, 218)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall38" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, -29, 4, 233)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall39" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -11, 18, 253)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall40" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, 19, 14, 268)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall41" type="CSGBox3D" parent="."]
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 37, 18, 286)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall42" type="CSGBox3D" parent="."]
-transform = Transform3D(1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 24, 22, 304)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall43" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, 6, 26, 329)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall44" type="CSGBox3D" parent="."]
-transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, -6, 7, 340)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="FloatWall45" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, 0.57358, 0, 1, 0, -0.57358, 0, 0.81915, -6, 14, 363)
-use_collision = true
-size = Vector3(1, 5, 10)
-material = SubResource("mat_panel")
-
-[node name="FloatWall46" type="CSGBox3D" parent="."]
-transform = Transform3D(0.81915, 0, -0.57358, 0, 1, 0, 0.57358, 0, 0.81915, -26, 4, 375)
-use_collision = true
-size = Vector3(1, 6, 6)
-material = SubResource("mat_panel")
-
-[node name="FloatWall47" type="CSGBox3D" parent="."]
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -29, 18, 396)
-use_collision = true
-size = Vector3(1, 4, 12)
-material = SubResource("mat_panel")
-
-[node name="FloatWall48" type="CSGBox3D" parent="."]
-transform = Transform3D(1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, -6, 22, 416)
-use_collision = true
-size = Vector3(1, 4, 8)
-material = SubResource("mat_panel")
-
-[node name="Target1" parent="." instance=ExtResource("3_target")]
+[node name="Target1" parent="." unique_id=906870415 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -405)
 
-[node name="Target2" parent="." instance=ExtResource("3_target")]
+[node name="Target2" parent="." unique_id=396137093 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 20)
 
-[node name="Target3" parent="." instance=ExtResource("3_target")]
+[node name="Target3" parent="." unique_id=1536141551 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24.5, 100)
 
-[node name="Target4" parent="." instance=ExtResource("3_target")]
+[node name="Target4" parent="." unique_id=81868856 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -350)
 
-[node name="Target5" parent="." instance=ExtResource("3_target")]
+[node name="Target5" parent="." unique_id=957539298 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, -300)
 
-[node name="Target6" parent="." instance=ExtResource("3_target")]
+[node name="Target6" parent="." unique_id=1708191286 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -220)
 
-[node name="Target7" parent="." instance=ExtResource("3_target")]
+[node name="Target7" parent="." unique_id=1991364760 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -150)
 
-[node name="Target8" parent="." instance=ExtResource("3_target")]
+[node name="Target8" parent="." unique_id=224451027 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -80)
 
-[node name="Target9" parent="." instance=ExtResource("3_target")]
+[node name="Target9" parent="." unique_id=1155984315 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, -10)
 
-[node name="Target10" parent="." instance=ExtResource("3_target")]
+[node name="Target10" parent="." unique_id=1808498911 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0, 60)
 
-[node name="Target11" parent="." instance=ExtResource("3_target")]
+[node name="Target11" parent="." unique_id=1105037254 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 140)
 
-[node name="Target12" parent="." instance=ExtResource("3_target")]
+[node name="Target12" parent="." unique_id=971504340 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 210)
 
-[node name="Target13" parent="." instance=ExtResource("3_target")]
+[node name="Target13" parent="." unique_id=1970698521 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0, 280)
 
-[node name="Target14" parent="." instance=ExtResource("3_target")]
+[node name="Target14" parent="." unique_id=1541586260 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 360)
 
-[node name="Target15" parent="." instance=ExtResource("3_target")]
+[node name="Target15" parent="." unique_id=1634773897 instance=ExtResource("3_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 420)
 
-[node name="Target16" parent="." instance=ExtResource("3_target")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 24.5, -250)
-
-[node name="Target17" parent="." instance=ExtResource("3_target")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 28.5, 350)
-
-[node name="Player" parent="." instance=ExtResource("1_player")]
+[node name="Player" parent="." unique_id=814175777 instance=ExtResource("1_player")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 2.6, -430)
 
-[node name="HUD" parent="." instance=ExtResource("2_hud")]
+[node name="HUD" parent="." unique_id=2126556201 instance=ExtResource("2_hud")]

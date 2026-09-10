@@ -113,7 +113,7 @@ godot4 --path game -- --lobby <ip> --name <username>  # join a server
 
 - Does chained-short-runs feel emerge from the dismount reward?
 - Is curved-surface wallrun viable (orange slots' rounded caps)?
-- How far apart can platforms be before flow breaks (floor gaps, teal panels)?
+- How far apart can platforms be before flow breaks (the parkour track's gaps)?
 - How long should the corridor actually be?
 - Does the rail charge feel good to commit to? (freeze + no cancel)
 - Is the dual-rail stagger a usable rhythm instrument?

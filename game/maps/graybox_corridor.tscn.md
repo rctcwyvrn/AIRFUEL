@@ -14,9 +14,10 @@ per-peer bodies) — the project's main scene is the menu, not this map.
 
 - Root `GrayboxCorridor` (Node3D); instances `player.tscn` (at z = −430,
   y = 2.6, rotated 180° to face +Z), `hud.tscn`, and
-  17 `target.tscn` dummies (`Target1-17`): Target1
-  (0, 0, −405) down the spawn sightline, most scattered at ground level
-  every ~60–80 m across varied x, two on elevated platforms (Target16-17).
+  15 `target.tscn` dummies (`Target1-15`): Target1
+  (0, 0, −405) down the spawn sightline, the rest scattered at ground level
+  every ~60–80 m across varied x (Target16-17 were removed with the
+  elevated platforms they stood on, 2026-09-10).
 - Any replacement map must provide the same two instances and solid geometry
   with default collision layers — the player probes walls via ray queries
   against `collision_mask` default.
@@ -42,13 +43,18 @@ Color code:
 - **Roof lights** — `LightPanel1-11` (emissive 6×6 strips under the roof
   every 80 m) each paired with an `OmniLight3D` (energy 0.8, range 55).
 - **Tan wall wedges** — `LWedge1-4` / `RWedge1-4`, symmetric triangular
-  CSGPolygon3D kickers (6 m tall, 3 m peak jut at mid-run over a 10 m
-  footprint — a kite in plan view) flush against the walls at alternating
-  base heights 0 / 8 m. Both slanted faces are wallrunnable and nudge a
-  runner ~31° off the wall with a launch lip at the apex, so they read the
-  same approached from +z or −z (made symmetric 2026-09-10, Lily's call —
-  the old one-sided ramps only launched one way). Polygon local frame:
-  X = world X, Y = world Z, extrusion rises upward (basis maps −Z to +Y).
+  CSGPolygon3D kickers spanning the FULL wall height (floor to roof,
+  y 0-40; was 6 m at alternating bases until 2026-09-10, Lily's call),
+  6 m peak jut at mid-run over a 20 m footprint — a kite in plan view,
+  a vertical ridge in elevation (deepened from 3 m/10 m on 2026-09-10:
+  the shallow apex let wallrun tracking fold around it and killed the
+  launch). Both slanted faces sit at ~31° — rideable — and the ~62° apex
+  flip lands in the movement system's convex corner-launch band
+  (`wallrun_corner_dismount_deg`, see player.gd.md), so a runner crossing
+  the apex ejects with velocity intact from either approach direction
+  (rig-verified: 51 m/s carried off the lip). Polygon local frame:
+  X = world X, Y = world Z, extrusion rises upward (basis maps −Z to
+  +Y).
 - **Orange slots** — `BigSlot1-6` (r 6, 36 tall), `MidSlot1-7` (r 5,
   32 tall) at x = ±15, `CenterSlot1-5` (r 4, 40 tall) on the center line.
   Extruded obround columns (stadium profile: two 8-segment semicircular
@@ -58,16 +64,19 @@ Color code:
   test surfaces; the flat sides add straight wallrun lanes (replaced plain
   cylinders 2026-09-10, Lily's call). A couple of low Cover boxes merge
   into slot bases where footprints touch — intentional-looking, harmless.
-- **Teal panels** — `Panel1-15` alternate x = ∓18 every 60 m at heights
-  16/22/28, each 14 m tall (a chainable ladder line down the whole
-  corridor); `OuterPanel1-6` at x = ±28 add a wider second line.
-- **Purple platforms** — three elevated 12×12 pads at y 24–28 (down-dash /
-  vantage).
-- **Interior lane** (the 2×-widening fill): `Tower1-6` — 4×28×4 square
-  pillars, wallrunnable on all four faces; `DiagPanel1-8` — 14 m-tall
-  panels yawed ±35° so chains can cut diagonally across the lane; `Rib1-4` —
-  low 10×8×2 floor blocks to hop or wrap around (tan); `SpinePanel1-3` —
-  mid-height panels on the center line.
+- **Long slots** — `LongSlot1-6`: the thin variant (r 2.5, 36 tall,
+  60 m total — straight section 55 m), zigzagging down the outer lanes at
+  x = ±22 in the space the old panel lines occupied. Same obround
+  construction and material as the other slots. ~15 m of clear lane
+  between each and its wall.
+- **Grounded fill** — `Rib1-4` (low 10×8×2 floor blocks to hop or wrap
+  around, tan).
+- **Removed 2026-09-10** (Lily's look experiment — corridor stripped to
+  shell + kites + slots + ribs; revert via git if it reads wrong): teal
+  panel ladder lines, outer panels, purple platforms, diag/spine panels,
+  the two platform-top targets, and (Lily's own editor pass) the Tower
+  pillars and low Cover boxes. Note: duel cover near the spawn ends went
+  with the Covers — revisit before the next playtest round.
 
 Lighting: one DirectionalLight3D (shadow distance raised to 400 for the long
 corridor) + ProceduralSky environment with `glow_enabled` — glow is what

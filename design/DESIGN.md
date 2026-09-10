@@ -1238,6 +1238,8 @@ The full list of numbers that need values, gathered for convenience.
 - Down dash: cost, distance
 - Double jump / air strafe: cost, strength
 - Wallrun: max duration, speed accumulation curve
+- Wallrun corner-launch band (convex normal-jump angles that eject with
+  velocity kept — wall wedges — vs. curves and hairpins, which track)
 - Wallrun dismount: fuel granted, speed boost, both scaled to wall speed
 - Ramp persistence: grace window duration, decay rate
 - Airfuel: max capacity

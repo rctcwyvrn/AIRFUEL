@@ -19,6 +19,13 @@ the game runs.
   Ramp Persistence, Misc. Units: meters/seconds/degrees; costs and
   grants in fuel points; `dismount_fuel_per_speed` is fuel per (m/s above
   `min_wallrun_speed`).
+- Wallrun group includes the corner-launch band (2026-09-10):
+  `wallrun_corner_dismount_deg` (50) / `wallrun_corner_wrap_deg` (80) — a
+  convex per-tick normal jump inside [50°, 80°) ejects the runner with
+  velocity kept (wall-wedge apexes); below tracks as a curve, at/above
+  wraps as a hairpin. Chosen so the parkour track's 45° corner blends keep
+  wrapping (the shipped TAS tape depends on it) while the 62° wedge apexes
+  launch. See player.gd.md `_wallrun_move`.
 
 ## Implementation
 
