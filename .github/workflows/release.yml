@@ -107,10 +107,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/windows build/linux
-          godot --headless --path game --export-release "Windows Desktop" "$PWD/build/windows/airfuel.exe"
+          godot --headless --path game --export-release "Windows Desktop" "$PWD/build/windows/AIRFUEL.exe"
           godot --headless --path game --export-release "Linux" "$PWD/build/linux/airfuel.x86_64"
           # Exports log errors without always failing — verify the artifacts.
-          test -s build/windows/airfuel.exe
+          test -s build/windows/AIRFUEL.exe
           test -s build/linux/airfuel.x86_64
           test -s build/linux/airfuel.pck
 
