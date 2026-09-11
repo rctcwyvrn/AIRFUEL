@@ -3,7 +3,9 @@
 Records bot-vs-bot gameplay videos of Airfuel — no OBS, no window, no GPU
 needed. Godot's Movie Maker mode renders every frame offline under a virtual
 X display (`xvfb`), so output is deterministic and works on headless
-WSL2/NixOS; `ffmpeg` converts the raw MJPEG AVI to an H.264 MP4. All
+WSL2/NixOS; `ffmpeg` converts the raw MJPEG AVI to an H.264 MP4. Audio
+(game sounds + BGM, mixed offline by Movie Maker regardless of any real
+audio device) is carried through as AAC (added 2026-09-10). All
 dependencies are fetched via nix (`nix-shell -p xvfb-run ffmpeg` around the
 project's own `shell.nix` for `godot4`).
 

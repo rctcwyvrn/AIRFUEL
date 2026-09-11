@@ -82,7 +82,9 @@ fi
 grep -E "BOTMATCH: recording|frames at" "$LOG" || true
 
 echo "Encoding MP4..."
+# Movie Maker writes uncompressed PCM audio into the AVI (game sounds, BGM);
+# encode it as AAC rather than stripping it.
 nix-shell -p ffmpeg --run \
 	"ffmpeg -y -loglevel error -i '$AVI' -c:v libx264 -crf 20 -preset medium \
--pix_fmt yuv420p -an '$OUT'"
+-pix_fmt yuv420p -c:a aac -b:a 192k '$OUT'"
 echo "Done: $OUT"
