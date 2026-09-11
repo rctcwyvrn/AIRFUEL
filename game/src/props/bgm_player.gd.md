@@ -24,7 +24,10 @@ loads and stops naturally on any scene change back to the menu.
   `AudioStreamPlaybackWAV` (ObjectDB warning at exit), which would break
   the "verify runs are silent" convention.
 - Looping lives in the wav's import settings (`bgm.wav.import`,
-  `edit/loop_mode=1` forward), not in code.
+  `edit/loop_mode=2` = Forward), not in code. Careful: the importer's
+  enum is offset by one from `AudioStreamWAV.LoopMode` — importer value
+  1 is *Disabled*, not forward. Verify a change with a headless script
+  printing the loaded stream's `loop_mode` (must be 1, `LOOP_FORWARD`).
 
 ## Assertions
 

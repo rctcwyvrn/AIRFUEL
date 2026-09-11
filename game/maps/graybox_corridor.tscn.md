@@ -24,7 +24,12 @@ per-peer bodies) — the project's main scene is the menu, not this map.
   elevated platforms they stood on, 2026-09-10).
 - `Bgm` (AudioStreamPlayer, `src/props/bgm_player.gd`): combat background
   music — `res://sounds/bgm.wav` at −10 dB, forward-looped via its
-  `.import` (`edit/loop_mode=1`). The script (not the autoplay flag)
+  `.import` (`edit/loop_mode=2` — the importer enum is offset by one from
+  `AudioStreamWAV.LoopMode`: 0 is Detect From WAV, 1 is Disabled, 2 is
+  Forward; 1 shipped once and the BGM died 80 s into every match). The
+  loop skips the track's ~4 s fade-out tail (`edit/loop_end=3330050`,
+  75.5 s — full level, matching the head) instead of dipping to silence
+  at the seam. The script (not the autoplay flag)
   starts it so the headless server stays silent; the menu and parkour
   map have no BGM by design (Lily, 2026-09-10: "bgm for combat").
 - Any replacement map must provide the same two instances (plus a
