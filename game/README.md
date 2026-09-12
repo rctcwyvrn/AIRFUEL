@@ -135,8 +135,10 @@ inspector while the game runs for live tuning.
   probes for flat + curved walls), movement tuning resource
 - `src/player/movement/` — the movement definitions (Trellis-style pilot):
   one pure static function per file over plain `MoveSim` data, each with a
-  `.tr`-style spec doc; `player_movement.gd` is the facade/node boundary.
-  Regression gate: `tools/fingerprint.tscn` vs `tas/parkour.fingerprint`
+  `.tr`-style spec doc whose test blocks run headlessly
+  (`tools/spec_runner.tscn`). Regression gates: the spec runner (unit) and
+  `tools/fingerprint.tscn` vs `tas/parkour.fingerprint` (integration);
+  `player_movement.gd` is the facade/node boundary
 - `src/weapons/` — rail arm state machine, combat tuning, canister prop
 - `src/targets/` — self-respawning 2 HP practice dummy (orange head = lethal)
 - `src/hud/` — fuel bar, speed/state readout, charge bars, hitmarkers

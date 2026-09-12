@@ -25,8 +25,11 @@ movement code allowed to touch node state.
   lunge), `spend_fuel(p, amount) -> bool` (the body's `_spend`).
 - `probe_wall_at(p, dir, dist_scale) -> Dictionary` — the wall-probe
   **capability's node-bound implementation** (world raycast from body
-  center, rejects `|normal.y| > 0.4`); `_probe_of(p)` binds it into the
+  center, filtered by `is_wall_normal`); `_probe_of(p)` binds it into the
   `probe: Callable` the wallrun/attach definitions take.
+- `const WALL_NORMAL_MAX_Y := 0.4` + `is_wall_normal(n) -> bool` — the
+  shared wall-ish predicate (accepts `|n.y| <= 0.4`); also used by
+  `bot_controller.gd`'s own probes so the threshold can't drift.
 - One `const <Name>Def := preload("movement/<name>.gd")` per definition —
   the module's import list.
 
@@ -62,6 +65,8 @@ movement code allowed to touch node state.
   refill (§5.1); every spend goes through the spend_fuel definition.
 - Public signatures here keep the pre-pilot shapes (`p`-first) — callers
   and the sword-lunge dismount contract in PlayerCombat rely on them.
-- `wall_normal` stays near-horizontal: `probe_wall_at` rejects
-  `|normal.y| > 0.4` (the same 0.4 appears in `bot_controller.gd`'s own
-  probe — keep them in step).
+- `wall_normal` stays near-horizontal: `probe_wall_at` filters through
+  `is_wall_normal` (`WALL_NORMAL_MAX_Y = 0.4`), and the bot's probes call
+  the same predicate. The one intentional non-user: `apply_glide.gd`
+  keeps its strict-`<` literal (a pure definition must not reach back
+  into the facade, and its comparison direction differs at exactly 0.4).

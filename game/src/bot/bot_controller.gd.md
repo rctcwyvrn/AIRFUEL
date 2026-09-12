@@ -125,7 +125,8 @@ land — charge → tell → dodge stays winnable against it.
   validity instrument (Appendix A) and do not add a difficulty knob
   without Lily (single tuning set is her call).
 - Structural literals (allowed, same class as player.gd's probe
-  constants): the 8-ray refuel probe count, the 0.4 wall-normal
-  rejection (matches `_probe_wall_at`), the ±(PI/2−0.1) pitch clamp,
-  and the 0.5 strafe coin flip. Gameplay-feel numbers stay in
+  constants): the 8-ray refuel probe count, the ±(PI/2−0.1) pitch clamp,
+  and the 0.5 strafe coin flip. The wall-normal filter is no longer a
+  local literal — both probes call `PlayerMovement.is_wall_normal`
+  (shared threshold, can't drift). Gameplay-feel numbers stay in
   `BotConfig`.

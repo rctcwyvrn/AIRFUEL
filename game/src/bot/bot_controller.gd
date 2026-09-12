@@ -387,7 +387,7 @@ func _side_wall_dist(side: float) -> float:
 		[body.get_rid()]
 	)
 	var hit := space.intersect_ray(params)
-	if hit.is_empty() or absf(hit.normal.y) > 0.4:
+	if hit.is_empty() or not PlayerMovement.is_wall_normal(hit.normal):
 		return INF
 	return body.global_position.distance_to(hit.position)
 
@@ -471,7 +471,7 @@ func _pick_refuel_wall() -> void:
 			[body.get_rid()]
 		)
 		var hit := space.intersect_ray(params)
-		if hit.is_empty() or absf(hit.normal.y) > 0.4:
+		if hit.is_empty() or not PlayerMovement.is_wall_normal(hit.normal):
 			continue
 		var d: float = body.global_position.distance_to(hit.position)
 		if d < best_d:

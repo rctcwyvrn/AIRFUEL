@@ -93,8 +93,19 @@ static func wish_dir(p: CharacterBody3D) -> Vector3:
 	return WishDirDef.wish_dir(p.cmd_move, p.global_transform.basis)
 
 
+## Legal wallrun normals are near-horizontal. Shared with the bot's own
+## probes (bot_controller.gd) so the threshold can't drift. (apply_glide.gd
+## keeps its strict-< literal: a pure definition must not reach back into
+## this facade, and its comparison direction differs at exactly 0.4.)
+const WALL_NORMAL_MAX_Y := 0.4
+
+
+static func is_wall_normal(n: Vector3) -> bool:
+	return absf(n.y) <= WALL_NORMAL_MAX_Y
+
+
 ## The wall-probe capability's node-bound implementation: a short world
-## raycast from the body center; wall-ish surfaces only (|normal.y| <= 0.4).
+## raycast from the body center; wall-ish surfaces only (is_wall_normal).
 static func probe_wall_at(p: CharacterBody3D, dir: Vector3, dist_scale := 1.0) -> Dictionary:
 	var space := p.get_world_3d().direct_space_state
 	var params := PhysicsRayQueryParameters3D.create(
@@ -104,7 +115,7 @@ static func probe_wall_at(p: CharacterBody3D, dir: Vector3, dist_scale := 1.0) -
 		[p.get_rid()]
 	)
 	var hit := space.intersect_ray(params)
-	if hit.is_empty() or absf(hit.normal.y) > 0.4:
+	if hit.is_empty() or not is_wall_normal(hit.normal):
 		return {}
 	return hit
 

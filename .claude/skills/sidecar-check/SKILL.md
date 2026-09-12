@@ -43,9 +43,10 @@ lists all pairs. Exit 1 means structural problems exist.
 - **`requires`/`ensures`** — each labelled clause must hold in the code
   (treat like Assertions: code-violates-spec is a finding for the user,
   not a silent edit).
-- **`test` blocks** — re-derive each case's expected values from the code
-  and the default `default_tuning.tres` numbers; a wrong expected value
-  is drift. (No runner exists yet — these are checked by reading.)
+- **`test` blocks** — run them: `godot4 --headless --path game
+  res://tools/spec_runner.tscn` (exit 0 = green; cfg is SCHEMA defaults
+  from `movement_config.gd`, not `default_tuning.tres`). A failing case
+  is drift in whichever side changed last.
 - **Prose + `## Implementation`** — same truthfulness bar as
   Function/Implementation below.
 

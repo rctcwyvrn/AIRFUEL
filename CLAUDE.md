@@ -58,15 +58,23 @@ pilot — currently `game/src/player/movement/`, one public static function
 or data type per file, pure over plain data): YAML frontmatter (`name:`),
 prose spec, a ` ```gd-sig` (or ` ```gd-type`) block, labelled
 ` ```requires`/` ```ensures` clauses, named ` ```test` blocks
-(`(args) => outcome`, `with` fixture lines — aspirational until a runner
-exists, but kept exact), and an `## Implementation` section. The format
-follows `~/code/trellis` `docs/tr-grammar.md` §3 where GDScript allows.
-Node-facing shells, facades, scenes, and tools keep the four-section
-format. Movement changes must keep the TAS trajectory fingerprint
-bit-identical: run `godot4 --headless --path game
-res://tools/fingerprint.tscn` and compare against
-`game/tas/parkour.fingerprint` (re-baseline only on a deliberate behavior
-change, same machine only).
+(`(args) => outcome`, `with` fixture lines), and an `## Implementation`
+section. The format follows `~/code/trellis` `docs/tr-grammar.md` §3
+where GDScript allows. Node-facing shells, facades, scenes, and tools
+keep the four-section format.
+
+Two movement gates, both headless (run after any movement change):
+
+```sh
+godot4 --headless --path game res://tools/spec_runner.tscn  # spec tests, exit 0
+godot4 --headless --path game res://tools/fingerprint.tscn  # vs game/tas/parkour.fingerprint
+```
+
+The spec runner executes the test blocks (fixtures per its sidecar; cfg =
+schema defaults, not default_tuning). The fingerprint must stay
+bit-identical to `game/tas/parkour.fingerprint` — re-baseline only on a
+deliberate behavior change (same machine only). New definition files must
+be registered in `tools/spec_runner.gd`'s `DEFS` table.
 
 **When you change a Godot file, update its sidecar in the same change.** When
 you create a Godot file, create its sidecar. A stale sidecar is a bug.
