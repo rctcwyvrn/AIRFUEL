@@ -88,5 +88,10 @@ check, loadout visuals, and the per-frame weapon viewmodel glow.
 - The cooldown glow is first-person viewmodel feedback ONLY — enemy
   puppet shoulder blocks show charge (the §8.1 tell) and must not gain
   a cooldown readout without a design decision.
-- Params stay typed `CharacterBody3D`; enum access stays dynamic
-  (`p.NetRole.*` / `p.MoveState.*`).
+- Params stay typed `CharacterBody3D`; enum access stays dynamic for
+  player enums (`p.NetRole.*`) and via the global `MoveSim.MoveState`
+  for move state (the enum moved into MoveSim in the Trellis-style
+  pilot). Movement state reads/writes go through `p.sim`
+  (`move_locked`, `state`, `wall_rearm_timer`, `ramp_grace_timer`) —
+  and the lunge launch writes `p.sim.velocity`, never the body's
+  `velocity` mirror.

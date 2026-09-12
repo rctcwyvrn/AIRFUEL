@@ -32,8 +32,12 @@ land — charge → tell → dodge stays winnable against it.
 - Reads from the opponent only what a human perceives: `global_position`
   / `camera.global_position` (staleness via `aim_lag`), `arm_types` +
   `display_arm_progress(i)` (charge tell — globally warned, §15.2),
-  `move_locked` (the visible charge freeze), `horizontal_speed()`,
+  `sim.move_locked` (the visible charge freeze), `horizontal_speed()`,
   `combat.charge_time`. Never the opponent's `cmd_*` or fuel.
+- Own-body movement reads go through the body's `sim` (`MoveSim`, since
+  the Trellis-style pilot): `sim.fuel`, `sim.state` (vs
+  `MoveSim.MoveState.*`), `sim.wallrun_time`, `sim.double_jump_timer`,
+  `sim.dash_cooldown_timer`, `sim.move_locked`.
 
 ## Implementation
 

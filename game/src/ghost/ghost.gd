@@ -119,8 +119,9 @@ func _physics_process(delta: float) -> void:
 	stall += delta
 	if stall > 8.0:
 		body.global_position = waypoints[maxi(idx - 1, 0)]
+		body.sim.velocity = Vector3.ZERO
 		body.velocity = Vector3.ZERO
-		body.fuel = body.config.fuel_max
+		body.sim.fuel = body.config.fuel_max
 		stall = 0.0
 		return
 
@@ -143,5 +144,10 @@ func _physics_process(delta: float) -> void:
 		body.cmd_jump = true  # climb: double jump whenever rise is fading
 	# dashes are the fuel hogs: spend only with a deep tank so climbs
 	# always have double-jump budget left
-	if hspeed < 26.0 and to.y > -3.0 and body.fuel > 80.0 and body.dash_cooldown_timer == 0.0:
+	if (
+		hspeed < 26.0
+		and to.y > -3.0
+		and body.sim.fuel > 80.0
+		and body.sim.dash_cooldown_timer == 0.0
+	):
 		body.cmd_dash = true

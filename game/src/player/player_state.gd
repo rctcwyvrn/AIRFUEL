@@ -72,33 +72,34 @@ static func capture(p: CharacterBody3D) -> PackedFloat32Array:
 	var s := PackedFloat32Array()
 	s.resize(SIZE)
 	var pos: Vector3 = p.global_position
+	var sim: MoveSim = p.sim
 	s[0] = pos.x
 	s[1] = pos.y
 	s[2] = pos.z
-	s[3] = p.velocity.x
-	s[4] = p.velocity.y
-	s[5] = p.velocity.z
-	s[6] = p.fuel
-	s[7] = float(p.state)
-	s[8] = p.wall_normal.x
-	s[9] = p.wall_normal.y
-	s[10] = p.wall_normal.z
-	s[11] = p.wall_speed
-	s[12] = p.wallrun_time
-	s[13] = p.last_wall_normal.x
-	s[14] = p.last_wall_normal.y
-	s[15] = p.last_wall_normal.z
-	s[16] = p.wall_rearm_timer
-	s[17] = p.ramp_grace_timer
-	s[18] = p.dash_cooldown_timer
-	s[19] = p.double_jump_timer
-	s[20] = p.wall_coyote_timer
-	s[21] = p.coyote_wall_normal.x
-	s[22] = p.coyote_wall_normal.y
-	s[23] = p.coyote_wall_normal.z
-	s[24] = p.coyote_wall_speed
-	s[25] = p.ground_coyote_timer
-	s[26] = p.jump_buffer_timer
+	s[3] = sim.velocity.x
+	s[4] = sim.velocity.y
+	s[5] = sim.velocity.z
+	s[6] = sim.fuel
+	s[7] = float(sim.state)
+	s[8] = sim.wall_normal.x
+	s[9] = sim.wall_normal.y
+	s[10] = sim.wall_normal.z
+	s[11] = sim.wall_speed
+	s[12] = sim.wallrun_time
+	s[13] = sim.last_wall_normal.x
+	s[14] = sim.last_wall_normal.y
+	s[15] = sim.last_wall_normal.z
+	s[16] = sim.wall_rearm_timer
+	s[17] = sim.ramp_grace_timer
+	s[18] = sim.dash_cooldown_timer
+	s[19] = sim.double_jump_timer
+	s[20] = sim.wall_coyote_timer
+	s[21] = sim.coyote_wall_normal.x
+	s[22] = sim.coyote_wall_normal.y
+	s[23] = sim.coyote_wall_normal.z
+	s[24] = sim.coyote_wall_speed
+	s[25] = sim.ground_coyote_timer
+	s[26] = sim.jump_buffer_timer
 	s[27] = p.countdown
 	s[28] = float(p.hp)
 	s[29] = p.shot_gap_timer
@@ -118,23 +119,25 @@ static func capture(p: CharacterBody3D) -> PackedFloat32Array:
 
 
 static func restore(p: CharacterBody3D, s: PackedFloat32Array) -> void:
+	var sim: MoveSim = p.sim
 	p.global_position = Vector3(s[0], s[1], s[2])
-	p.velocity = Vector3(s[3], s[4], s[5])
-	p.fuel = s[6]
-	p.state = int(s[7])
-	p.wall_normal = Vector3(s[8], s[9], s[10])
-	p.wall_speed = s[11]
-	p.wallrun_time = s[12]
-	p.last_wall_normal = Vector3(s[13], s[14], s[15])
-	p.wall_rearm_timer = s[16]
-	p.ramp_grace_timer = s[17]
-	p.dash_cooldown_timer = s[18]
-	p.double_jump_timer = s[19]
-	p.wall_coyote_timer = s[20]
-	p.coyote_wall_normal = Vector3(s[21], s[22], s[23])
-	p.coyote_wall_speed = s[24]
-	p.ground_coyote_timer = s[25]
-	p.jump_buffer_timer = s[26]
+	sim.velocity = Vector3(s[3], s[4], s[5])
+	p.velocity = sim.velocity  # keep the body mirror in step
+	sim.fuel = s[6]
+	sim.state = int(s[7]) as MoveSim.MoveState
+	sim.wall_normal = Vector3(s[8], s[9], s[10])
+	sim.wall_speed = s[11]
+	sim.wallrun_time = s[12]
+	sim.last_wall_normal = Vector3(s[13], s[14], s[15])
+	sim.wall_rearm_timer = s[16]
+	sim.ramp_grace_timer = s[17]
+	sim.dash_cooldown_timer = s[18]
+	sim.double_jump_timer = s[19]
+	sim.wall_coyote_timer = s[20]
+	sim.coyote_wall_normal = Vector3(s[21], s[22], s[23])
+	sim.coyote_wall_speed = s[24]
+	sim.ground_coyote_timer = s[25]
+	sim.jump_buffer_timer = s[26]
 	p.countdown = s[27]
 	p.hp = int(s[28])
 	p.shot_gap_timer = s[29]
@@ -150,7 +153,7 @@ static func restore(p: CharacterBody3D, s: PackedFloat32Array) -> void:
 	p.arm_right.charge = s[39]
 	p.arm_right.cooldown = s[40]
 	_restore_pending(p, int(s[41]))
-	p.move_locked = p.arm_left.is_locking() or p.arm_right.is_locking()
+	sim.move_locked = p.arm_left.is_locking() or p.arm_right.is_locking()
 
 
 ## Fields that must match for a client prediction to stand. Position/velocity

@@ -6,9 +6,18 @@ description: Verify every Godot file's sidecar doc (<file>.md) is present and co
 # sidecar-check
 
 Confirms the sidecar-doc convention (see repo `CLAUDE.md`): every Godot file
-in `game/` is paired with `<filename>.md` containing four sections —
-Function, Interface, Implementation, Assertions — and those sections are
-**true**, not just present.
+in `game/` is paired with `<filename>.md`, and its content is **true**, not
+just present. Two sidecar formats exist:
+
+- **Four-section** (the default): Function, Interface, Implementation,
+  Assertions. Used by node scripts, scenes, resources, tools, and facades.
+- **`.tr`-style definition spec** (the Trellis-style pilot,
+  `game/src/player/movement/`): YAML frontmatter with `name:`, prose, a
+  ` ```gd-sig` block, optional ` ```requires`/` ```ensures` labelled
+  clauses, named ` ```test` blocks, and an `## Implementation` section.
+  Detected by the frontmatter + a `gd-sig` (or `gd-type`) fence. Used by
+  per-definition files (one public static function or one data type per
+  file).
 
 ## Procedure
 
@@ -27,7 +36,20 @@ lists all pairs. Exit 1 means structural problems exist.
 
 ### 3. Verify each pair (read both files, compare claim-by-claim)
 
-The sidecar must have all four sections. Then per section:
+**`.tr`-style spec docs** verify by their own parts:
+
+- **`gd-sig`** — must match the actual static function's name, parameter
+  names/types/order, and return type (for `gd-type`: the actual fields).
+- **`requires`/`ensures`** — each labelled clause must hold in the code
+  (treat like Assertions: code-violates-spec is a finding for the user,
+  not a silent edit).
+- **`test` blocks** — re-derive each case's expected values from the code
+  and the default `default_tuning.tres` numbers; a wrong expected value
+  is drift. (No runner exists yet — these are checked by reading.)
+- **Prose + `## Implementation`** — same truthfulness bar as
+  Function/Implementation below.
+
+**Four-section sidecars** must have all four sections. Then per section:
 
 - **Interface** — every claim must be verifiable in the file: `class_name`,
   exports and their types, public fields/methods other files rely on, node

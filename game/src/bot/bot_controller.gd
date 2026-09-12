@@ -98,12 +98,12 @@ func _think() -> void:
 	want_move_dash = randf() < bot.move_dash_chance
 	noise_yaw_target = deg_to_rad(randfn(0.0, bot.aim_noise_deg))
 	noise_pitch_target = deg_to_rad(randfn(0.0, bot.aim_noise_deg))
-	if intent == Intent.ENGAGE and body.fuel < bot.refuel_enter:
+	if intent == Intent.ENGAGE and body.sim.fuel < bot.refuel_enter:
 		intent = Intent.REFUEL
 		has_refuel_target = false
-	elif intent == Intent.REFUEL and body.fuel >= bot.refuel_exit:
+	elif intent == Intent.REFUEL and body.sim.fuel >= bot.refuel_exit:
 		intent = Intent.ENGAGE
-	if intent == Intent.REFUEL and body.state != AirfuelPlayer.MoveState.WALLRUN:
+	if intent == Intent.REFUEL and body.sim.state != MoveSim.MoveState.WALLRUN:
 		_pick_refuel_wall()
 
 
@@ -204,7 +204,11 @@ func _try_dash() -> void:
 	# Mechanical scarcity degrades a rolled dash to the strafe juke — distinct
 	# from the deliberate no-dodge roll, and the second reason staggered
 	# dual-rail lands (the first dodge's cooldown is often still running).
-	if body.move_locked or body.dash_cooldown_timer > 0.0 or body.fuel < body.config.air_dash_cost:
+	if (
+		body.sim.move_locked
+		or body.sim.dash_cooldown_timer > 0.0
+		or body.sim.fuel < body.config.air_dash_cost
+	):
 		return
 	var side := strafe_dir
 	if _dash_blocked(side):
@@ -329,25 +333,25 @@ func _engage_move(dist: float, delta: float) -> void:
 ## owed, and everything fueled sits above air_fuel_floor so the REFUEL
 ## intent still has something to work with.
 func _air_habits() -> void:
-	if body.state == AirfuelPlayer.MoveState.WALLRUN:
-		if body.wallrun_time >= bot.engage_wall_ride_time:
+	if body.sim.state == MoveSim.MoveState.WALLRUN:
+		if body.sim.wallrun_time >= bot.engage_wall_ride_time:
 			body.cmd_jump = true  # dismount: fuel + speed, back to the air
 		return
 	if body.is_on_floor():
 		body.cmd_jump = true  # never linger on the ground
 		return
 	if (
-		body.fuel > bot.air_fuel_floor
+		body.sim.fuel > bot.air_fuel_floor
 		and body.velocity.y < -bot.double_jump_fall_speed
-		and body.double_jump_timer == 0.0
+		and body.sim.double_jump_timer == 0.0
 	):
 		body.cmd_jump = true
 	# Movement dashes are the LUXURY spend (higher floor than double
 	# jumps): wallrun dismounts are the income, dashes only ride surplus.
 	if (
 		want_move_dash
-		and body.fuel > bot.dash_fuel_floor
-		and body.dash_cooldown_timer == 0.0
+		and body.sim.fuel > bot.dash_fuel_floor
+		and body.sim.dash_cooldown_timer == 0.0
 		and not _dodge_dash_pending()
 		and prev_charge[0] <= 0.0
 		and prev_charge[1] <= 0.0
@@ -362,7 +366,7 @@ func _air_habits() -> void:
 ## mid-fight, long before the last-resort REFUEL intent triggers. With a
 ## full tank the side is random.
 func _pick_strafe_dir() -> float:
-	if body.fuel < bot.wall_seek_fuel:
+	if body.sim.fuel < bot.wall_seek_fuel:
 		var left := _side_wall_dist(-1.0)
 		var right := _side_wall_dist(1.0)
 		if left < INF or right < INF:
@@ -427,14 +431,14 @@ func _try_rail(index: int, aimed: bool) -> void:
 ## gap-closer beyond its band (that loadout's design identity, §8.3); a
 ## rail+sword bot never lunges as traversal.
 func _try_sword(index: int, dist: float, aimed: bool, gap_arm: bool) -> void:
-	if not aimed or body.move_locked or body.state == AirfuelPlayer.MoveState.WALLRUN:
+	if not aimed or body.sim.move_locked or body.sim.state == MoveSim.MoveState.WALLRUN:
 		return
 	if body.sword_cd[index] > 0.0:
 		return
-	if body.fuel < body.combat.sword_lunge_cost + bot.sword_fuel_reserve:
+	if body.sim.fuel < body.combat.sword_lunge_cost + bot.sword_fuel_reserve:
 		return
 	var committed := dist <= body.combat.sword_hit_range * bot.sword_commit_factor
-	if dist <= bot.sword_max_range and (opponent.move_locked or committed):
+	if dist <= bot.sword_max_range and (opponent.sim.move_locked or committed):
 		_press_fire(index)
 		return
 	if gap_arm and dist > bot.dual_sword_range_max:
@@ -486,9 +490,9 @@ func _pick_refuel_wall() -> void:
 
 
 func _refuel_move(delta: float) -> void:
-	if body.state == AirfuelPlayer.MoveState.WALLRUN:
+	if body.sim.state == MoveSim.MoveState.WALLRUN:
 		body.cmd_move = Vector2(0.0, -1.0)
-		if body.wallrun_time >= bot.refuel_ride_time:
+		if body.sim.wallrun_time >= bot.refuel_ride_time:
 			body.cmd_jump = true  # jump dismount: fuel grant + speed boost
 		return
 	if not has_refuel_target:

@@ -36,10 +36,10 @@ within `combat.sword_warning_range`, pulsing), and — via
   `bot_controlled` (offline: you, never the TAS ghost or the practice
   bot; networked: yours, not a remote puppet), lazily in `_process`,
   re-resolving if it's freed. Shows `player.hp` in the state line.
-- Reads only public player surface: `fuel`, `config.fuel_max`,
-  `ramp_grace_timer`, `horizontal_speed()`, `state_name()`,
+- Reads only public player surface: `sim.fuel`, `config.fuel_max`,
+  `sim.ramp_grace_timer`, `horizontal_speed()`, `state_name()`,
   `arm_progress_left/right()` (rail charge, or sword cooldown-readiness),
-  `move_locked`, `loadout_name()`, `hp`, `combat.hp_max`,
+  `sim.move_locked`, `loadout_name()`, `hp`, `combat.hp_max`,
   `combat.sword_warning_range`, `run_time`, `run_finished`, `countdown`,
   `recording`; on enemy bodies: `arm_types`,
   `display_arm_progress(i)`, `global_position`. Connects to `shot_fired`

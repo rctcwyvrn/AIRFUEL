@@ -92,12 +92,12 @@ func _process(_delta: float) -> void:
 		map_prism.track = player
 		_build_hp_pips(player.combat.hp_max)
 	fuel_bar.max_value = player.config.fuel_max
-	fuel_bar.value = player.fuel
-	fuel_label.text = "AIRFUEL %d" % roundi(player.fuel)
+	fuel_bar.value = player.sim.fuel
+	fuel_label.text = "AIRFUEL %d" % roundi(player.sim.fuel)
 	speed_label.text = "%d m/s" % roundi(player.horizontal_speed())
 	var extra := ""
-	if player.ramp_grace_timer > 0.0:
-		extra = "   RAMP %.1f" % player.ramp_grace_timer
+	if player.sim.ramp_grace_timer > 0.0:
+		extra = "   RAMP %.1f" % player.sim.ramp_grace_timer
 	if get_tree().get_first_node_in_group("finish") != null:
 		timer_label.visible = true
 		var t := player.run_time
@@ -119,7 +119,7 @@ func _process(_delta: float) -> void:
 	state_label.text = "%sHP %d   %s%s" % [rec, player.hp, player.state_name(), extra]
 	charge_l.value = player.arm_progress_left()
 	charge_r.value = player.arm_progress_right()
-	lock_label.visible = player.move_locked
+	lock_label.visible = player.sim.move_locked
 	if hit_timer > 0.0:
 		hit_timer -= _delta
 		if hit_timer <= 0.0:

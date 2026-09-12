@@ -44,7 +44,7 @@ you whenever a Godot file changes.
 it** (`player.gd` → `player.gd.md`, `hud.tscn` → `hud.tscn.md`). This covers
 `.gd`, `.tscn`, `.tres`, and `project.godot`.
 
-Each sidecar has four sections:
+The default sidecar has four sections:
 
 - **Function** — what the file is for, in terms of the design doc.
 - **Interface** — what the rest of the project may rely on: exports, public
@@ -52,6 +52,21 @@ Each sidecar has four sections:
 - **Implementation** — how it works; the non-obvious decisions and their why.
 - **Assertions** — invariants that must survive any edit. Treat these as a
   checklist before and after changing the paired file.
+
+**Definition files use a `.tr`-style spec instead** (the Trellis-style
+pilot — currently `game/src/player/movement/`, one public static function
+or data type per file, pure over plain data): YAML frontmatter (`name:`),
+prose spec, a ` ```gd-sig` (or ` ```gd-type`) block, labelled
+` ```requires`/` ```ensures` clauses, named ` ```test` blocks
+(`(args) => outcome`, `with` fixture lines — aspirational until a runner
+exists, but kept exact), and an `## Implementation` section. The format
+follows `~/code/trellis` `docs/tr-grammar.md` §3 where GDScript allows.
+Node-facing shells, facades, scenes, and tools keep the four-section
+format. Movement changes must keep the TAS trajectory fingerprint
+bit-identical: run `godot4 --headless --path game
+res://tools/fingerprint.tscn` and compare against
+`game/tas/parkour.fingerprint` (re-baseline only on a deliberate behavior
+change, same machine only).
 
 **When you change a Godot file, update its sidecar in the same change.** When
 you create a Godot file, create its sidecar. A stale sidecar is a bug.

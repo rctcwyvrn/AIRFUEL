@@ -39,8 +39,10 @@ hold-W, jump on floor when the line rises or speed drops, double-jump on
 fading climbs, dash only below 26 m/s with fuel to spare. A waypoint
 counts as reached when close OR passed (behind while near) — orbiting was
 the classic failure. 8 s without progress snaps the body back onto the
-line at the previous waypoint (velocity zeroed, tank refilled) — a splice,
-not a full-track restart.
+line at the previous waypoint (velocity zeroed — `sim.velocity` plus the
+body mirror — and the tank refilled via `sim.fuel`) — a splice, not a
+full-track restart. Movement-state reads go through `body.sim` since the
+Trellis-style pilot.
 Fuel is honest: the controller never refuels, so it runs dry and slows —
 a wallrun behavior would fix that (Step 3 bot territory).
 

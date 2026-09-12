@@ -36,21 +36,21 @@ static func trigger_arm(p: CharacterBody3D, index: int) -> void:
 		return
 	# Sword lunge (DESIGN.md 8.2): movement ability that is also the kill.
 	# Cheaper per meter and longer than a dash, per-arm cooldown, no freeze.
-	if p.move_locked:
+	if p.sim.move_locked:
 		return
 	if p.sword_cd[index] > 0.0 or not p._spend(p.combat.sword_lunge_cost):
 		return
-	if p.state == p.MoveState.WALLRUN:
+	if p.sim.state == MoveSim.MoveState.WALLRUN:
 		# Lunging off a wall is a real dismount, same as dashing off (fuel
 		# grant + the longer anti-pogo rearm); the lunge velocity below is
 		# the launch — it replaces the dismount boost entirely.
 		PlayerMovement.dismount(p, true)
-		p.wall_rearm_timer = p.config.dash_wall_rearm_time
+		p.sim.wall_rearm_timer = p.config.dash_wall_rearm_time
 	p.sword_cd[index] = p.combat.sword_lunge_cooldown
 	p.sword_active = p.combat.sword_active_time
 	p.sword_side = "L" if index == 0 else "R"
-	p.velocity = -p.camera.global_transform.basis.z * p.combat.sword_lunge_speed
-	p.ramp_grace_timer = p.config.ramp_grace_window
+	p.sim.velocity = -p.camera.global_transform.basis.z * p.combat.sword_lunge_speed
+	p.sim.ramp_grace_timer = p.config.ramp_grace_window
 	if p.replaying:
 		return
 	var vm: MeshInstance3D = p.vm_left if index == 0 else p.vm_right

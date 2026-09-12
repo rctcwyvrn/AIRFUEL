@@ -13,8 +13,6 @@ extends CharacterBody3D
 ## PlayerCombat (§7/§8 arms + weapon visuals), PlayerRecorder (TAS tapes),
 ## plus the existing PlayerState (codec) and PlayerFx (one-shot cosmetics).
 
-enum MoveState { GROUNDED, AIRBORNE, WALLRUN }
-
 ## Who simulates this body, and from what input:
 ## LOCAL     — authoritative + local human input (offline solo, LAN host's own
 ##             body, TAS ghosts via ghost_controlled).
@@ -48,28 +46,15 @@ var role := NetRole.LOCAL
 @onready var puppet_arm_l: MeshInstance3D = $PuppetArmL
 @onready var puppet_arm_r: MeshInstance3D = $PuppetArmR
 
-var state := MoveState.AIRBORNE
-var fuel := 0.0
-
-var wall_normal := Vector3.ZERO
-var wall_speed := 0.0
-var wallrun_time := 0.0
-var last_wall_normal := Vector3.ZERO
-var wall_rearm_timer := 0.0
-
-var ramp_grace_timer := 0.0
-var dash_cooldown_timer := 0.0
-var double_jump_timer := 0.0
-var wall_coyote_timer := 0.0
-var coyote_wall_normal := Vector3.ZERO
-var coyote_wall_speed := 0.0
-var ground_coyote_timer := 0.0
-var jump_buffer_timer := 0.0
+# The movement simulation state, as plain data (Trellis-style pilot): the
+# movement definitions under movement/ read and write ONLY this. The body's
+# own `velocity` is a mirror synced around move_and_slide() and for
+# rendering/net reads — gameplay code writes sim.velocity.
+var sim := MoveSim.new()
 
 var base_fov := 100.0
 var spawn_transform: Transform3D
 
-var move_locked := false
 var pending_arms: Array[RailArm] = []
 var shot_gap_timer := 0.0
 
@@ -129,7 +114,7 @@ var _trails: PlayerTrails
 
 
 func _ready() -> void:
-	fuel = config.fuel_max
+	sim.fuel = config.fuel_max
 	hp = combat.hp_max
 	spawn_transform = global_transform
 	_net_target_pos = global_position
@@ -270,55 +255,49 @@ func _simulate(delta: float) -> void:
 		# 3-2-1 after any reset: frozen in place (look around freely); the
 		# run clock, tape recording, and ghost playback all wait for GO
 		countdown -= delta
+		sim.velocity = Vector3.ZERO
 		velocity = Vector3.ZERO
 		return
 	if not run_finished:
 		run_time += delta
 	shot_gap_timer = maxf(0.0, shot_gap_timer - delta)
-	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
-	double_jump_timer = maxf(0.0, double_jump_timer - delta)
-	wall_rearm_timer = maxf(0.0, wall_rearm_timer - delta)
-	wall_coyote_timer = maxf(0.0, wall_coyote_timer - delta)
-	ground_coyote_timer = maxf(0.0, ground_coyote_timer - delta)
-	jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
+	sim.dash_cooldown_timer = maxf(0.0, sim.dash_cooldown_timer - delta)
+	sim.double_jump_timer = maxf(0.0, sim.double_jump_timer - delta)
+	sim.wall_rearm_timer = maxf(0.0, sim.wall_rearm_timer - delta)
+	sim.wall_coyote_timer = maxf(0.0, sim.wall_coyote_timer - delta)
+	sim.ground_coyote_timer = maxf(0.0, sim.ground_coyote_timer - delta)
+	sim.jump_buffer_timer = maxf(0.0, sim.jump_buffer_timer - delta)
 	sword_cd[0] = maxf(0.0, sword_cd[0] - delta)
 	sword_cd[1] = maxf(0.0, sword_cd[1] - delta)
 	if sword_active > 0.0:
 		sword_active -= delta
 		PlayerCombat.sword_hit_check(self)
 	if cmd_jump:
-		jump_buffer_timer = config.jump_buffer_time
+		sim.jump_buffer_timer = config.jump_buffer_time
 
-	move_locked = arm_left.is_locking() or arm_right.is_locking()
+	sim.move_locked = arm_left.is_locking() or arm_right.is_locking()
 	PlayerCombat.handle_arms(self)
 
-	var wish := Vector3.ZERO if move_locked else PlayerMovement.wish_dir(self)
+	var wish := Vector3.ZERO if sim.move_locked else PlayerMovement.wish_dir(self)
 
-	match state:
-		MoveState.GROUNDED:
+	match sim.state:
+		MoveSim.MoveState.GROUNDED:
 			PlayerMovement.ground_move(self, wish, delta)
-		MoveState.AIRBORNE:
+		MoveSim.MoveState.AIRBORNE:
 			PlayerMovement.air_move(self, wish, delta)
-		MoveState.WALLRUN:
+		MoveSim.MoveState.WALLRUN:
 			PlayerMovement.wallrun_move(self, delta)
 
 	PlayerMovement.handle_dashes(self)
+	PlayerMovement.apply_speed_limits(self, delta)
 
-	var speed := velocity.length()
-	if speed > config.terminal_velocity:
-		# Soft ceiling: overspeed (sword lunge) decays fast instead of clamping
-		velocity *= (
-			move_toward(speed, config.terminal_velocity, config.overspeed_decay * delta) / speed
-		)
-	if move_locked:
-		# Charging bleeds you down to a slower, more readable trajectory
-		velocity = velocity.limit_length(combat.charge_speed_cap)
-	velocity.y = maxf(velocity.y, -config.terminal_fall_speed)
-
+	velocity = sim.velocity
 	var pre_slide_velocity := velocity
 	move_and_slide()
-	if state != MoveState.WALLRUN:
+	sim.velocity = velocity
+	if sim.state != MoveSim.MoveState.WALLRUN:
 		PlayerMovement.apply_glide(self, pre_slide_velocity)
+		velocity = sim.velocity
 	PlayerMovement.update_state(self)
 
 	var manual_respawn := cmd_respawn and not Net.active
@@ -485,11 +464,9 @@ func loadout_name() -> String:
 
 
 ## All-or-nothing fuel spend — the only way anything drains fuel.
+## Delegates to the spend_fuel definition (movement/spend_fuel.gd).
 func _spend(amount: float) -> bool:
-	if fuel < amount:
-		return false
-	fuel -= amount
-	return true
+	return PlayerMovement.spend_fuel(self, amount)
 
 
 func _gather_input() -> void:
@@ -531,13 +508,13 @@ func _autoduel_cmds() -> void:
 	var phase := 150 if not ids.is_empty() and multiplayer.get_unique_id() == ids.max() else 0
 	cmd_fire_l = (frames + phase) % 300 == 0
 	var strafe := 1.0 if floori(frames / 96.0) % 2 == 0 else -1.0
-	cmd_move = Vector2.ZERO if move_locked else Vector2(strafe, 0.0)
+	cmd_move = Vector2.ZERO if sim.move_locked else Vector2(strafe, 0.0)
 
 
 func _camera_feel(delta: float) -> void:
 	var target_roll := 0.0
-	if state == MoveState.WALLRUN:
-		var side := signf((-wall_normal).dot(global_transform.basis.x))
+	if sim.state == MoveSim.MoveState.WALLRUN:
+		var side := signf((-sim.wall_normal).dot(global_transform.basis.x))
 		target_roll = side * deg_to_rad(config.wallrun_camera_roll_deg)
 	camera.rotation.z = lerpf(
 		camera.rotation.z, target_roll, 1.0 - exp(-config.wallrun_camera_roll_speed * delta)
@@ -545,7 +522,7 @@ func _camera_feel(delta: float) -> void:
 
 	var hs := Vector3(velocity.x, 0.0, velocity.z).length()
 	var target_fov := base_fov + clampf(hs - config.base_run_speed, 0.0, 25.0) * 0.6
-	if state == MoveState.WALLRUN:
+	if sim.state == MoveSim.MoveState.WALLRUN:
 		target_fov += config.wallrun_fov_bonus
 	camera.fov = lerpf(camera.fov, target_fov, 1.0 - exp(-6.0 * delta))
 
@@ -562,8 +539,9 @@ func finish_run() -> void:
 
 func _respawn() -> void:
 	global_transform = spawn_transform
+	sim.velocity = Vector3.ZERO
 	velocity = Vector3.ZERO
-	fuel = config.fuel_max
+	sim.fuel = config.fuel_max
 	hp = combat.hp_max
 	run_time = 0.0
 	run_finished = false
@@ -571,13 +549,13 @@ func _respawn() -> void:
 	_trails.clear()
 	# Deterministic reset: recordings and replays must start from identical
 	# state, so no timer or arm state survives a respawn
-	dash_cooldown_timer = 0.0
-	double_jump_timer = 0.0
-	wall_coyote_timer = 0.0
-	ground_coyote_timer = 0.0
-	jump_buffer_timer = 0.0
-	wall_rearm_timer = 0.0
-	ramp_grace_timer = 0.0
+	sim.dash_cooldown_timer = 0.0
+	sim.double_jump_timer = 0.0
+	sim.wall_coyote_timer = 0.0
+	sim.ground_coyote_timer = 0.0
+	sim.jump_buffer_timer = 0.0
+	sim.wall_rearm_timer = 0.0
+	sim.ramp_grace_timer = 0.0
 	sword_cd = [0.0, 0.0]
 	sword_active = 0.0
 	arm_left.reset()
@@ -588,10 +566,10 @@ func _respawn() -> void:
 		# one clean spawn-to-finish attempt, never a spliced teleport
 		PlayerRecorder.restart_tape(self)
 	respawned.emit()
-	state = MoveState.AIRBORNE
-	ramp_grace_timer = 0.0
-	wallrun_time = 0.0
-	wall_speed = 0.0
+	sim.state = MoveSim.MoveState.AIRBORNE
+	sim.ramp_grace_timer = 0.0
+	sim.wallrun_time = 0.0
+	sim.wall_speed = 0.0
 	head.rotation.x = 0.0
 
 
@@ -631,10 +609,10 @@ func display_arm_progress(index: int) -> float:
 
 
 func state_name() -> String:
-	match state:
-		MoveState.GROUNDED:
+	match sim.state:
+		MoveSim.MoveState.GROUNDED:
 			return "GROUNDED"
-		MoveState.WALLRUN:
+		MoveSim.MoveState.WALLRUN:
 			return "WALLRUN"
 		_:
 			return "AIRBORNE"

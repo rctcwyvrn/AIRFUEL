@@ -9,11 +9,14 @@ surface. Also the body of the offline practice bot (`bot_controlled`,
 Appendix A's practice opponent — see `src/bot/`).
 
 **Split 2026-09-10 (Lily's call)**: the mechanics live in sibling
-static-helper classes over this body — the `PlayerState` pattern, ALL
-state stays HERE so the codec and prediction are untouched:
+static-helper classes over this body — the `PlayerState` pattern.
+**Amended by the Trellis-style pilot (2026-09-12)**: movement state now
+lives in a plain-data `MoveSim` (`sim` field, `movement/move_sim.gd`);
+combat/arm/run state still lives HERE. The codec reads both:
 
 - `player_movement.gd` (`PlayerMovement`) — §4/§5 movement, dashes,
-  wallrun, assists.
+  wallrun, assists; now a facade over per-definition files in
+  `movement/` (see player_movement.gd.md).
 - `player_combat.gd` (`PlayerCombat`) — §7/§8 arms, rail, sword,
   loadout + viewmodel visuals.
 - `player_recorder.gd` (`PlayerRecorder`) — TAS tapes.
@@ -108,18 +111,21 @@ its controller, not here.)
   color/glow constants (`RAIL_VM_COLOR`, `SWORD_VM_COLOR`,
   `SWORD_FLARE_COLOR`, `VM_EMISSION_WARM`, `VM_COOLDOWN_COLOR`) live
   here as the shared palette.
-- HUD-facing reads: `fuel`, `ramp_grace_timer`, `config`, `combat`,
-  `horizontal_speed()`, `state_name()`, `move_locked`, `hp`,
+- HUD-facing reads: `sim.fuel`, `sim.ramp_grace_timer`, `config`,
+  `combat`, `horizontal_speed()`, `state_name()`, `sim.move_locked`, `hp`,
   `arm_progress_left/right()` (rail charge, or sword cooldown-readiness),
   **`display_arm_progress(index)`** (role-aware — REPLICA from
   snapshot-fed `_net_prog`, simulated bodies from real arm state; the
   HUD's enemy-charge-warning source), `arm_types`, `loadout_name()`,
   `run_time`, `run_finished`, `countdown`, `recording`.
 - Helper-facing state (public by necessity — the helpers are the only
-  intended writers): `pending_arms`, `shot_gap_timer`, `sword_cd`,
+  intended writers): `sim: MoveSim` (ALL movement state — velocity,
+  fuel, move state, wall/coyote/timer fields; the body's own `velocity`
+  is a render/physics MIRROR synced around `move_and_slide`, written
+  only by the shell), `pending_arms`, `shot_gap_timer`, `sword_cd`,
   `sword_active`, `sword_side`, `tape_lines`, `rail_vm_mesh`/
-  `sword_vm_mesh`, all movement/timer fields, and `_spend(amount)` (the
-  all-or-nothing fuel spend).
+  `sword_vm_mesh`, and `_spend(amount)` (delegates to the spend_fuel
+  definition via the facade).
 - Expected children: `Head` (pitch) → `Head/Camera3D` (roll + FOV feel);
   `ArmLeft`/`ArmRight` (`RailArm`); `Head/Camera3D/ViewmodelL/R`;
   `PuppetArmL/R` and `BodyMesh`/`Head/HeadMesh` (puppet visuals). Yaw
@@ -127,7 +133,9 @@ its controller, not here.)
 - Consumes input actions: `move_forward/back/left/right`, `down_dash`
   (Q), `jump`, `dash` (Shift), `fire_left`/`fire_right`, `swap_loadout`
   (Tab), `record` (F5, dev-only), `respawn` (T, solo), `ui_cancel`.
-- `MoveState { GROUNDED, AIRBORNE, WALLRUN }` in `state`.
+- `MoveState { GROUNDED, AIRBORNE, WALLRUN }` lives in `MoveSim` (moved
+  in the pilot — definition files can't name `AirfuelPlayer`), read as
+  `sim.state`.
 
 ## Implementation
 
@@ -145,11 +153,14 @@ its controller, not here.)
   lerp, shoulder charge glow from `_net_prog`).
 
 **`_simulate(delta)` — the re-runnable tick**: countdown freeze → run
-clock → timer decays → sword tick + `PlayerCombat.sword_hit_check` →
-jump buffer → `move_locked` recompute + `PlayerCombat.handle_arms` →
-per-state move (`PlayerMovement.ground_move`/`air_move`/`wallrun_move`)
-→ `PlayerMovement.handle_dashes` → terminal-velocity/charge clamps →
-`move_and_slide()` → `PlayerMovement.apply_glide` →
+clock → timer decays (on `sim`) → sword tick +
+`PlayerCombat.sword_hit_check` → jump buffer → `sim.move_locked`
+recompute + `PlayerCombat.handle_arms` → per-state move
+(`PlayerMovement.ground_move`/`air_move`/`wallrun_move`) →
+`PlayerMovement.handle_dashes` → `PlayerMovement.apply_speed_limits`
+(the terminal-velocity/charge clamps, now a definition) → **mirror sync**
+`velocity = sim.velocity` → `move_and_slide()` → `sim.velocity =
+velocity` → `PlayerMovement.apply_glide` (+ re-mirror) →
 `PlayerMovement.update_state` → respawn check (manual `cmd_respawn` only
 offline; `kill_y` always) → **arms stepped last** (`arm_*.step(delta)` —
 a charge completing this tick fires next tick). Everything a tick's
@@ -207,8 +218,13 @@ must be bit-identical between a run and its ghost. `finish_run()`
 
 ## Assertions
 
-- `fuel` stays in `[0, config.fuel_max]`; all spends go through `_spend`,
-  which is all-or-nothing (never partial-drains below the cost).
+- `sim.fuel` stays in `[0, config.fuel_max]`; all spends go through
+  `_spend` → the spend_fuel definition, which is all-or-nothing (never
+  partial-drains below the cost).
+- **Gameplay code writes `sim.velocity`, never the body's `velocity`** —
+  the body field is a mirror the shell syncs around `move_and_slide` and
+  after restore/respawn/splice. A stray write to the body field gets
+  silently clobbered by the next mirror sync.
 - Dismount is the only in-play fuel refill (§5.1 — do not add refills on
   kill, death, or pickup). Movement invariants: `player_movement.gd.md`;
   combat invariants: `player_combat.gd.md`.
@@ -249,4 +265,7 @@ must be bit-identical between a run and its ghost. `finish_run()`
 - **The helper split is state-free**: `PlayerMovement`/`PlayerCombat`/
   `PlayerRecorder` hold no state and type their param
   `CharacterBody3D`, never `AirfuelPlayer` (class-resolution cycle).
-  Moving state into a helper breaks the `PlayerState` codec.
+  Movement state lives in `sim` (a `MoveSim` instance — data, not a
+  helper); everything the codec captures still hangs off this body via
+  `self`/`sim`, and a new sim field missing from the codec is a silent
+  desync bug.

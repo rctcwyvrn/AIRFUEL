@@ -12,11 +12,14 @@ No targets — pure traversal.
 - Root `ParkourTrack` (Node3D); instances `player.tscn` (start room,
   facing +Z, y ≈ 42.6), `hud.tscn`, and a `GhostRunner`
   (`player.tscn` with `ghost_controlled = true`) driven by
-  `TasController` (`ghost.gd`) replaying `res://tas/parkour.tas` — the
-  tape was INVALIDATED 2026-09-10 (the Q rebind changed cmd semantics;
-  Lily is re-recording), so the ghost currently runs the baked
-  `waypoints` autopilot fallback until a new F5 tape is saved there. The ghost spawns at the PLAYER's exact spawn — a
+  `TasController` (`ghost.gd`) replaying `res://tas/parkour.tas` — a
+  post-Q-rebind tape (re-recorded 2026-09-10 after the rebind briefly
+  invalidated its predecessor), 3804 ticks, `loadout=0`; the baked
+  `waypoints` are only the autopilot fallback if the tape file goes
+  missing. The ghost spawns at the PLAYER's exact spawn — a
   tape replayed from an offset start desyncs in an enclosed hallway.
+  This tape is also the trajectory-fingerprint baseline input
+  (`tools/fingerprint.tscn`).
 - `FinishZone` — Area3D in group `finish` (`finish_zone.gd`, mask 4,
   24×30×3 box) just inside the green emissive `EndCapWall` that seals
   the last straight; touching it stops the run timer for the local

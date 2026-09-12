@@ -17,9 +17,11 @@ carries the client's rewind echo for §20.2 N2 lag compensation.
 - `const SIZE := 42` — every array produced/consumed here has exactly this
   length.
 - `static capture(p: CharacterBody3D) -> PackedFloat32Array` — snapshot of
-  the player's full sim state.
+  the player's full sim state (movement slots read from `p.sim`, the
+  `MoveSim`; position/countdown/combat slots from the body).
 - `static restore(p: CharacterBody3D, s: PackedFloat32Array) -> void` —
-  writes a captured state back onto a body.
+  writes a captured state back onto a body: movement slots onto `p.sim`,
+  plus the body's `velocity` mirror so renderers/net reads stay in step.
 - `static agree(a, b) -> bool` — do a predicted state and the server's
   state match closely enough for the prediction to stand?
 - `const CMD_SIZE := 8` — the cmd wire format:
@@ -78,7 +80,7 @@ the format):
   arm (`state`/`charge`/`cooldown` written directly onto the RailArm
   nodes), and pending slots overwrite those side effects with the captured
   values. `move_locked` is not stored — it's derived, recomputed from
-  `is_locking()` at the end of restore.
+  `is_locking()` into `p.sim.move_locked` at the end of restore.
 - **`agree` epsilons**: analog fields tolerate cross-machine float drift —
   position ≤ 0.02 m, velocity ≤ 0.1, fuel ≤ 0.5, countdown ≤ 0.1.
   Discrete fields must match exactly: move state (7), hp (28), loadout
@@ -94,7 +96,9 @@ the format):
   The same rule holds for the cmd layout and `CMD_SIZE`.
 - Any new field that `_simulate()`'s outcome depends on MUST be added to
   `capture`/`restore` (and to `agree` if its divergence matters);
-  a missing field is a silent desync bug.
+  a missing field is a silent desync bug. This includes any new `MoveSim`
+  field (movement state lives there since the Trellis-style pilot;
+  changing `MoveSim` also means re-baselining `tas/parkour.fingerprint`).
 - No view angles (yaw/pitch/head rotation) may ever be added to the state —
   they belong to the cmd stream.
 - `restore` must leave a body that continues exactly as the captured body
